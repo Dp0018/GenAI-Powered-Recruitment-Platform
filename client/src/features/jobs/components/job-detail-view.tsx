@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useJobDetailQuery } from "../hooks/use-jobs";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useApplicationStatusQuery } from "@/features/applications/hooks/use-applications";
+import { ApplyJobModal } from "@/features/applications/components/apply-job-modal";
 import { Button } from "@/components/ui/button";
 import {
   Building2,
@@ -30,8 +32,13 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const { data: job, isLoading, isError } = useJobDetailQuery(slug);
+  const { data: hasApplied = false } = useApplicationStatusQuery(
+    job?.id || "",
+    Boolean(isAuthenticated && job?.id)
+  );
+
   const [copied, setCopied] = useState(false);
-  const [hasApplied, setHasApplied] = useState(false);
+  const [applyModalOpen, setApplyModalOpen] = useState(false);
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -46,8 +53,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
       router.push(`/login?redirect=/jobs/${slug}`);
       return;
     }
-    // Candidates application trigger
-    setHasApplied(true);
+    setApplyModalOpen(true);
   };
 
   if (isLoading) {
@@ -293,6 +299,14 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
           </div>
         </div>
       </div>
+
+      <ApplyJobModal
+        open={applyModalOpen}
+        onOpenChange={setApplyModalOpen}
+        jobId={job.id}
+        jobTitle={job.title}
+        companyName={job.company?.name || "Corporate Employer"}
+      />
     </div>
   );
 }

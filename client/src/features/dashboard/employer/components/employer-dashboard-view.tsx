@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useCompanyJobsQuery, useDeleteJobMutation } from "@/features/jobs/hooks/use-jobs";
+import { useCompanyApplicationsQuery } from "@/features/applications/hooks/use-applications";
+import { EmployerApplicantsTable } from "@/features/applications/components/employer-applicants-table";
 import { CreateJobModal } from "@/features/jobs/components/create-job-modal";
 import { Button } from "@/components/ui/button";
 import { JobItem } from "@/features/jobs/types/job";
@@ -100,11 +102,11 @@ export function EmployerKycBanner() {
 
 interface EmployerMetricsGridProps {
   jobs: JobItem[];
+  totalApplicants: number;
 }
 
-export function EmployerMetricsGrid({ jobs }: EmployerMetricsGridProps) {
+export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGridProps) {
   const publishedCount = jobs.filter((j) => j.status === "PUBLISHED").length;
-  const totalApplicants = jobs.reduce((sum, j) => sum + (j.applicantCount || 0), 0);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -300,20 +302,62 @@ export function EmployerRequisitionsTable({
 }
 
 export function EmployerDashboardView() {
-  const { data, isLoading } = useCompanyJobsQuery();
-  const jobs = data?.content || [];
-  const totalElements = data?.totalElements || 0;
+  const [activeTab, setActiveTab] = useState<"requisitions" | "applicants">("requisitions");
+  const { data: jobsData, isLoading: jobsLoading } = useCompanyJobsQuery();
+  const { data: appsData } = useCompanyApplicationsQuery();
+
+  const jobs = jobsData?.content || [];
+  const totalJobs = jobsData?.totalElements || 0;
+  const totalApplicants = appsData?.totalElements || 0;
 
   return (
     <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-8">
       <EmployerHeader />
       <EmployerKycBanner />
-      <EmployerMetricsGrid jobs={jobs} />
-      <EmployerRequisitionsTable
-        jobs={jobs}
-        isLoading={isLoading}
-        totalElements={totalElements}
-      />
+      <EmployerMetricsGrid jobs={jobs} totalApplicants={totalApplicants} />
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-border">
+        <button
+          onClick={() => setActiveTab("requisitions")}
+          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+            activeTab === "requisitions"
+              ? "border-primary text-foreground font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <FileSpreadsheet className="size-3.5" />
+          <span>Job Requisitions</span>
+          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-secondary">
+            {totalJobs}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("applicants")}
+          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+            activeTab === "applicants"
+              ? "border-primary text-foreground font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Users className="size-3.5" />
+          <span>Applicant Pipeline</span>
+          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-secondary">
+            {totalApplicants}
+          </span>
+        </button>
+      </div>
+
+      {activeTab === "requisitions" ? (
+        <EmployerRequisitionsTable
+          jobs={jobs}
+          isLoading={jobsLoading}
+          totalElements={totalJobs}
+        />
+      ) : (
+        <EmployerApplicantsTable />
+      )}
     </div>
   );
 }
