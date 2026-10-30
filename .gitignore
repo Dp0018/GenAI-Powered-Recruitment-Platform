@@ -1,0 +1,26 @@
+# Secrets & Environment Variables (NEVER COMMIT)
+.env
+.env.*
+*.env
+application-local.properties
+application-secret.properties
+*.secret
+*.key
+
+# Build outputs & dependencies
+target/
+build/
+.mvn/wrapper/maven-wrapper.jar
+node_modules/
+.next/
+out/
+
+# IDE & OS files
+.DS_Store
+*.DS_Store
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.swp
