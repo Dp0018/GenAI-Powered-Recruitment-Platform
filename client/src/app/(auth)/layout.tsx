@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { ShieldCheck, Lock, Layers, CheckCircle2 } from "lucide-react";
+import { Briefcase, ShieldCheck, Lock, Layers } from "lucide-react";
+import { GuestOnlyGuard } from "@/features/auth/components/guest-only-guard";
 
 export default function AuthLayout({
   children,
@@ -9,23 +10,23 @@ export default function AuthLayout({
 }) {
   return (
     <div className="h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] overflow-hidden flex flex-col lg:grid lg:grid-cols-12 bg-background relative">
-      {/* Precision Blueprint Architectural Background Pattern */}
+      {/* Precision Architectural Background Pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.08] bg-[linear-gradient(to_right,#38bdf8_1px,transparent_1px),linear-gradient(to_bottom,#38bdf8_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]" />
 
-      {/* Left Column: Enterprise Security & Value Proposition (Desktop) */}
+      {/* Left Column: Platform Security & Value Proposition (Desktop) */}
       <aside className="hidden lg:flex lg:col-span-5 xl:col-span-5 flex-col justify-between p-8 xl:p-12 border-r border-border/80 bg-card/40 relative z-10 h-full overflow-hidden">
         <div className="space-y-6">
           {/* Brand Header */}
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="size-9 rounded-md bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
-              <ShieldCheck className="size-5" />
+            <div className="size-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+              <Briefcase className="size-5" />
             </div>
             <div>
               <div className="font-bold text-base tracking-tight text-foreground">
                 JobPortal
               </div>
-              <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                Enterprise Multi-Tenant
+              <div className="text-xs text-muted-foreground">
+                Recruitment Infrastructure
               </div>
             </div>
           </Link>
@@ -109,7 +110,7 @@ export default function AuthLayout({
       {/* Right Column: Active Auth Form (Fit height, no window scroll) */}
       <main className="flex-1 lg:col-span-7 xl:col-span-7 h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10 overflow-y-auto">
         <div className="w-full max-w-lg my-auto py-2">
-          {children}
+          <GuestOnlyGuard>{children}</GuestOnlyGuard>
         </div>
       </main>
     </div>

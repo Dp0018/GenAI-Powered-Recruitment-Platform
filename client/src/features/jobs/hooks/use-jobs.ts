@@ -10,6 +10,7 @@ export function useJobsQuery(params: SearchJobsParams = {}) {
     queryKey: ["jobs", params],
     queryFn: () => jobsApi.searchJobs(params),
     staleTime: 1000 * 60 * 2,
+    retry: 2,
   });
 }
 
