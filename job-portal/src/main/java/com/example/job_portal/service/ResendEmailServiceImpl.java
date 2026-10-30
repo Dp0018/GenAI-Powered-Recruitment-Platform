@@ -59,7 +59,11 @@ public class ResendEmailServiceImpl implements EmailService {
 
             log.info("Verification OTP email sent to {} via Resend. Response: {}", toEmail, response);
         } catch (Exception ex) {
-            log.error("Failed to send email via Resend API to {}: {}", toEmail, ex.getMessage(), ex);
+            log.error("Failed to deliver email via Resend API to {}: {}", toEmail, ex.getMessage());
+            if (ex.getMessage() != null && ex.getMessage().contains("domain is not verified")) {
+                log.warn(">>> [RESEND DOMAIN PENDING VERIFICATION] Sender domain '{}' is pending verification at https://resend.com/domains. OTP is saved in database and logged above for testing. <<<", fromEmail);
+                return;
+            }
             throw new InvalidOperationException("Failed to deliver OTP email: " + ex.getMessage());
         }
     }

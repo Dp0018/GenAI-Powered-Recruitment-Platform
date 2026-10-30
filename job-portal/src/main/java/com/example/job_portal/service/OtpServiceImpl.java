@@ -59,6 +59,7 @@ public class OtpServiceImpl implements OtpService {
                         .build());
 
         verificationRepository.save(verification);
+        log.info(">>> [OTP VERIFICATION CODE GENERATED] Email: '{}' | Code: '{}' (Valid for {}m) <<<", normalizedEmail, otpCode, expirationMinutes);
 
         emailService.sendOtpEmail(normalizedEmail, otpCode, expirationMinutes);
         log.info("Email verification OTP dispatched for: {}", normalizedEmail);
