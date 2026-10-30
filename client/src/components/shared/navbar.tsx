@@ -5,12 +5,9 @@ import Link from "next/link";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
-  ShieldCheck,
+  Briefcase,
   LayoutDashboard,
   LogOut,
-  User,
-  ArrowRight,
-  Terminal,
 } from "lucide-react";
 
 export function Navbar() {
@@ -27,57 +24,50 @@ export function Navbar() {
     return "/dashboard/candidate";
   };
 
+  const getRoleLabel = () => {
+    if (!user) return "";
+    switch (user.role) {
+      case "EMPLOYER_ADMIN":
+        return "Employer";
+      case "RECRUITER":
+        return "Recruiter";
+      case "PLATFORM_ADMIN":
+        return "Admin";
+      default:
+        return "Candidate";
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md">
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Brand */}
         <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="flex items-center gap-3 font-semibold text-foreground tracking-tight group"
+            className="flex items-center gap-2.5 font-semibold text-foreground tracking-tight group"
           >
-            <div className="size-8 rounded-md bg-primary/10 border border-primary/30 flex items-center justify-center text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-              <ShieldCheck className="size-4" />
+            <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+              <Briefcase className="size-4" />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold tracking-tight">JobPortal</span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase font-semibold bg-secondary border border-border text-muted-foreground">
-                Enterprise
-              </span>
-            </div>
+            <span className="text-base font-bold tracking-tight text-foreground">
+              JobPortal
+            </span>
           </Link>
 
-          {/* Nav Items */}
+          {/* Real Job Board Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <Link
               href="/jobs"
               className="hover:text-foreground transition-colors"
             >
-              Browse Jobs
-            </Link>
-            <Link
-              href="/#security"
-              className="hover:text-foreground transition-colors"
-            >
-              Security
-            </Link>
-            <Link
-              href="/#workflows"
-              className="hover:text-foreground transition-colors"
-            >
-              Workflows
+              Find Jobs
             </Link>
             <Link
               href="/register/employer"
               className="hover:text-foreground transition-colors"
             >
-              For Employers
-            </Link>
-            <Link
-              href="/terms"
-              className="hover:text-foreground transition-colors"
-            >
-              Compliance
+              Post a Job
             </Link>
           </nav>
         </div>
@@ -92,26 +82,31 @@ export function Navbar() {
                   size="sm"
                   className="h-9 gap-2 border-border bg-card/60 text-foreground hover:bg-secondary font-medium text-sm rounded-md"
                 >
-                  <LayoutDashboard className="size-4 text-primary" />
+                  <LayoutDashboard className="size-4 text-muted-foreground" />
                   <span>Dashboard</span>
                 </Button>
               </Link>
 
-              <div className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-secondary/50 border border-border text-xs font-mono">
-                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-foreground font-semibold max-w-[130px] truncate">
-                  {user.name}
-                </span>
-                <span className="text-primary font-bold">
-                  [{user.role.replace("_", " ")}]
-                </span>
+              {/* Clean Human Profile Info - No AI pulse dot, no mono brackets */}
+              <div className="flex items-center gap-2.5 pl-1">
+                <div className="size-8 rounded-full bg-secondary border border-border flex items-center justify-center text-xs font-semibold text-foreground">
+                  {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                </div>
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-xs font-medium text-foreground leading-tight max-w-[120px] truncate">
+                    {user.name}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground leading-tight">
+                    {getRoleLabel()}
+                  </span>
+                </div>
               </div>
 
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={logout}
-                className="h-9 px-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md"
                 title="Sign out"
               >
                 <LogOut className="size-4" />
@@ -123,7 +118,7 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-9 px-4 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md text-sm font-medium"
+                  className="h-9 px-3.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md text-sm font-medium"
                 >
                   Sign In
                 </Button>

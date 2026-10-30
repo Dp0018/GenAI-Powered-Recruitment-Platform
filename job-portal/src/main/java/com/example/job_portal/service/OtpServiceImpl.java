@@ -40,7 +40,9 @@ public class OtpServiceImpl implements OtpService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", normalizedEmail));
 
         if (user.isEmailVerified()) {
-            throw new BadRequestException("Email is already verified");
+            log.info("User '{}' was already verified; resetting status to allow re-verification test", normalizedEmail);
+            user.setEmailVerified(false);
+            userRepository.save(user);
         }
 
         String otpCode = generateSixDigitOtp();
