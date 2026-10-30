@@ -1,0 +1,223 @@
+package com.example.job_portal.service;
+
+import com.example.job_portal.common.exception.ForbiddenException;
+import com.example.job_portal.common.exception.ResourceNotFoundException;
+import com.example.job_portal.common.response.PagedResponse;
+import com.example.job_portal.dto.job.CreateJobRequest;
+import com.example.job_portal.dto.job.JobResponse;
+import com.example.job_portal.entity.Company;
+import com.example.job_portal.entity.Job;
+import com.example.job_portal.repository.CompanyRepository;
+import com.example.job_portal.repository.JobRepository;
+import com.example.job_portal.security.UserPrincipal;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class JobService {
+
+    private final JobRepository jobRepository;
+    private final CompanyRepository companyRepository;
+
+    private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
+    private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+
+    @Transactional(readOnly = true)
+    public PagedResponse<JobResponse> searchPublishedJobs(
+            String query,
+            String location,
+            String workplaceType,
+            String jobType,
+            int page,
+            int size
+    ) {
+        Specification<Job> spec = (root, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Status MUST be published
+            predicates.add(cb.equal(root.get("status"), Job.JobStatus.PUBLISHED));
+
+            // Join with Company for fetching
+            Join<Job, Company> companyJoin = root.join("company", JoinType.LEFT);
+
+            if (query != null && !query.trim().isEmpty()) {
+                String pattern = "%" + query.trim().toLowerCase() + "%";
+                Predicate titleLike = cb.like(cb.lower(root.get("title")), pattern);
+                Predicate descLike = cb.like(cb.lower(root.get("description")), pattern);
+                Predicate companyLike = cb.like(cb.lower(companyJoin.get("name")), pattern);
+                predicates.add(cb.or(titleLike, descLike, companyLike));
+            }
+
+            if (location != null && !location.trim().isEmpty() && !location.equalsIgnoreCase("ALL")) {
+                String locPattern = "%" + location.trim().toLowerCase() + "%";
+                predicates.add(cb.like(cb.lower(root.get("location")), locPattern));
+            }
+
+            if (workplaceType != null && !workplaceType.trim().isEmpty() && !workplaceType.equalsIgnoreCase("ALL")) {
+                try {
+                    Job.WorkplaceType wp = Job.WorkplaceType.valueOf(workplaceType.toUpperCase());
+                    predicates.add(cb.equal(root.get("workplaceType"), wp));
+                } catch (IllegalArgumentException ignored) {}
+            }
+
+            if (jobType != null && !jobType.trim().isEmpty() && !jobType.equalsIgnoreCase("ALL")) {
+                try {
+                    Job.JobType jt = Job.JobType.valueOf(jobType.toUpperCase());
+                    predicates.add(cb.equal(root.get("jobType"), jt));
+                } catch (IllegalArgumentException ignored) {}
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Job> jobPage = jobRepository.findAll(spec, pageable);
+
+        return PagedResponse.from(jobPage.map(JobResponse::fromEntity));
+    }
+
+    @Transactional(readOnly = true)
+    public JobResponse getJobBySlug(String slug) {
+        Job job = jobRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Job", "slug", slug));
+        return JobResponse.fromEntity(job);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<JobResponse> getCompanyJobs(String companyId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Job> jobPage = jobRepository.findAllByCompanyId(companyId, pageable);
+        return PagedResponse.from(jobPage.map(JobResponse::fromEntity));
+    }
+
+    @Transactional
+    public JobResponse createJob(CreateJobRequest request, UserPrincipal principal) {
+        if (principal.getCompanyId() == null) {
+            throw new ForbiddenException("You must be affiliated with an employer company to create job requisitions");
+        }
+
+        Company company = companyRepository.findById(principal.getCompanyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", principal.getCompanyId()));
+
+        String baseSlug = toSlug(request.getTitle() + " " + company.getName());
+        String slug = baseSlug;
+        int counter = 1;
+        while (jobRepository.existsBySlug(slug)) {
+            slug = baseSlug + "-" + counter++;
+        }
+
+        Job.WorkplaceType workplaceType = Job.WorkplaceType.REMOTE;
+        try {
+            workplaceType = Job.WorkplaceType.valueOf(request.getWorkplaceType().toUpperCase());
+        } catch (Exception ignored) {}
+
+        Job.JobType jobType = Job.JobType.FULL_TIME;
+        try {
+            jobType = Job.JobType.valueOf(request.getJobType().toUpperCase());
+        } catch (Exception ignored) {}
+
+        Job.JobStatus status = Job.JobStatus.PUBLISHED;
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            try {
+                status = Job.JobStatus.valueOf(request.getStatus().toUpperCase());
+            } catch (Exception ignored) {}
+        }
+
+        Job job = Job.builder()
+                .company(company)
+                .title(request.getTitle().trim())
+                .slug(slug)
+                .description(request.getDescription())
+                .requirements(request.getRequirements())
+                .location(request.getLocation().trim())
+                .workplaceType(workplaceType)
+                .jobType(jobType)
+                .minSalary(request.getMinSalary())
+                .maxSalary(request.getMaxSalary())
+                .currency(request.getCurrency() != null ? request.getCurrency() : "USD")
+                .tags(request.getTags() != null ? request.getTags() : new ArrayList<>())
+                .status(status)
+                .applicantCount(0)
+                .build();
+
+        Job savedJob = jobRepository.save(job);
+        log.info("Created job requisition '{}' [ID: {}] for company '{}'", savedJob.getTitle(), savedJob.getId(), company.getName());
+        return JobResponse.fromEntity(savedJob);
+    }
+
+    @Transactional
+    public JobResponse updateJob(String jobId, CreateJobRequest request, UserPrincipal principal) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+
+        // Strict Tenant Isolation Guard
+        if (!job.getCompany().getId().equals(principal.getCompanyId())) {
+            throw new ForbiddenException("Access denied: You do not have permission to manage requisitions for another company");
+        }
+
+        job.setTitle(request.getTitle().trim());
+        job.setDescription(request.getDescription());
+        job.setRequirements(request.getRequirements());
+        job.setLocation(request.getLocation().trim());
+
+        try {
+            job.setWorkplaceType(Job.WorkplaceType.valueOf(request.getWorkplaceType().toUpperCase()));
+        } catch (Exception ignored) {}
+
+        try {
+            job.setJobType(Job.JobType.valueOf(request.getJobType().toUpperCase()));
+        } catch (Exception ignored) {}
+
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            try {
+                job.setStatus(Job.JobStatus.valueOf(request.getStatus().toUpperCase()));
+            } catch (Exception ignored) {}
+        }
+
+        job.setMinSalary(request.getMinSalary());
+        job.setMaxSalary(request.getMaxSalary());
+        if (request.getCurrency() != null) job.setCurrency(request.getCurrency());
+        if (request.getTags() != null) job.setTags(request.getTags());
+
+        Job updated = jobRepository.save(job);
+        return JobResponse.fromEntity(updated);
+    }
+
+    @Transactional
+    public void deleteJob(String jobId, UserPrincipal principal) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+
+        if (!job.getCompany().getId().equals(principal.getCompanyId())) {
+            throw new ForbiddenException("Access denied: You do not have permission to delete this requisition");
+        }
+
+        jobRepository.delete(job);
+        log.info("Deleted job requisition [ID: {}] by user {}", jobId, principal.getEmail());
+    }
+
+    private String toSlug(String input) {
+        String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
+        String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
+        String slug = NONLATIN.matcher(normalized).replaceAll("");
+        return slug.toLowerCase(Locale.ENGLISH).replaceAll("-+", "-");
+    }
+}

@@ -1,5 +1,6 @@
 import React from "react";
 import { HeroSection } from "@/features/landing/components/hero-section";
+import { PublicJobsBoard } from "@/features/jobs/components/public-jobs-board";
 import { ArchitecturePillars } from "@/features/landing/components/architecture-pillars";
 import { InteractiveFeatureTabs } from "@/features/landing/components/interactive-feature-tabs";
 import { RolePathways } from "@/features/landing/components/role-pathways";
@@ -15,6 +16,7 @@ export default function HomePage() {
   return (
     <div className="flex-1 flex flex-col">
       <HeroSection />
+      <PublicJobsBoard />
       <ArchitecturePillars />
       <InteractiveFeatureTabs />
       <RolePathways />

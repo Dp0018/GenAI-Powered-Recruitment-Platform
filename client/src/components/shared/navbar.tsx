@@ -50,6 +50,12 @@ export function Navbar() {
           {/* Nav Items */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <Link
+              href="/jobs"
+              className="hover:text-foreground transition-colors"
+            >
+              Browse Jobs
+            </Link>
+            <Link
               href="/#security"
               className="hover:text-foreground transition-colors"
             >

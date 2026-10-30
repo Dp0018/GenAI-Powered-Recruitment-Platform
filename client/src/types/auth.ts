@@ -7,11 +7,22 @@ export interface CompanyResponse {
   name: string;
   slug: string;
   logoUrl?: string | null;
+  bannerUrl?: string | null;
   website?: string | null;
   industry?: string | null;
   companySize?: string | null;
   location?: string | null;
+  description?: string | null;
   verificationStatus: VerificationStatus;
+}
+
+export interface PagedResponse<T> {
+  content: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }
 
 export interface UserResponse {
