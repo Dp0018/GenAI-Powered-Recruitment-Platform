@@ -29,9 +29,10 @@ export async function apiClient<T>(
 ): Promise<ApiResponse<T>> {
   const { token, headers, ...customConfig } = options;
 
-  const defaultHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+  const defaultHeaders: Record<string, string> = {};
+  if (!(customConfig.body instanceof FormData)) {
+    defaultHeaders["Content-Type"] = "application/json";
+  }
 
   const storedToken =
     typeof window !== "undefined" ? localStorage.getItem("job_portal_access_token") : null;
