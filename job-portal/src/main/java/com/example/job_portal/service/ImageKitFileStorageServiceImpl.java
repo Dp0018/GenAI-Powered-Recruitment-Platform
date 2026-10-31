@@ -111,6 +111,59 @@ public class ImageKitFileStorageServiceImpl implements FileStorageService {
         return executeUpload(file, originalFilename, "/avatars");
     }
 
+    @Override
+    public FileUploadResponse uploadCompanyLogo(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Please select a company logo to upload.");
+        }
+
+        if (file.getSize() > MAX_AVATAR_SIZE_BYTES) {
+            throw new BadRequestException("Logo file size exceeds 5MB limit.");
+        }
+
+        String contentType = file.getContentType();
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "logo.png");
+
+        boolean isImage = (contentType != null && ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase()))
+                || originalFilename.toLowerCase().endsWith(".jpg")
+                || originalFilename.toLowerCase().endsWith(".jpeg")
+                || originalFilename.toLowerCase().endsWith(".png")
+                || originalFilename.toLowerCase().endsWith(".webp")
+                || originalFilename.toLowerCase().endsWith(".svg");
+
+        if (!isImage) {
+            throw new BadRequestException("Invalid logo format. Allowed formats: JPG, PNG, WEBP, SVG.");
+        }
+
+        return executeUpload(file, originalFilename, "/companies/logos");
+    }
+
+    @Override
+    public FileUploadResponse uploadCompanyBanner(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Please select a banner image to upload.");
+        }
+
+        if (file.getSize() > 8 * 1024 * 1024) {
+            throw new BadRequestException("Banner file size exceeds 8MB limit.");
+        }
+
+        String contentType = file.getContentType();
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "banner.jpg");
+
+        boolean isImage = (contentType != null && ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase()))
+                || originalFilename.toLowerCase().endsWith(".jpg")
+                || originalFilename.toLowerCase().endsWith(".jpeg")
+                || originalFilename.toLowerCase().endsWith(".png")
+                || originalFilename.toLowerCase().endsWith(".webp");
+
+        if (!isImage) {
+            throw new BadRequestException("Invalid banner image format. Allowed formats: JPG, PNG, WEBP.");
+        }
+
+        return executeUpload(file, originalFilename, "/companies/banners");
+    }
+
     private FileUploadResponse executeUpload(MultipartFile file, String originalFilename, String folder) {
         if (!StringUtils.hasText(privateKey)) {
             log.error("ImageKit private key is not configured.");

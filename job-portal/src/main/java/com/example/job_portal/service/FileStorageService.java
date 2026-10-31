@@ -6,4 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 public interface FileStorageService {
     FileUploadResponse uploadResume(MultipartFile file);
     FileUploadResponse uploadAvatar(MultipartFile file);
+    FileUploadResponse uploadCompanyLogo(MultipartFile file);
+    FileUploadResponse uploadCompanyBanner(MultipartFile file);
 }

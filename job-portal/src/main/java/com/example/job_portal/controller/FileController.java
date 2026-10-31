@@ -41,4 +41,24 @@ public class FileController {
         FileUploadResponse response = fileStorageService.uploadAvatar(file);
         return ResponseEntity.ok(ApiResponse.success("Avatar uploaded successfully", response));
     }
+
+    @PostMapping(value = "/upload/company-logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'RECRUITER')")
+    public ResponseEntity<ApiResponse<FileUploadResponse>> uploadCompanyLogo(
+            @RequestParam("file") MultipartFile file
+    ) {
+        log.info("Received company logo upload: name={}, size={}", file.getOriginalFilename(), file.getSize());
+        FileUploadResponse response = fileStorageService.uploadCompanyLogo(file);
+        return ResponseEntity.ok(ApiResponse.success("Company logo uploaded successfully", response));
+    }
+
+    @PostMapping(value = "/upload/company-banner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'RECRUITER')")
+    public ResponseEntity<ApiResponse<FileUploadResponse>> uploadCompanyBanner(
+            @RequestParam("file") MultipartFile file
+    ) {
+        log.info("Received company banner upload: name={}, size={}", file.getOriginalFilename(), file.getSize());
+        FileUploadResponse response = fileStorageService.uploadCompanyBanner(file);
+        return ResponseEntity.ok(ApiResponse.success("Company banner uploaded successfully", response));
+    }
 }
