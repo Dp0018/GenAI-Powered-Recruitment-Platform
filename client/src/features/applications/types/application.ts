@@ -47,4 +47,6 @@ export interface SubmitApplicationPayload {
 
 export interface UpdateApplicationStatusPayload {
   status: ApplicationStatus;
+  notes?: string;
 }
+

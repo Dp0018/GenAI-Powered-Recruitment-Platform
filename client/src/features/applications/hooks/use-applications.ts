@@ -67,7 +67,7 @@ export function useUpdateApplicationStatusMutation(onSuccess?: () => void) {
     }) => applicationsApi.updateStatus(applicationId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["company-applications"] });
-      toast.success("Applicant status updated successfully");
+      toast.success("Stage updated & candidate notified via email");
       if (onSuccess) onSuccess();
     },
     onError: (err: any) => {

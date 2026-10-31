@@ -30,6 +30,7 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Transactional
     public ApplicationResponse applyToJob(String jobId, SubmitApplicationRequest request, UserPrincipal candidateUser) {
@@ -71,6 +72,10 @@ public class ApplicationService {
 
         log.info("Candidate '{}' ({}) applied to job '{}' [{}]",
                 candidate.getName(), candidate.getEmail(), job.getTitle(), job.getId());
+
+        // Send confirmation email asynchronously via Resend
+        String companyName = job.getCompany() != null ? job.getCompany().getName() : "Hiring Organization";
+        emailService.sendApplicationReceivedEmail(candidate.getEmail(), candidate.getName(), job.getTitle(), companyName);
 
         return ApplicationResponse.fromEntity(saved);
     }
@@ -125,6 +130,21 @@ public class ApplicationService {
 
         log.info("Application '{}' status updated to {} by employer member '{}'",
                 applicationId, request.getStatus(), employerUser.getEmail());
+
+        // Send automated status update email asynchronously via Resend
+        if (application.getCandidate() != null && application.getJob() != null) {
+            String companyName = application.getJob().getCompany() != null
+                    ? application.getJob().getCompany().getName()
+                    : "Hiring Organization";
+            emailService.sendApplicationStatusUpdateEmail(
+                    application.getCandidate().getEmail(),
+                    application.getCandidate().getName(),
+                    application.getJob().getTitle(),
+                    companyName,
+                    updated.getStatus(),
+                    request.getNotes()
+            );
+        }
 
         return ApplicationResponse.fromEntity(updated);
     }
