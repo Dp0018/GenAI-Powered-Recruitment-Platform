@@ -23,4 +23,17 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> findByRole(Role role);
 
     List<User> findByCompanyId(String companyId);
+
+    org.springframework.data.domain.Page<User> findByRole(Role role, org.springframework.data.domain.Pageable pageable);
+
+    org.springframework.data.domain.Page<User> findByBanned(boolean banned, org.springframework.data.domain.Pageable pageable);
+
+    org.springframework.data.domain.Page<User> findByRoleAndBanned(Role role, boolean banned, org.springframework.data.domain.Pageable pageable);
+
+    org.springframework.data.domain.Page<User> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+            String name, String email, org.springframework.data.domain.Pageable pageable);
+
+    long countByRole(Role role);
+
+    long countByBanned(boolean banned);
 }

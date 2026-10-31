@@ -1,6 +1,8 @@
 import { VerificationStatus } from "@/types/auth";
 import { JobItem } from "@/features/jobs/types/job";
 
+export type { VerificationStatus };
+
 export interface Company {
   id: string;
   name: string;

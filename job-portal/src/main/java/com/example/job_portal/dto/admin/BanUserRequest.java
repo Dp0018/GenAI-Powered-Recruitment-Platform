@@ -1,0 +1,18 @@
+package com.example.job_portal.dto.admin;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class BanUserRequest {
+    @NotBlank(message = "Ban reason is required")
+    private String reason;
+
+    private Integer durationDays;
+}

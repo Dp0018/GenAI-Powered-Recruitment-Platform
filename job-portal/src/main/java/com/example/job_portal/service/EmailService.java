@@ -8,5 +8,9 @@ public interface EmailService {
 
     void sendApplicationReceivedEmail(String candidateEmail, String candidateName, String jobTitle, String companyName);
 
-    void sendApplicationStatusUpdateEmail(String candidateEmail, String candidateName, String jobTitle, String companyName, Application.ApplicationStatus newStatus, String customNote);
+    void sendApplicationStatusUpdateEmail(String candidateEmail, String candidateName, String jobTitle,
+            String companyName, Application.ApplicationStatus newStatus, String customNote);
+
+    void sendCompanyVerificationEmail(String recipientEmail, String recipientName, String companyName,
+            boolean verified, String notes);
 }

@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 "/test/errors/**",
                                 "/error"
                         ).permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole("PLATFORM_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

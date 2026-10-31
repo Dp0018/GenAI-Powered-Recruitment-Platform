@@ -292,4 +292,72 @@ public class ResendEmailServiceImpl implements EmailService {
                 </html>
                 """.formatted(statusBadgeColor, status.name(), candidateName, statusExplanation, jobTitle, companyName, noteSection, dashboardUrl);
     }
+
+    @Override
+    public void sendCompanyVerificationEmail(String recipientEmail, String recipientName, String companyName,
+            boolean verified, String notes) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (!StringUtils.hasText(resendApiKey)) {
+                    log.info("[Email Skipped] Resend API key not configured for company verification notification to {}", recipientEmail);
+                    return;
+                }
+
+                String statusTitle = verified ? "Company Profile Verified" : "Company Verification Rejected";
+                String badgeColor = verified ? "#059669" : "#DC2626";
+                String badgeText = verified ? "KYC VERIFIED" : "VERIFICATION REJECTED";
+                String bodyText = verified
+                        ? "Congratulations! Your employer profile and company entity have been officially verified by platform administrators. You now have full authorization to publish active job requisitions and source talent on JobPortal."
+                        : "Your company verification request has been rejected by platform administrators.";
+
+                String noteHtml = StringUtils.hasText(notes)
+                        ? "<div style=\"background: #1F2937; border-left: 3px solid #6366F1; padding: 12px 16px; margin: 20px 0; border-radius: 4px; font-size: 13px; color: #D1D5DB;\"><strong>Administrator Note:</strong> " + notes + "</div>"
+                        : "";
+
+                String dashboardUrl = frontendUrl + "/dashboard/employer";
+
+                String htmlContent = """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0B0F19; color: #FFFFFF; margin: 0; padding: 40px 20px; }
+                            .container { max-width: 560px; margin: 0 auto; background: #111827; border: 1px solid #1F2937; border-radius: 16px; padding: 36px; }
+                            .brand { font-size: 18px; font-weight: 700; color: #6366F1; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .title { font-size: 22px; font-weight: 700; color: #F9FAFB; margin-bottom: 12px; }
+                            .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; background: %s; color: #FFFFFF; margin-bottom: 16px; }
+                            .text { font-size: 14px; color: #9CA3AF; line-height: 1.6; margin-bottom: 24px; }
+                            .btn { display: inline-block; background-color: #4F46E5; color: #FFFFFF !important; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
+                            .footer { font-size: 12px; color: #6B7280; border-top: 1px solid #1F2937; padding-top: 20px; margin-top: 32px; }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <div class="brand">JobPortal Governance</div>
+                            <div class="badge">%s</div>
+                            <div class="title">%s</div>
+                            <div class="text">
+                              Hello %s,<br><br>
+                              This is an official notice regarding the verification status of <strong>%s</strong>.<br><br>
+                              %s
+                            </div>
+                            %s
+                            <div>
+                              <a href="%s" class="btn">Open Employer Dashboard</a>
+                            </div>
+                            <div class="footer">
+                              &copy; 2026 JobPortal Platform Inc. All rights reserved.
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """.formatted(badgeColor, badgeText, statusTitle, recipientName, companyName, bodyText, noteHtml, dashboardUrl);
+
+                executeEmailSend(recipientEmail, "KYC Status: " + companyName + " - " + statusTitle, htmlContent, false);
+            } catch (Exception e) {
+                log.error("Failed to send company verification email to {}: {}", recipientEmail, e.getMessage());
+            }
+        });
+    }
 }

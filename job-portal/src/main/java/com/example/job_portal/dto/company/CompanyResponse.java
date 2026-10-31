@@ -48,4 +48,8 @@ public class CompanyResponse {
                 .updatedAt(company.getUpdatedAt())
                 .build();
     }
+
+    public static CompanyResponse fromEntity(Company company) {
+        return fromEntity(company, 0);
+    }
 }

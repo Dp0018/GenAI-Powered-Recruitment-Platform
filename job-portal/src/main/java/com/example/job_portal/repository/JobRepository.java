@@ -23,4 +23,6 @@ public interface JobRepository extends JpaRepository<Job, String>, JpaSpecificat
     long countByCompanyId(String companyId);
 
     long countByCompanyIdAndStatus(String companyId, Job.JobStatus status);
+
+    long countByStatus(Job.JobStatus status);
 }
