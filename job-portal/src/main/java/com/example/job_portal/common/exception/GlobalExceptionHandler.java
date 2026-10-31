@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -42,6 +43,13 @@ public class GlobalExceptionHandler {
             BadRequestException ex, HttpServletRequest request) {
         log.warn("Bad request: {} at path: {}", ex.getMessage(), request.getRequestURI());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+            UnauthorizedException ex, HttpServletRequest request) {
+        log.warn("Unauthorized: {} at path: {}", ex.getMessage(), request.getRequestURI());
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(VendorNotVerifiedException.class)
@@ -162,6 +170,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNAUTHORIZED,
                 "AUTHENTICATION_REQUIRED",
                 "Authentication is required to access this resource",
+                request.getRequestURI()
+        );
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+            NoResourceFoundException ex, HttpServletRequest request) {
+        log.warn("Route not found: {} at path: {}", ex.getMessage(), request.getRequestURI());
+        return buildErrorResponse(
+                HttpStatus.NOT_FOUND,
+                "RESOURCE_NOT_FOUND",
+                "Endpoint or resource not found at " + request.getRequestURI(),
                 request.getRequestURI()
         );
     }

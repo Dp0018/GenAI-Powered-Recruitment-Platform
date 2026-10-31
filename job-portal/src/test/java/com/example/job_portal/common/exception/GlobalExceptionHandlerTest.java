@@ -43,6 +43,17 @@ class GlobalExceptionHandlerTest {
             throw new VendorNotVerifiedException(42L);
         }
 
+        @GetMapping("/unauthorized")
+        public void triggerUnauthorized() {
+            throw new UnauthorizedException("Invalid email or password");
+        }
+
+        @GetMapping("/missing-resource")
+        public void triggerMissingResource() throws Exception {
+            throw new org.springframework.web.servlet.resource.NoResourceFoundException(
+                    org.springframework.http.HttpMethod.GET, "/test/errors/missing-resource", "Resource not found");
+        }
+
         @PostMapping("/validate")
         public void triggerValidation(@Valid @RequestBody DummyPayload payload) {
             // No-op
@@ -107,5 +118,27 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.errors[0].field", is("title")))
                 .andExpect(jsonPath("$.errors[0].message", is("Title is required")));
+    }
+
+    @Test
+    @DisplayName("Should return 401 for UnauthorizedException")
+    void shouldHandleUnauthorized() throws Exception {
+        mockMvc.perform(get("/test/errors/unauthorized"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.statusCode", is(401)))
+                .andExpect(jsonPath("$.errorCode", is("UNAUTHORIZED")))
+                .andExpect(jsonPath("$.message", is("Invalid email or password")));
+    }
+
+    @Test
+    @DisplayName("Should return 404 for NoResourceFoundException")
+    void shouldHandleNoResourceFound() throws Exception {
+        mockMvc.perform(get("/test/errors/missing-resource"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.statusCode", is(404)))
+                .andExpect(jsonPath("$.errorCode", is("RESOURCE_NOT_FOUND")))
+                .andExpect(jsonPath("$.message", containsString("Endpoint or resource not found")));
     }
 }
