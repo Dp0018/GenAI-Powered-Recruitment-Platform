@@ -301,8 +301,10 @@ export function EmployerRequisitionsTable({
   );
 }
 
+import { EmployerCompanyBrandingTab } from "./employer-company-branding-tab";
+
 export function EmployerDashboardView() {
-  const [activeTab, setActiveTab] = useState<"requisitions" | "applicants">("requisitions");
+  const [activeTab, setActiveTab] = useState<"requisitions" | "applicants" | "branding">("requisitions");
   const { data: jobsData, isLoading: jobsLoading } = useCompanyJobsQuery();
   const { data: appsData } = useCompanyApplicationsQuery();
 
@@ -347,6 +349,18 @@ export function EmployerDashboardView() {
             {totalApplicants}
           </span>
         </button>
+
+        <button
+          onClick={() => setActiveTab("branding")}
+          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+            activeTab === "branding"
+              ? "border-primary text-foreground font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Building2 className="size-3.5" />
+          <span>Company Branding</span>
+        </button>
       </div>
 
       {activeTab === "requisitions" ? (
@@ -355,8 +369,10 @@ export function EmployerDashboardView() {
           isLoading={jobsLoading}
           totalElements={totalJobs}
         />
-      ) : (
+      ) : activeTab === "applicants" ? (
         <EmployerApplicantsTable />
+      ) : (
+        <EmployerCompanyBrandingTab />
       )}
     </div>
   );
