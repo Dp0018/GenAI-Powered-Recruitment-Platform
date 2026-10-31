@@ -8,6 +8,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useApplicationStatusQuery } from "@/features/applications/hooks/use-applications";
 import { ApplyJobModal } from "@/features/applications/components/apply-job-modal";
 import { Button } from "@/components/ui/button";
+import { BookmarkButton } from "./bookmark-button";
 import {
   Building2,
   MapPin,
@@ -118,10 +119,20 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
           <div className="space-y-3">
             {/* Company metadata */}
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-sm font-semibold text-primary font-mono flex items-center gap-1.5">
-                <Building2 className="size-4 text-primary" />
-                <span>{job.company?.name || "Corporate Employer"}</span>
-              </span>
+              {job.company?.slug ? (
+                <Link
+                  href={`/companies/${job.company.slug}`}
+                  className="text-sm font-semibold text-primary hover:underline font-mono flex items-center gap-1.5"
+                >
+                  <Building2 className="size-4 text-primary" />
+                  <span>{job.company?.name || "Corporate Employer"}</span>
+                </Link>
+              ) : (
+                <span className="text-sm font-semibold text-primary font-mono flex items-center gap-1.5">
+                  <Building2 className="size-4 text-primary" />
+                  <span>{job.company?.name || "Corporate Employer"}</span>
+                </span>
+              )}
               {isVerified && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/40">
                   <CheckCircle2 className="size-3.5" />
@@ -177,20 +188,29 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
               )}
             </div>
 
-            {hasApplied ? (
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-emerald-950/40 border border-emerald-700/50 text-emerald-300 text-xs font-medium font-mono">
-                <CheckCircle2 className="size-4 text-emerald-400" />
-                <span>Application Submitted</span>
-              </div>
-            ) : (
-              <Button
-                onClick={handleApplyClick}
-                className="h-10 px-6 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-md shadow-sm shadow-primary/20 gap-2"
-              >
-                <Send className="size-3.5" />
-                <span>{isAuthenticated ? "Submit Candidacy" : "Sign In to Apply"}</span>
-              </Button>
-            )}
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <BookmarkButton
+                jobId={job.id}
+                size="default"
+                variant="outline"
+                showText
+                className="h-10 border-border"
+              />
+              {hasApplied ? (
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-emerald-950/40 border border-emerald-700/50 text-emerald-300 text-xs font-medium font-mono">
+                  <CheckCircle2 className="size-4 text-emerald-400" />
+                  <span>Application Submitted</span>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleApplyClick}
+                  className="h-10 px-6 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-md shadow-sm shadow-primary/20 gap-2"
+                >
+                  <Send className="size-3.5" />
+                  <span>{isAuthenticated ? "Submit Candidacy" : "Sign In to Apply"}</span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 

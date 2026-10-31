@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
+import { BookmarkButton } from "./bookmark-button";
 
 interface JobCardProps {
   job: JobItem;
@@ -70,22 +71,25 @@ export function JobCard({ job }: JobCardProps) {
           )}
         </div>
 
-        {/* Right Info: Comp, Location, Workplace */}
-        <div className="sm:text-right shrink-0 flex sm:flex-col justify-between sm:justify-start gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/60">
-          <div>
-            {job.minSalary && job.maxSalary ? (
-              <div className="font-mono text-sm font-bold text-foreground">
-                ${(job.minSalary / 1000).toFixed(0)}k - ${(job.maxSalary / 1000).toFixed(0)}k{" "}
-                <span className="text-[10px] text-muted-foreground">{job.currency}</span>
-              </div>
-            ) : job.minSalary ? (
-              <div className="font-mono text-sm font-bold text-foreground">
-                From ${(job.minSalary / 1000).toFixed(0)}k{" "}
-                <span className="text-[10px] text-muted-foreground">{job.currency}</span>
-              </div>
-            ) : (
-              <span className="text-xs font-mono text-muted-foreground">Competitive Compensation</span>
-            )}
+        {/* Right Info: Comp, Location, Workplace & Bookmark */}
+        <div className="sm:text-right shrink-0 flex sm:flex-col justify-between sm:justify-start items-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/60">
+          <div className="flex items-center gap-2">
+            <div>
+              {job.minSalary && job.maxSalary ? (
+                <div className="font-mono text-sm font-bold text-foreground">
+                  ${(job.minSalary / 1000).toFixed(0)}k - ${(job.maxSalary / 1000).toFixed(0)}k{" "}
+                  <span className="text-[10px] text-muted-foreground">{job.currency}</span>
+                </div>
+              ) : job.minSalary ? (
+                <div className="font-mono text-sm font-bold text-foreground">
+                  From ${(job.minSalary / 1000).toFixed(0)}k{" "}
+                  <span className="text-[10px] text-muted-foreground">{job.currency}</span>
+                </div>
+              ) : (
+                <span className="text-xs font-mono text-muted-foreground">Competitive Compensation</span>
+              )}
+            </div>
+            <BookmarkButton jobId={job.id} size="sm" variant="ghost" className="h-7 w-7 p-0" />
           </div>
 
           <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-1 text-xs text-muted-foreground">

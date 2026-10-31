@@ -8,6 +8,8 @@ import { ApplicationItem, ApplicationStatus } from "@/features/applications/type
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CandidateProfileView } from "@/features/profile/components/candidate-profile-view";
+import { CandidateSavedJobsTab } from "./candidate-saved-jobs-tab";
+import { useSavedJobsQuery } from "@/features/jobs/hooks/use-jobs";
 import {
   User,
   Briefcase,
@@ -20,6 +22,7 @@ import {
   CheckCircle2,
   Loader2,
   Calendar,
+  Bookmark,
 } from "lucide-react";
 
 export function CandidateHeader() {
@@ -282,8 +285,10 @@ export function CandidateProfileSummary() {
 
 export function CandidateDashboardView() {
   const { data, isLoading } = useMyApplicationsQuery();
+  const { data: savedJobsData } = useSavedJobsQuery();
   const applications = data?.content || [];
   const totalElements = data?.totalElements || 0;
+  const totalSaved = savedJobsData?.totalElements || 0;
 
   return (
     <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6">
@@ -297,6 +302,13 @@ export function CandidateDashboardView() {
           >
             <FileText className="size-3.5" />
             <span>Applications ({totalElements})</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="saved"
+            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
+          >
+            <Bookmark className="size-3.5" />
+            <span>Saved Jobs ({totalSaved})</span>
           </TabsTrigger>
           <TabsTrigger
             value="profile"
@@ -315,6 +327,10 @@ export function CandidateDashboardView() {
             totalElements={totalElements}
           />
           <CandidateProfileSummary />
+        </TabsContent>
+
+        <TabsContent value="saved" className="outline-none">
+          <CandidateSavedJobsTab />
         </TabsContent>
 
         <TabsContent value="profile" className="outline-none">

@@ -72,4 +72,30 @@ export const jobsApi = {
       method: "DELETE",
     });
   },
+
+  toggleSaveJob: async (jobId: string): Promise<boolean> => {
+    const res = await apiClient<boolean>(`/jobs/${jobId}/save`, {
+      method: "POST",
+    });
+    return Boolean(res.data);
+  },
+
+  isJobSaved: async (jobId: string): Promise<boolean> => {
+    const res = await apiClient<boolean>(`/jobs/${jobId}/is-saved`);
+    return Boolean(res.data);
+  },
+
+  getSavedJobs: async (page = 0, size = 10): Promise<PagedResponse<JobItem>> => {
+    const res = await apiClient<PagedResponse<JobItem>>(`/jobs/saved?page=${page}&size=${size}`);
+    return (
+      res.data || {
+        content: [],
+        pageNumber: 0,
+        pageSize: size,
+        totalElements: 0,
+        totalPages: 0,
+        last: true,
+      }
+    );
+  },
 };

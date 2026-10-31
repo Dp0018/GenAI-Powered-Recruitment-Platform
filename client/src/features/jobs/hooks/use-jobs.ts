@@ -64,3 +64,38 @@ export function useDeleteJobMutation() {
     },
   });
 }
+
+export function useIsJobSavedQuery(jobId: string, enabled = true) {
+  return useQuery({
+    queryKey: ["job-saved", jobId],
+    queryFn: () => jobsApi.isJobSaved(jobId),
+    enabled: Boolean(jobId) && enabled,
+    staleTime: 1000 * 60 * 2,
+  });
+}
+
+export function useToggleSaveJobMutation(jobId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => jobsApi.toggleSaveJob(jobId),
+    onSuccess: (isSaved) => {
+      queryClient.setQueryData(["job-saved", jobId], isSaved);
+      queryClient.invalidateQueries({ queryKey: ["saved-jobs"] });
+      toast.success(isSaved ? "Job added to saved bookmarks" : "Job removed from bookmarks");
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Please sign in as a candidate to save jobs");
+    },
+  });
+}
+
+export function useSavedJobsQuery(page = 0, size = 10, enabled = true) {
+  return useQuery({
+    queryKey: ["saved-jobs", page, size],
+    queryFn: () => jobsApi.getSavedJobs(page, size),
+    enabled,
+    staleTime: 1000 * 30,
+  });
+}
+
