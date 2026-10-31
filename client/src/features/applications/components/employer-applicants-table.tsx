@@ -25,6 +25,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+import { ResumePreviewModal } from "./resume-preview-modal";
+
 interface EmployerApplicantsTableProps {
   jobId?: string;
 }
@@ -36,6 +38,7 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
     candidateName: string;
     note: string;
   } | null>(null);
+  const [previewingApp, setPreviewingApp] = useState<ApplicationItem | null>(null);
 
   const applications = data?.content || [];
   const totalElements = data?.totalElements || 0;
@@ -133,15 +136,14 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
 
                     {/* Resume Document Link */}
                     <td className="py-3.5 px-4">
-                      <a
-                        href={app.resumeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary border border-border text-xs font-mono text-primary hover:bg-secondary/80 transition-colors"
+                      <button
+                        type="button"
+                        onClick={() => setPreviewingApp(app)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary border border-border text-xs font-mono text-primary hover:bg-secondary/80 transition-colors cursor-pointer"
                       >
-                        <ExternalLink className="size-3.5" />
-                        <span>Open Resume</span>
-                      </a>
+                        <FileText className="size-3.5" />
+                        <span>Preview Resume</span>
+                      </button>
                     </td>
 
                     {/* Status Dropdown */}
@@ -218,6 +220,15 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* In-App Resume PDF Previewer Modal */}
+      <ResumePreviewModal
+        application={previewingApp}
+        open={Boolean(previewingApp)}
+        onOpenChange={(open) => {
+          if (!open) setPreviewingApp(null);
+        }}
+      />
     </div>
   );
 }
