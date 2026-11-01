@@ -7,6 +7,8 @@ import { useAdminAnalyticsQuery } from "@/features/admin/hooks/use-admin";
 import { AdminMetricsGrid } from "./admin-metrics-grid";
 import { AdminCompanyVerificationTab } from "./admin-company-verification-tab";
 import { AdminUserModerationTab } from "./admin-user-moderation-tab";
+import { AdminFraudQuarantineTab } from "./admin-fraud-quarantine-tab";
+import { useQuarantinedJobsQuery } from "@/features/ai/hooks/use-ai";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,7 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 
 export function AdminHeader() {
@@ -139,8 +142,10 @@ function AdminSystemHealthTab() {
 export function AdminDashboardView() {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { data: analytics } = useAdminAnalyticsQuery();
+  const { data: quarantinedData } = useQuarantinedJobsQuery(0, 1);
   const pendingKYC = analytics?.pendingCompanies ?? 0;
   const totalUsers = analytics?.totalUsers ?? 0;
+  const quarantinedCount = quarantinedData?.totalElements ?? 0;
 
   if (isAuthLoading) {
     return (
@@ -191,6 +196,19 @@ export function AdminDashboardView() {
           </TabsTrigger>
 
           <TabsTrigger
+            value="quarantine"
+            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
+          >
+            <ShieldAlert className="size-3.5 text-rose-400" />
+            <span>AI Trust & Quarantine</span>
+            {quarantinedCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-rose-500 text-white ml-0.5">
+                {quarantinedCount}
+              </span>
+            ) : null}
+          </TabsTrigger>
+
+          <TabsTrigger
             value="users"
             className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
           >
@@ -209,6 +227,10 @@ export function AdminDashboardView() {
 
         <TabsContent value="kyc" className="outline-none">
           <AdminCompanyVerificationTab />
+        </TabsContent>
+
+        <TabsContent value="quarantine" className="outline-none">
+          <AdminFraudQuarantineTab />
         </TabsContent>
 
         <TabsContent value="users" className="outline-none">

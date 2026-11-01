@@ -17,6 +17,7 @@ import {
 import { BookmarkButton } from "./bookmark-button";
 import { getBenefitLabel } from "../types/benefits";
 import { SkillsMatchBadge } from "./skills-match-badge";
+import { JobFraudShieldBadge } from "@/features/ai/components/job-fraud-shield-badge";
 
 interface JobCardProps {
   job: JobItem;
@@ -76,6 +77,12 @@ export function JobCard({ job }: JobCardProps) {
               </span>
             )}
             <SkillsMatchBadge jobId={job.id} />
+            <JobFraudShieldBadge
+              fraudScore={job.fraudRiskScore ?? 5}
+              riskLevel={job.fraudRiskLevel ?? "LOW"}
+              fraudReasons={job.fraudReasons ?? undefined}
+              isQuarantined={job.isQuarantined ?? false}
+            />
           </div>
 
           {/* Job Title */}

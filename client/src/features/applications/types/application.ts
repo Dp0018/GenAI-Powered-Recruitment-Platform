@@ -48,6 +48,10 @@ export interface ApplicationItem {
   reviewCount?: number;
   referralCode?: string | null;
   referredBy?: string | null;
+  matchScore?: number | null;
+  xaiExplanation?: string | null;
+  resumeAnomalyScore?: number | null;
+  resumeAnomalyFlags?: string | null;
   createdAt: string;
   updatedAt?: string | null;
 }

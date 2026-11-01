@@ -37,6 +37,9 @@ import { useProfileQuery } from "@/features/profile/hooks/use-profile";
 import { useSubmitApplicationMutation } from "@/features/applications/hooks/use-applications";
 import { COMPANY_BENEFITS, getBenefitLabel } from "../types/benefits";
 import { SkillsMatchBreakdownCard } from "./skills-match-breakdown-card";
+import { JobFraudShieldBadge } from "@/features/ai/components/job-fraud-shield-badge";
+import { ExplainableMatchCard } from "@/features/ai/components/explainable-match-card";
+import { useExplainJobMatchQuery } from "@/features/ai/hooks/use-ai";
 
 interface JobDetailViewProps {
   slug: string;
@@ -56,6 +59,16 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
   const [copiedReferral, setCopiedReferral] = useState(false);
   const [applyModalOpen, setApplyModalOpen] = useState(false);
   const [referralCode, setReferralCode] = useState<string | undefined>(undefined);
+  const [showAiFit, setShowAiFit] = useState(false);
+
+  const {
+    data: aiMatchData,
+    isLoading: isAiMatchLoading,
+    refetch: refetchAiFit,
+  } = useExplainJobMatchQuery(
+    job?.id,
+    Boolean(showAiFit && isAuthenticated && job?.id)
+  );
 
   const referralFromUrl = searchParams.get("ref");
 
@@ -252,6 +265,12 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
 
             {/* Key Badges */}
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground font-mono">
+              <JobFraudShieldBadge
+                fraudScore={job.fraudRiskScore}
+                riskLevel={job.fraudRiskLevel}
+                fraudReasons={job.fraudReasons}
+                isQuarantined={job.isQuarantined}
+              />
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary border border-border text-foreground">
                 <MapPin className="size-3 text-primary" />
                 <span>{job.location}</span>
@@ -416,6 +435,63 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
         <div className="lg:col-span-8 space-y-8">
           {/* Candidate Skills Match Breakdown */}
           <SkillsMatchBreakdownCard jobId={job.id} />
+
+          {/* Explainable AI (XAI) Fit Engine */}
+          {isAuthenticated && user?.role === "CANDIDATE" && (
+            <section className="p-6 rounded-xl bg-card/60 border border-border space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
+                <div className="flex items-center gap-2.5">
+                  <div className="size-8 rounded-lg bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                      <span>Explainable AI (XAI) Fit Engine</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      Transparent multi-factor match synthesis powered by Gemini 3.5 Flash
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  size="sm"
+                  variant={showAiFit ? "outline" : "default"}
+                  onClick={() => {
+                    setShowAiFit(true);
+                    if (showAiFit) refetchAiFit();
+                  }}
+                  disabled={isAiMatchLoading}
+                  className="h-8 text-xs font-mono gap-1.5 shrink-0"
+                >
+                  {isAiMatchLoading ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" />
+                      <span>Synthesizing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="size-3.5" />
+                      <span>{showAiFit ? "Re-Analyze Match" : "Explain My Fit (AI)"}</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {showAiFit && (
+                <div className="pt-1">
+                  {isAiMatchLoading ? (
+                    <div className="p-8 flex flex-col items-center justify-center space-y-2 text-muted-foreground">
+                      <Loader2 className="size-5 animate-spin text-primary" />
+                      <span className="text-xs font-mono">Auditing competencies, experience, domain, and DE&I fairness...</span>
+                    </div>
+                  ) : aiMatchData ? (
+                    <ExplainableMatchCard data={aiMatchData} />
+                  ) : null}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Overview */}
           <section className="p-6 rounded-xl bg-card/60 border border-border space-y-4">

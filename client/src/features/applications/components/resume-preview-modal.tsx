@@ -30,10 +30,14 @@ import {
   Globe,
   Code,
   Link2,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { RecruiterScreeningScorecard } from "./recruiter-screening-scorecard";
 import { useCandidateProfileByIdQuery } from "@/features/profile/hooks/use-profile";
+import { useExplainApplicationMatchQuery } from "@/features/ai/hooks/use-ai";
+import { ExplainableMatchCard } from "@/features/ai/components/explainable-match-card";
 
 const REJECTION_TEMPLATES = [
   {
@@ -70,9 +74,19 @@ export function ResumePreviewModal({
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<ApplicationStatus | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "evaluation" | "answers" | "profile">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "evaluation" | "answers" | "profile" | "xai"
+  >("overview");
   const { data: candidateProfile, isLoading: isProfileLoading } = useCandidateProfileByIdQuery(
     application?.candidate?.id
+  );
+  const {
+    data: xaiData,
+    isLoading: isXaiLoading,
+    refetch: refetchXai,
+  } = useExplainApplicationMatchQuery(
+    application?.id,
+    Boolean(application?.id && activeTab === "xai")
   );
 
   if (!application) return null;
@@ -216,7 +230,33 @@ export function ResumePreviewModal({
                   <User className="size-3 text-cyan-400" />
                   <span>Profile</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("xai")}
+                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+                    activeTab === "xai"
+                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Sparkles className="size-3 text-primary" />
+                  <span>AI Fit</span>
+                </button>
               </div>
+
+              {/* Prompt Injection / Anomaly Alert if flagged */}
+              {((application.resumeAnomalyScore && application.resumeAnomalyScore >= 70) ||
+                application.resumeAnomalyFlags) && (
+                <div className="p-3 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-rose-400">
+                    <ShieldAlert className="size-4 shrink-0" />
+                    <span>AI Trust Alert: Resume Anomaly Flagged</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-rose-200/90 font-sans">
+                    Gemini AI detected potential prompt manipulation or hidden prompt injection in this candidate&apos;s resume text.
+                  </p>
+                </div>
+              )}
 
               {/* Tab 1: Overview */}
               {activeTab === "overview" && (
@@ -420,6 +460,40 @@ export function ResumePreviewModal({
                           </div>
                         )}
                       </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tab 5: Explainable AI Match & Integrity */}
+              {activeTab === "xai" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-border">
+                    <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-foreground">
+                      <Sparkles className="size-3.5 text-primary" />
+                      <span>Gemini 3.5 Flash XAI Audit</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => refetchXai()}
+                      disabled={isXaiLoading}
+                      className="h-6 text-[10px] font-mono px-2"
+                    >
+                      Refresh
+                    </Button>
+                  </div>
+
+                  {isXaiLoading ? (
+                    <div className="p-8 flex flex-col items-center justify-center space-y-2 text-muted-foreground">
+                      <Loader2 className="size-5 animate-spin text-primary" />
+                      <span className="text-xs font-mono">Synthesizing candidate match...</span>
+                    </div>
+                  ) : xaiData ? (
+                    <ExplainableMatchCard data={xaiData} candidateName={application.candidate.name} />
+                  ) : (
+                    <div className="p-6 text-center text-xs text-muted-foreground font-mono">
+                      No XAI report generated yet.
                     </div>
                   )}
                 </div>

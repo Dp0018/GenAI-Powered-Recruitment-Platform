@@ -38,6 +38,10 @@ export interface JobItem {
   status: "DRAFT" | "PUBLISHED" | "CLOSED";
   applicantCount: number;
   viewsCount?: number;
+  fraudRiskScore?: number | null;
+  fraudRiskLevel?: string | null;
+  fraudReasons?: string | null;
+  isQuarantined?: boolean | null;
   company: CompanyResponse;
   screeningQuestions?: JobQuestionItem[];
   createdAt: string;

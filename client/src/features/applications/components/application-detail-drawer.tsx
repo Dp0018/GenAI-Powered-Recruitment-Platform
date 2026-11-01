@@ -23,7 +23,10 @@ import {
   ArrowRight,
   Ban,
   Loader2,
+  Sparkles,
 } from "lucide-react";
+import { useExplainApplicationMatchQuery } from "@/features/ai/hooks/use-ai";
+import { ExplainableMatchCard } from "@/features/ai/components/explainable-match-card";
 
 interface ApplicationDetailDrawerProps {
   application: ApplicationItem | null;
@@ -37,6 +40,16 @@ export function ApplicationDetailDrawer({
   onOpenChange,
 }: ApplicationDetailDrawerProps) {
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [showXai, setShowXai] = useState(false);
+
+  const {
+    data: xaiData,
+    isLoading: isXaiLoading,
+    refetch: refetchXai,
+  } = useExplainApplicationMatchQuery(
+    application?.id,
+    Boolean(application?.id && showXai)
+  );
 
   const withdrawMutation = useWithdrawApplicationMutation(() => {
     setConfirmWithdraw(false);
@@ -207,6 +220,60 @@ export function ApplicationDetailDrawer({
               </p>
             </div>
           )}
+
+          {/* Explainable AI Fit Engine Insights */}
+          <div className="p-4 rounded-xl bg-card/60 border border-border space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-lg bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
+                  <Sparkles className="size-3.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-foreground">
+                    Explainable AI (XAI) Fit Breakdown
+                  </h4>
+                  <p className="text-[10px] text-muted-foreground font-mono">
+                    Powered by Gemini 3.5 Flash
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setShowXai(!showXai);
+                  if (!showXai) refetchXai();
+                }}
+                disabled={isXaiLoading}
+                className="h-7 text-[11px] font-mono gap-1"
+              >
+                {isXaiLoading ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Sparkles className="size-3 text-primary" />
+                )}
+                <span>{showXai ? "Hide Analysis" : "View Fit Analysis"}</span>
+              </Button>
+            </div>
+
+            {showXai && (
+              <div className="pt-2">
+                {isXaiLoading ? (
+                  <div className="p-6 flex flex-col items-center justify-center space-y-2 text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin text-primary" />
+                    <span className="text-[11px] font-mono">Synthesizing match factor breakdown...</span>
+                  </div>
+                ) : xaiData ? (
+                  <ExplainableMatchCard data={xaiData} />
+                ) : (
+                  <div className="p-4 text-center text-xs text-muted-foreground font-mono">
+                    Could not load AI fit breakdown.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Submission Details */}
           <div className="p-4 rounded-lg bg-card/60 border border-border space-y-3 text-xs">

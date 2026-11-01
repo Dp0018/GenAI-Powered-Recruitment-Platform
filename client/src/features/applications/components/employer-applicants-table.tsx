@@ -29,6 +29,7 @@ import {
   Sparkles,
   XCircle,
   Award,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -273,6 +274,16 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                         <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           <Sparkles className="size-2.5" />
                           <span>Ref: {app.referralCode}</span>
+                        </div>
+                      )}
+                      {((app.resumeAnomalyScore && app.resumeAnomalyScore >= 70) || app.resumeAnomalyFlags) && (
+                        <div
+                          className="inline-flex items-center gap-1 mt-1 ml-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 cursor-pointer"
+                          onClick={() => setPreviewingApp(app)}
+                          title="Gemini AI Flagged: Prompt Injection / Resume Anomaly Detected"
+                        >
+                          <ShieldAlert className="size-2.5" />
+                          <span>AI Shield Alert</span>
                         </div>
                       )}
                     </td>
