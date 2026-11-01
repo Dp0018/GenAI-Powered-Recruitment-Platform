@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   Dialog,
@@ -15,15 +15,11 @@ import {
   FileText,
   Building2,
   MapPin,
-  Clock,
   CheckCircle2,
   AlertCircle,
   ExternalLink,
   MessageSquare,
   ShieldCheck,
-  Calendar,
-  Phone,
-  User,
   ArrowRight,
   Ban,
   Loader2,
@@ -99,12 +95,12 @@ export function ApplicationDetailDrawer({
                 application.status === "OFFERED"
                   ? "bg-emerald-950/40 text-emerald-400 border-emerald-800/40"
                   : application.status === "REJECTED"
-                  ? "bg-rose-950/40 text-rose-400 border-rose-800/40"
-                  : application.status === "WITHDRAWN"
-                  ? "bg-secondary text-muted-foreground border-border"
-                  : application.status === "INTERVIEWING"
-                  ? "bg-blue-950/40 text-blue-400 border-blue-800/40"
-                  : "bg-amber-950/40 text-amber-400 border-amber-800/40"
+                    ? "bg-rose-950/40 text-rose-400 border-rose-800/40"
+                    : application.status === "WITHDRAWN"
+                      ? "bg-secondary text-muted-foreground border-border"
+                      : application.status === "INTERVIEWING"
+                        ? "bg-blue-950/40 text-blue-400 border-blue-800/40"
+                        : "bg-amber-950/40 text-amber-400 border-amber-800/40"
               }`}
             >
               {application.status}
@@ -123,7 +119,9 @@ export function ApplicationDetailDrawer({
             <span>•</span>
             <span className="font-mono">{application.job?.workplaceType}</span>
             <span>•</span>
-            <span className="font-mono">{application.job?.jobType?.replace("_", " ")}</span>
+            <span className="font-mono">
+              {application.job?.jobType?.replace("_", " ")}
+            </span>
           </div>
         </DialogHeader>
 
@@ -169,7 +167,9 @@ export function ApplicationDetailDrawer({
                     <div key={stage.label} className="space-y-1.5">
                       <div
                         className={`h-1.5 rounded-full transition-colors ${
-                          isDone || isCurrent ? "bg-primary" : "bg-secondary border border-border"
+                          isDone || isCurrent
+                            ? "bg-primary"
+                            : "bg-secondary border border-border"
                         }`}
                       />
                       <div className="space-y-0.5">
@@ -178,8 +178,8 @@ export function ApplicationDetailDrawer({
                             isCurrent
                               ? "text-primary"
                               : isDone
-                              ? "text-foreground"
-                              : "text-muted-foreground"
+                                ? "text-foreground"
+                                : "text-muted-foreground"
                           }`}
                         >
                           {stage.label}
@@ -210,7 +210,9 @@ export function ApplicationDetailDrawer({
 
           {/* Submission Details */}
           <div className="p-4 rounded-lg bg-card/60 border border-border space-y-3 text-xs">
-            <h4 className="font-semibold text-foreground">Submission Records</h4>
+            <h4 className="font-semibold text-foreground">
+              Submission Records
+            </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-muted-foreground font-mono">
               <div className="space-y-1">
@@ -238,6 +240,38 @@ export function ApplicationDetailDrawer({
               )}
             </div>
 
+            {application.status === "OFFERED" && (
+              <div className="p-4 rounded-xl bg-linear-to-r from-emerald-950/40 to-teal-950/30 border border-emerald-600/40 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                    <CheckCircle2 className="size-4" />
+                    <span>Official Offer Extended! 🎉</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-400/80">
+                    Pending Action
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  The hiring team has extended a formal employment agreement
+                  with full compensation and electronic signature workflow.
+                </p>
+                <div className="pt-1">
+                  <Link
+                    href="/dashboard/candidate?tab=offers"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    <Button
+                      size="sm"
+                      className="h-8 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1.5"
+                    >
+                      <span>View & E-Sign Offer Letter</span>
+                      <ArrowRight className="size-3" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+
             <div className="pt-2 border-t border-border flex items-center justify-between">
               <span className="text-muted-foreground">Uploaded Resume:</span>
               <a
@@ -262,6 +296,30 @@ export function ApplicationDetailDrawer({
                 </p>
               </div>
             )}
+
+            {application.screeningAnswers &&
+              application.screeningAnswers.length > 0 && (
+                <div className="pt-2 border-t border-border space-y-2">
+                  <span className="text-[10px] uppercase text-muted-foreground/70 block font-semibold">
+                    Pre-Screening Question Responses
+                  </span>
+                  <div className="space-y-2">
+                    {application.screeningAnswers.map((ans, idx) => (
+                      <div
+                        key={ans.id || idx}
+                        className="p-2.5 rounded bg-background border border-border space-y-1"
+                      >
+                        <div className="text-[11px] font-medium text-foreground">
+                          {idx + 1}. {ans.questionText}
+                        </div>
+                        <div className="text-xs text-primary font-mono pl-3 border-l-2 border-primary/40">
+                          {ans.answerText}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
           </div>
 
           {/* Actions & Withdrawal */}
@@ -275,7 +333,9 @@ export function ApplicationDetailDrawer({
                 <span>View Public Job Listing</span>
                 <ExternalLink className="size-3" />
               </Link>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
 
             {canWithdraw && (
               <div>
@@ -291,7 +351,9 @@ export function ApplicationDetailDrawer({
                   </Button>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-muted-foreground">Confirm withdraw?</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Confirm withdraw?
+                    </span>
                     <Button
                       variant="ghost"
                       size="sm"

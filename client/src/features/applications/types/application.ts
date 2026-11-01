@@ -27,6 +27,13 @@ export interface ApplicationCandidateSummary {
   phone?: string | null;
 }
 
+export interface ScreeningAnswerItem {
+  id?: string;
+  questionId?: string;
+  questionText: string;
+  answerText: string;
+}
+
 export interface ApplicationItem {
   id: string;
   job: ApplicationJobSummary;
@@ -36,6 +43,11 @@ export interface ApplicationItem {
   phone?: string | null;
   feedbackNote?: string | null;
   status: ApplicationStatus;
+  screeningAnswers?: ScreeningAnswerItem[];
+  averageRating?: number | null;
+  reviewCount?: number;
+  referralCode?: string | null;
+  referredBy?: string | null;
   createdAt: string;
   updatedAt?: string | null;
 }
@@ -44,6 +56,9 @@ export interface SubmitApplicationPayload {
   resumeUrl: string;
   coverLetter?: string;
   phone?: string;
+  screeningAnswers?: ScreeningAnswerItem[];
+  referralCode?: string;
+  referredBy?: string;
 }
 
 export interface UpdateApplicationStatusPayload {

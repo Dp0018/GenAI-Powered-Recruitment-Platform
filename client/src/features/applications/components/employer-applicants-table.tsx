@@ -24,11 +24,18 @@ import {
   Briefcase,
   CheckCircle2,
   Calendar,
+  Star,
+  Download,
+  Sparkles,
+  XCircle,
+  Award,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { ResumePreviewModal } from "./resume-preview-modal";
 import { ScheduleInterviewModal } from "@/features/interviews/components/schedule-interview-modal";
 import { ApplicationMatchBadge } from "./application-match-badge";
+import { CreateOfferModal } from "@/features/offers/components/create-offer-modal";
 
 interface EmployerApplicantsTableProps {
   jobId?: string;
@@ -43,9 +50,69 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
   } | null>(null);
   const [previewingApp, setPreviewingApp] = useState<ApplicationItem | null>(null);
   const [schedulingApp, setSchedulingApp] = useState<ApplicationItem | null>(null);
+  const [offeringApp, setOfferingApp] = useState<ApplicationItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const applications = data?.content || [];
   const totalElements = data?.totalElements || 0;
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === applications.length && applications.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(applications.map((a) => a.id));
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkStatusChange = (newStatus: ApplicationStatus) => {
+    selectedIds.forEach((id) => {
+      updateStatusMutation.mutate({
+        applicationId: id,
+        payload: { status: newStatus },
+      });
+    });
+    toast.success(`Advancing ${selectedIds.length} candidate(s) to ${newStatus}`);
+    setSelectedIds([]);
+  };
+
+  const exportToCsv = () => {
+    const appsToExport = selectedIds.length > 0
+      ? applications.filter((a) => selectedIds.includes(a.id))
+      : applications;
+
+    if (appsToExport.length === 0) {
+      toast.error("No applicants to export");
+      return;
+    }
+
+    const headers = ["Candidate Name", "Email", "Phone", "Job Title", "Location", "Stage", "Applied Date", "Rating"];
+    const rows = appsToExport.map((a) => [
+      `"${(a.candidate?.name || "").replace(/"/g, '""')}"`,
+      `"${(a.candidate?.email || "").replace(/"/g, '""')}"`,
+      `"${(a.phone || "").replace(/"/g, '""')}"`,
+      `"${(a.job?.title || "").replace(/"/g, '""')}"`,
+      `"${(a.job?.location || "").replace(/"/g, '""')}"`,
+      `"${a.status}"`,
+      `"${new Date(a.createdAt).toLocaleDateString()}"`,
+      `"${a.averageRating ? a.averageRating.toFixed(1) : "N/A"}"`,
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `applicants_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${appsToExport.length} candidate(s) to CSV`);
+  };
 
   const handleStatusChange = (
     app: ApplicationItem,
@@ -72,7 +139,66 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
             {totalElements} Candidate{totalElements !== 1 ? "s" : ""}
           </span>
         </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={exportToCsv}
+          className="h-8 text-xs font-mono gap-1.5 border-border cursor-pointer"
+          title="Export applicant roster to CSV"
+        >
+          <Download className="size-3.5" />
+          <span>Export CSV</span>
+        </Button>
       </div>
+
+      {selectedIds.length > 0 && (
+        <div className="p-3 px-4 rounded-lg bg-primary/10 border border-primary/30 flex flex-wrap items-center justify-between gap-3 text-xs animate-in fade-in-50">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-primary">
+              {selectedIds.length} candidate{selectedIds.length !== 1 ? "s" : ""} selected
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="text-xs text-muted-foreground hover:underline cursor-pointer"
+            >
+              (Clear selection)
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleBulkStatusChange("SHORTLISTED")}
+              className="h-7 text-xs border-purple-800/40 text-purple-400 hover:bg-purple-950/30 gap-1 font-mono cursor-pointer"
+            >
+              <Sparkles className="size-3" />
+              <span>Bulk Shortlist</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleBulkStatusChange("INTERVIEWING")}
+              className="h-7 text-xs border-amber-800/40 text-amber-400 hover:bg-amber-950/30 gap-1 font-mono cursor-pointer"
+            >
+              <Calendar className="size-3" />
+              <span>Bulk Interview</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleBulkStatusChange("REJECTED")}
+              className="h-7 text-xs border-destructive/40 text-destructive hover:bg-destructive/10 gap-1 font-mono cursor-pointer"
+            >
+              <XCircle className="size-3" />
+              <span>Bulk Reject</span>
+            </Button>
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="p-12 text-center rounded-lg border border-border bg-card/40 space-y-3">
@@ -99,9 +225,18 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
             <table className="w-full text-left text-xs">
               <thead className="bg-secondary/60 border-b border-border text-muted-foreground font-mono uppercase text-[11px]">
                 <tr>
+                  <th className="py-3 px-3 w-8 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length === applications.length && applications.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded border-border accent-primary size-3.5 cursor-pointer"
+                    />
+                  </th>
                   <th className="py-3 px-4 font-semibold">Candidate</th>
                   <th className="py-3 px-4 font-semibold">Requisition Applied</th>
                   <th className="py-3 px-4 font-semibold">Match Fit</th>
+                  <th className="py-3 px-4 font-semibold">Scorecard</th>
                   <th className="py-3 px-4 font-semibold">Applied Date</th>
                   <th className="py-3 px-4 font-semibold">Resume / Docs</th>
                   <th className="py-3 px-4 font-semibold">Hiring Pipeline Stage</th>
@@ -111,6 +246,14 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
               <tbody className="divide-y divide-border">
                 {applications.map((app) => (
                   <tr key={app.id} className="hover:bg-secondary/30 transition-colors">
+                    <td className="py-3.5 px-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(app.id)}
+                        onChange={() => toggleSelectOne(app.id)}
+                        className="rounded border-border accent-primary size-3.5 cursor-pointer"
+                      />
+                    </td>
                     {/* Candidate Identity */}
                     <td className="py-3.5 px-4">
                       <div className="font-semibold text-foreground text-sm">
@@ -124,6 +267,12 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
                           <Phone className="size-3 text-muted-foreground" />
                           <span>{app.phone}</span>
+                        </div>
+                      )}
+                      {app.referralCode && (
+                        <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <Sparkles className="size-2.5" />
+                          <span>Ref: {app.referralCode}</span>
                         </div>
                       )}
                     </td>
@@ -141,6 +290,34 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                     {/* Match Fit Score */}
                     <td className="py-3.5 px-4">
                       <ApplicationMatchBadge applicationId={app.id} />
+                    </td>
+
+                    {/* Scorecard Average Rating */}
+                    <td className="py-3.5 px-4">
+                      {app.averageRating !== null && app.averageRating !== undefined ? (
+                        <button
+                          type="button"
+                          onClick={() => setPreviewingApp(app)}
+                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-xs font-mono font-bold text-amber-400 hover:bg-amber-500/20 transition-colors cursor-pointer"
+                          title="Click to view detailed scorecard"
+                        >
+                          <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                          <span>{app.averageRating.toFixed(1)}</span>
+                          <span className="text-[10px] text-muted-foreground font-normal">
+                            ({app.reviewCount || 0})
+                          </span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setPreviewingApp(app)}
+                          className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                          title="Click to evaluate candidate"
+                        >
+                          <Star className="size-3 text-muted-foreground/60" />
+                          <span>Not rated</span>
+                        </button>
+                      )}
                     </td>
 
                     {/* Applied Date */}
@@ -186,6 +363,15 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                           className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-primary transition-colors cursor-pointer border border-border/60 hover:border-border"
                         >
                           <Calendar className="size-3.5" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setOfferingApp(app)}
+                          title="Generate formal employment offer letter with e-signature"
+                          className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-emerald-400 transition-colors cursor-pointer border border-border/60 hover:border-border"
+                        >
+                          <Award className="size-3.5" />
                         </button>
                       </div>
                     </td>
@@ -261,6 +447,18 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
         open={Boolean(schedulingApp)}
         onOpenChange={(open) => {
           if (!open) setSchedulingApp(null);
+        }}
+      />
+
+      {/* Formal Offer Letter Generator Modal */}
+      <CreateOfferModal
+        applicationId={offeringApp?.id || ""}
+        candidateName={offeringApp?.candidate?.name || "Candidate"}
+        jobTitle={offeringApp?.job?.title || ""}
+        companyName={offeringApp?.job?.companyName || ""}
+        open={Boolean(offeringApp)}
+        onOpenChange={(open) => {
+          if (!open) setOfferingApp(null);
         }}
       />
     </div>

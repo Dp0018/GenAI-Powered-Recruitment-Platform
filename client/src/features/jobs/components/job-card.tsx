@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import { BookmarkButton } from "./bookmark-button";
 import { getBenefitLabel } from "../types/benefits";
@@ -68,6 +69,12 @@ export function JobCard({ job }: JobCardProps) {
               </span>
             )}
             {getExpirationBadge()}
+            {!job.expired && (!job.screeningQuestions || job.screeningQuestions.filter((q) => q.required).length === 0) && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono text-amber-400 bg-amber-950/40 border border-amber-800/40 font-semibold">
+                <Zap className="size-2.5 fill-current" />
+                <span>Quick Apply</span>
+              </span>
+            )}
             <SkillsMatchBadge jobId={job.id} />
           </div>
 
@@ -131,15 +138,34 @@ export function JobCard({ job }: JobCardProps) {
               {job.minSalary && job.maxSalary ? (
                 <div className="font-mono text-sm font-bold text-foreground">
                   ${(job.minSalary / 1000).toFixed(0)}k - ${(job.maxSalary / 1000).toFixed(0)}k{" "}
-                  <span className="text-[10px] text-muted-foreground">{job.currency}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {job.currency} {job.salaryPeriod === "HOURLY" ? "/hr" : job.salaryPeriod === "MONTHLY" ? "/mo" : "/yr"}
+                  </span>
                 </div>
               ) : job.minSalary ? (
                 <div className="font-mono text-sm font-bold text-foreground">
                   From ${(job.minSalary / 1000).toFixed(0)}k{" "}
-                  <span className="text-[10px] text-muted-foreground">{job.currency}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {job.currency} {job.salaryPeriod === "HOURLY" ? "/hr" : job.salaryPeriod === "MONTHLY" ? "/mo" : "/yr"}
+                  </span>
                 </div>
               ) : (
                 <span className="text-xs font-mono text-muted-foreground">Competitive Compensation</span>
+              )}
+              {/* Equity & Bonus Badges for Pay Transparency */}
+              {(job.hasEquity || job.hasSignOnBonus) && (
+                <div className="flex flex-wrap items-center justify-end gap-1 pt-1">
+                  {job.hasEquity && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-800/40">
+                      + Equity
+                    </span>
+                  )}
+                  {job.hasSignOnBonus && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-indigo-400 bg-indigo-950/40 border border-indigo-800/40">
+                      + Bonus
+                    </span>
+                  )}
+                </div>
               )}
             </div>
             <BookmarkButton jobId={job.id} size="sm" variant="ghost" className="h-7 w-7 p-0" />

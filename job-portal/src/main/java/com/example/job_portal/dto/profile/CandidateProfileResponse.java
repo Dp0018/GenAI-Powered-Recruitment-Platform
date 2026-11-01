@@ -37,10 +37,33 @@ public class CandidateProfileResponse {
     private String currentRole;
     private String currentCompany;
 
+    @Builder.Default
+    private List<WorkExperienceDto> workExperiences = new ArrayList<>();
+
+    @Builder.Default
+    private List<EducationHistoryDto> educationHistory = new ArrayList<>();
+
     private Instant createdAt;
     private Instant updatedAt;
 
     public static CandidateProfileResponse from(CandidateProfile profile, User user) {
+        return from(profile, user, null, null);
+    }
+
+    public static CandidateProfileResponse from(
+            CandidateProfile profile,
+            User user,
+            List<com.example.job_portal.entity.WorkExperience> experiences,
+            List<com.example.job_portal.entity.EducationHistory> educations
+    ) {
+        List<WorkExperienceDto> expDtos = experiences != null
+                ? experiences.stream().map(WorkExperienceDto::from).toList()
+                : new ArrayList<>();
+
+        List<EducationHistoryDto> eduDtos = educations != null
+                ? educations.stream().map(EducationHistoryDto::from).toList()
+                : new ArrayList<>();
+
         if (profile == null) {
             return CandidateProfileResponse.builder()
                     .userId(user.getId())
@@ -50,6 +73,8 @@ public class CandidateProfileResponse {
                     .phone(user.getPhone())
                     .avatarUrl(user.getImage())
                     .skills(new ArrayList<>())
+                    .workExperiences(expDtos)
+                    .educationHistory(eduDtos)
                     .build();
         }
 
@@ -73,6 +98,8 @@ public class CandidateProfileResponse {
                 .yearsOfExperience(profile.getYearsOfExperience())
                 .currentRole(profile.getCurrentRole())
                 .currentCompany(profile.getCurrentCompany())
+                .workExperiences(expDtos)
+                .educationHistory(eduDtos)
                 .createdAt(profile.getCreatedAt())
                 .updatedAt(profile.getUpdatedAt())
                 .build();

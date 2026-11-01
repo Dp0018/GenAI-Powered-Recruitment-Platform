@@ -15,7 +15,8 @@ import { useCreateJobMutation } from "../hooks/use-jobs";
 import { COMPANY_BENEFITS } from "../types/benefits";
 import { Plus, Loader2, Briefcase, MapPin, DollarSign, Tag, Building2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { JobItem } from "../types/job";
+import { JobItem, JobQuestionItem } from "../types/job";
+import { JobScreeningQuestionsBuilder } from "./job-screening-questions-builder";
 
 interface CreateJobModalProps {
   open?: boolean;
@@ -44,9 +45,17 @@ export function CreateJobModal({
   const [experienceLevel, setExperienceLevel] = useState("MID_LEVEL");
   const [minSalary, setMinSalary] = useState("");
   const [maxSalary, setMaxSalary] = useState("");
+  const [salaryPeriod, setSalaryPeriod] = useState<string>("YEARLY");
+  const [hasEquity, setHasEquity] = useState(false);
+  const [equityRange, setEquityRange] = useState("");
+  const [hasSignOnBonus, setHasSignOnBonus] = useState(false);
+  const [signOnBonus, setSignOnBonus] = useState("");
+  const [annualBonusPercentage, setAnnualBonusPercentage] = useState("");
+  const [compensationNotes, setCompensationNotes] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
   const [expirationDays, setExpirationDays] = useState<string>("30");
+  const [screeningQuestions, setScreeningQuestions] = useState<JobQuestionItem[]>([]);
 
   React.useEffect(() => {
     if (initialValues && open) {
@@ -59,9 +68,17 @@ export function CreateJobModal({
       setExperienceLevel(initialValues.experienceLevel || "MID_LEVEL");
       setMinSalary(initialValues.minSalary ? String(initialValues.minSalary) : "");
       setMaxSalary(initialValues.maxSalary ? String(initialValues.maxSalary) : "");
+      setSalaryPeriod(initialValues.salaryPeriod || "YEARLY");
+      setHasEquity(!!initialValues.hasEquity);
+      setEquityRange(initialValues.equityRange || "");
+      setHasSignOnBonus(!!initialValues.hasSignOnBonus);
+      setSignOnBonus(initialValues.signOnBonus ? String(initialValues.signOnBonus) : "");
+      setAnnualBonusPercentage(initialValues.annualBonusPercentage ? String(initialValues.annualBonusPercentage) : "");
+      setCompensationNotes(initialValues.compensationNotes || "");
       setTagsInput(initialValues.tags?.join(", ") || "");
       setSelectedBenefits(initialValues.benefits || []);
       setExpirationDays("30");
+      setScreeningQuestions(initialValues.screeningQuestions || []);
     }
   }, [initialValues, open]);
 
@@ -83,6 +100,7 @@ export function CreateJobModal({
     setTagsInput("");
     setSelectedBenefits([]);
     setExpirationDays("30");
+    setScreeningQuestions([]);
   };
 
   const toggleBenefit = (key: string) => {
@@ -117,10 +135,18 @@ export function CreateJobModal({
       minSalary: minSalary ? parseInt(minSalary, 10) : undefined,
       maxSalary: maxSalary ? parseInt(maxSalary, 10) : undefined,
       currency: "USD",
+      salaryPeriod,
+      hasEquity,
+      equityRange: hasEquity && equityRange.trim() ? equityRange.trim() : undefined,
+      hasSignOnBonus,
+      signOnBonus: hasSignOnBonus && signOnBonus ? parseInt(signOnBonus, 10) : undefined,
+      annualBonusPercentage: annualBonusPercentage ? parseFloat(annualBonusPercentage) : undefined,
+      compensationNotes: compensationNotes.trim() || undefined,
       tags,
       benefits: selectedBenefits,
       expirationDays: expDays,
       status: "PUBLISHED",
+      screeningQuestions: screeningQuestions.length > 0 ? screeningQuestions : undefined,
     });
   };
 
@@ -220,33 +246,139 @@ export function CreateJobModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-left">
-            <div className="space-y-1">
-              <Label htmlFor="minSalary" className="text-xs font-medium text-foreground">
-                Min Annual Comp (USD)
-              </Label>
-              <Input
-                id="minSalary"
-                type="number"
-                placeholder="140000"
-                value={minSalary}
-                onChange={(e) => setMinSalary(e.target.value)}
-                className="h-10 bg-background border-border text-foreground text-xs rounded-md focus-visible:ring-primary"
-              />
+          {/* Pay Transparency & Total Rewards Band */}
+          <div className="p-3.5 rounded-lg bg-secondary/30 border border-border space-y-3 text-left">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <span>Pay Transparency & Compensation Band</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-normal">
+                    Legal Compliance
+                  </span>
+                </span>
+                <p className="text-[11px] text-muted-foreground pt-0.5">
+                  Structured base range & variable incentives complying with modern transparency statutes.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="maxSalary" className="text-xs font-medium text-foreground">
-                Max Annual Comp (USD)
-              </Label>
-              <Input
-                id="maxSalary"
-                type="number"
-                placeholder="195000"
-                value={maxSalary}
-                onChange={(e) => setMaxSalary(e.target.value)}
-                className="h-10 bg-background border-border text-foreground text-xs rounded-md focus-visible:ring-primary"
-              />
+            <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="minSalary" className="text-[11px] font-medium text-foreground">
+                  Min Base
+                </Label>
+                <Input
+                  id="minSalary"
+                  type="number"
+                  placeholder="140000"
+                  value={minSalary}
+                  onChange={(e) => setMinSalary(e.target.value)}
+                  className="h-9 bg-background border-border text-foreground text-xs rounded-md"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="maxSalary" className="text-[11px] font-medium text-foreground">
+                  Max Base
+                </Label>
+                <Input
+                  id="maxSalary"
+                  type="number"
+                  placeholder="195000"
+                  value={maxSalary}
+                  onChange={(e) => setMaxSalary(e.target.value)}
+                  className="h-9 bg-background border-border text-foreground text-xs rounded-md"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="salaryPeriod" className="text-[11px] font-medium text-foreground">
+                  Pay Period
+                </Label>
+                <select
+                  id="salaryPeriod"
+                  value={salaryPeriod}
+                  onChange={(e) => setSalaryPeriod(e.target.value)}
+                  className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-none focus:border-primary"
+                >
+                  <option value="YEARLY">Yearly</option>
+                  <option value="MONTHLY">Monthly</option>
+                  <option value="HOURLY">Hourly</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Equity & Sign-on Bonuses */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-border/50">
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={hasEquity}
+                    onChange={(e) => setHasEquity(e.target.checked)}
+                    className="rounded border-border text-primary focus:ring-primary size-3.5"
+                  />
+                  <span>Includes Equity / Stock Options</span>
+                </label>
+                {hasEquity && (
+                  <Input
+                    placeholder="e.g. 0.05% - 0.12% or 10,000 RSUs"
+                    value={equityRange}
+                    onChange={(e) => setEquityRange(e.target.value)}
+                    className="h-8 bg-background border-border text-foreground text-xs rounded-md"
+                  />
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={hasSignOnBonus}
+                    onChange={(e) => setHasSignOnBonus(e.target.checked)}
+                    className="rounded border-border text-primary focus:ring-primary size-3.5"
+                  />
+                  <span>Includes Sign-On Bonus</span>
+                </label>
+                {hasSignOnBonus && (
+                  <Input
+                    type="number"
+                    placeholder="Sign-on amount ($)"
+                    value={signOnBonus}
+                    onChange={(e) => setSignOnBonus(e.target.value)}
+                    className="h-8 bg-background border-border text-foreground text-xs rounded-md"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-border/50">
+              <div className="space-y-1">
+                <Label htmlFor="annualBonusPercentage" className="text-[11px] font-medium text-foreground">
+                  Annual Target Incentive (%)
+                </Label>
+                <Input
+                  id="annualBonusPercentage"
+                  type="number"
+                  placeholder="e.g. 15 for 15%"
+                  value={annualBonusPercentage}
+                  onChange={(e) => setAnnualBonusPercentage(e.target.value)}
+                  className="h-8 bg-background border-border text-foreground text-xs rounded-md"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="compensationNotes" className="text-[11px] font-medium text-foreground">
+                  Transparency Disclosure Note
+                </Label>
+                <Input
+                  id="compensationNotes"
+                  placeholder="e.g. Disclosed range covers CA & NYC bands"
+                  value={compensationNotes}
+                  onChange={(e) => setCompensationNotes(e.target.value)}
+                  className="h-8 bg-background border-border text-foreground text-xs rounded-md"
+                />
+              </div>
             </div>
           </div>
 
@@ -361,6 +493,11 @@ export function CreateJobModal({
               className="bg-background border-border text-foreground text-xs rounded-md focus-visible:ring-primary"
             />
           </div>
+
+          <JobScreeningQuestionsBuilder
+            questions={screeningQuestions}
+            onChange={setScreeningQuestions}
+          />
 
           <div className="pt-3 border-t border-border flex items-center justify-end gap-2.5">
             <Button

@@ -22,4 +22,10 @@ public class SubmitApplicationRequest {
 
     @Size(max = 30, message = "Phone number must be under 30 characters")
     private String phone;
+
+    private java.util.List<ScreeningAnswerDto> screeningAnswers;
+
+    private String referralCode;
+
+    private String referredBy;
 }

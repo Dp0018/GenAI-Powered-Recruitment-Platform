@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { interviewsApi } from "../api/interviews-api";
-import { CreateInterviewPayload } from "../types/interview";
+import {
+  CreateInterviewPayload,
+  ProposeSlotsPayload,
+  SelectSlotPayload,
+} from "../types/interview";
 import { toast } from "sonner";
 
 export const INTERVIEWS_QUERY_KEY = ["interviews"];
@@ -31,6 +35,38 @@ export function useScheduleInterviewMutation() {
     },
     onError: (err: any) => {
       toast.error(err.message || "Failed to schedule interview");
+    },
+  });
+}
+
+export function useProposeSlotsMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: ProposeSlotsPayload) => interviewsApi.proposeSlots(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: INTERVIEWS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      toast.success("Proposed time slots sent to candidate for self-booking!");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to propose interview slots");
+    },
+  });
+}
+
+export function useSelectSlotMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: SelectSlotPayload) => interviewsApi.selectSlot(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: INTERVIEWS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      toast.success("Interview booked successfully! Calendar invite (.ics) generated.");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to book interview slot");
     },
   });
 }

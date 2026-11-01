@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
 } from "lucide-react";
+import { NotificationBellDropdown } from "@/features/notifications/components/notification-bell-dropdown";
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -76,6 +77,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
+              <NotificationBellDropdown />
               <Link href={getDashboardLink()}>
                 <Button
                   variant="outline"

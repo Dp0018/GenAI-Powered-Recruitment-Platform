@@ -492,4 +492,205 @@ public class ResendEmailServiceImpl implements EmailService {
             }
         });
     }
+
+    @Override
+    public void sendJobAlertDigestEmail(
+            String candidateEmail,
+            String candidateName,
+            String alertKeyword,
+            java.util.List<com.example.job_portal.entity.Job> matchingJobs
+    ) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (!StringUtils.hasText(resendApiKey)) {
+                    log.info("[Email Skipped] Resend API key not configured for job alert digest to {}", candidateEmail);
+                    return;
+                }
+
+                if (matchingJobs == null || matchingJobs.isEmpty()) {
+                    return;
+                }
+
+                StringBuilder jobCardsHtml = new StringBuilder();
+                for (com.example.job_portal.entity.Job j : matchingJobs) {
+                    String jobUrl = frontendUrl + "/jobs/" + j.getSlug();
+                    String companyName = j.getCompany() != null ? j.getCompany().getName() : "Featured Employer";
+                    String salaryText = j.getMinSalary() != null && j.getMaxSalary() != null
+                            ? "$" + String.format("%,d", j.getMinSalary()) + " - $" + String.format("%,d", j.getMaxSalary())
+                            : "Competitive Salary";
+
+                    jobCardsHtml.append("""
+                            <div style="background: #1F2937; border-radius: 8px; padding: 16px; margin-bottom: 12px; border-left: 3px solid #6366F1;">
+                              <div style="font-size: 15px; font-weight: 600; color: #FFFFFF; margin-bottom: 4px;">%s</div>
+                              <div style="font-size: 13px; color: #9CA3AF; margin-bottom: 8px;">%s • %s • %s</div>
+                              <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 12px; color: #A5B4FC; font-weight: 500;">%s</span>
+                                <a href="%s" style="font-size: 12px; color: #FFFFFF; background: #4F46E5; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600;">View & Apply</a>
+                              </div>
+                            </div>
+                            """.formatted(j.getTitle(), companyName, j.getLocation(), j.getWorkplaceType(), salaryText, jobUrl));
+                }
+
+                String exploreUrl = frontendUrl + "/jobs?query=" + java.net.URLEncoder.encode(alertKeyword, java.nio.charset.StandardCharsets.UTF_8);
+
+                String htmlContent = """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0B0F19; color: #FFFFFF; margin: 0; padding: 40px 20px; }
+                            .container { max-width: 580px; margin: 0 auto; background: #111827; border: 1px solid #1F2937; border-radius: 16px; padding: 36px; }
+                            .brand { font-size: 18px; font-weight: 700; color: #6366F1; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .badge { display: inline-block; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #A5B4FC; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; margin-bottom: 12px; }
+                            .title { font-size: 20px; font-weight: 700; color: #F9FAFB; margin-bottom: 12px; }
+                            .text { font-size: 14px; color: #9CA3AF; line-height: 1.6; margin-bottom: 20px; }
+                            .footer { font-size: 12px; color: #6B7280; border-top: 1px solid #1F2937; padding-top: 20px; margin-top: 28px; }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <div class="brand">JobPortal</div>
+                            <div class="badge">NEW JOB ALERT DIGEST</div>
+                            <div class="title">%d New Opportunities Matching "%s"</div>
+                            <div class="text">
+                              Hello %s,<br><br>
+                              We found new job openings matching your saved job alert for <strong>"%s"</strong>:
+                            </div>
+                            %s
+                            <div style="text-align: center; margin-top: 24px;">
+                              <a href="%s" style="display: inline-block; background: #1F2937; border: 1px solid #374151; color: #FFFFFF; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500;">Explore All Results on JobPortal</a>
+                            </div>
+                            <div class="footer">
+                              You received this email because you subscribed to alerts for "%s". Manage your alerts in your candidate dashboard.<br><br>
+                              &copy; 2026 JobPortal Platform Inc. All rights reserved.
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """.formatted(matchingJobs.size(), alertKeyword, candidateName, alertKeyword, jobCardsHtml.toString(), exploreUrl, alertKeyword);
+
+                executeEmailSend(candidateEmail, matchingJobs.size() + " New Job Openings for \"" + alertKeyword + "\" - JobPortal Alert", htmlContent, false);
+            } catch (Exception e) {
+                log.error("Failed to send job alert digest email to {}: {}", candidateEmail, e.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void sendOfferExtendedEmail(String candidateEmail, String candidateName, String jobTitle,
+            String companyName, Integer baseSalary, String currency, String signUrl) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (!StringUtils.hasText(resendApiKey)) {
+                    log.info("[Email Skipped] Resend API key not configured for offer extended email to {}", candidateEmail);
+                    return;
+                }
+
+                String formattedSalary = baseSalary != null ? String.format("%,d", baseSalary) : "N/A";
+
+                String htmlContent = """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0B0F19; color: #FFFFFF; margin: 0; padding: 40px 20px; }
+                            .container { max-width: 580px; margin: 0 auto; background: #111827; border: 1px solid #1F2937; border-radius: 16px; padding: 36px; }
+                            .brand { font-size: 18px; font-weight: 700; color: #10B981; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .badge { display: inline-block; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34D399; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; margin-bottom: 12px; }
+                            .title { font-size: 22px; font-weight: 700; color: #F9FAFB; margin-bottom: 12px; }
+                            .text { font-size: 14px; color: #9CA3AF; line-height: 1.6; margin-bottom: 20px; }
+                            .offer-card { background: #1F2937; border-radius: 10px; padding: 20px; border-left: 4px solid #10B981; margin: 20px 0; }
+                            .btn { display: inline-block; background-color: #10B981; color: #000000 !important; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 700; text-align: center; }
+                            .footer { font-size: 12px; color: #6B7280; border-top: 1px solid #1F2937; padding-top: 20px; margin-top: 32px; }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <div class="brand">JobPortal Enterprise ATS</div>
+                            <div class="badge">OFFER OF EMPLOYMENT EXTENDED</div>
+                            <div class="title">Congratulations %s!</div>
+                            <div class="text">
+                              We are delighted to extend a formal offer of employment for the position of <strong>%s</strong> at <strong>%s</strong>.<br><br>
+                              Please review your compensation terms, equity details, and benefits package using the secure link below:
+                            </div>
+                            <div class="offer-card">
+                              <div style="font-size: 16px; font-weight: 700; color: #FFFFFF; margin-bottom: 8px;">%s</div>
+                              <div style="font-size: 13px; color: #D1D5DB;"><strong>Company:</strong> %s</div>
+                              <div style="font-size: 13px; color: #D1D5DB; margin-top: 4px;"><strong>Base Compensation:</strong> %s %s / year</div>
+                            </div>
+                            <div style="margin-top: 24px;">
+                              <a href="%s" class="btn">Review & E-Sign Offer Letter</a>
+                            </div>
+                            <div class="footer">
+                              This electronic document constitutes an official job offer. Please e-sign before the stated deadline.<br><br>
+                              &copy; 2026 JobPortal Platform Inc. All rights reserved.
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """.formatted(candidateName, jobTitle, companyName, jobTitle, companyName, currency, formattedSalary, signUrl);
+
+                executeEmailSend(candidateEmail, "Formal Offer of Employment: " + jobTitle + " at " + companyName, htmlContent, false);
+            } catch (Exception e) {
+                log.error("Failed to send offer extended email to {}: {}", candidateEmail, e.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void sendOfferAcceptedEmail(String recruiterEmail, String candidateName, String jobTitle,
+            String companyName, java.time.Instant signedAt) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (!StringUtils.hasText(resendApiKey)) {
+                    log.info("[Email Skipped] Resend API key not configured for offer accepted email to {}", recruiterEmail);
+                    return;
+                }
+
+                String dashboardUrl = frontendUrl + "/dashboard/employer";
+
+                String htmlContent = """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0B0F19; color: #FFFFFF; margin: 0; padding: 40px 20px; }
+                            .container { max-width: 580px; margin: 0 auto; background: #111827; border: 1px solid #1F2937; border-radius: 16px; padding: 36px; }
+                            .brand { font-size: 18px; font-weight: 700; color: #10B981; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .badge { display: inline-block; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34D399; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; margin-bottom: 12px; }
+                            .title { font-size: 22px; font-weight: 700; color: #F9FAFB; margin-bottom: 12px; }
+                            .text { font-size: 14px; color: #9CA3AF; line-height: 1.6; margin-bottom: 20px; }
+                            .btn { display: inline-block; background-color: #4F46E5; color: #FFFFFF !important; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
+                            .footer { font-size: 12px; color: #6B7280; border-top: 1px solid #1F2937; padding-top: 20px; margin-top: 32px; }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <div class="brand">JobPortal Enterprise ATS</div>
+                            <div class="badge">OFFER SIGNED & ACCEPTED</div>
+                            <div class="title">New Hire Confirmed! 🎉</div>
+                            <div class="text">
+                              Great news! <strong>%s</strong> has officially signed and accepted the job offer for <strong>%s</strong> at <strong>%s</strong>.<br><br>
+                              The electronic signature has been cryptographically recorded with full legal consent.
+                            </div>
+                            <div>
+                              <a href="%s" class="btn">View Candidate in Employer Portal</a>
+                            </div>
+                            <div class="footer">
+                              &copy; 2026 JobPortal Platform Inc. All rights reserved.
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """.formatted(candidateName, jobTitle, companyName, dashboardUrl);
+
+                executeEmailSend(recruiterEmail, "Offer Accepted: " + candidateName + " joined as " + jobTitle + "! 🎉", htmlContent, false);
+            } catch (Exception e) {
+                log.error("Failed to send offer accepted email to {}: {}", recruiterEmail, e.getMessage());
+            }
+        });
+    }
 }

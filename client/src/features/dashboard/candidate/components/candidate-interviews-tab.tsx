@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   useCandidateInterviewsQuery,
   useCancelInterviewMutation,
+  useSelectSlotMutation,
 } from "@/features/interviews/hooks/use-interviews";
 import { InterviewItem } from "@/features/interviews/types/interview";
 import { Button } from "@/components/ui/button";
@@ -19,11 +20,15 @@ import {
   AlertCircle,
   XCircle,
   CheckCircle2,
+  CalendarCheck2,
+  Sparkles,
 } from "lucide-react";
 
 export function CandidateInterviewsTab() {
   const { data: interviews, isLoading } = useCandidateInterviewsQuery();
   const cancelMutation = useCancelInterviewMutation();
+  const selectSlotMutation = useSelectSlotMutation();
+  const [selectedSlots, setSelectedSlots] = useState<Record<string, string>>({});
 
   const handleCancel = (interview: InterviewItem) => {
     if (confirm(`Are you sure you want to cancel the interview for "${interview.jobTitle}"?`)) {
@@ -31,7 +36,14 @@ export function CandidateInterviewsTab() {
     }
   };
 
+  const handleSelectSlotConfirm = (interviewId: string) => {
+    const slot = selectedSlots[interviewId];
+    if (!slot) return;
+    selectSlotMutation.mutate({ interviewId, selectedSlot: slot });
+  };
+
   const getGoogleCalendarUrl = (interview: InterviewItem) => {
+    if (!interview.scheduledAt) return "#";
     const start = new Date(interview.scheduledAt);
     const durationMs = (interview.durationMinutes || 45) * 60 * 1000;
     const end = new Date(start.getTime() + durationMs);
@@ -53,8 +65,15 @@ export function CandidateInterviewsTab() {
   };
 
   const items = interviews || [];
-  const upcoming = items.filter((i) => i.status === "SCHEDULED" && new Date(i.scheduledAt).getTime() > Date.now());
-  const pastOrCancelled = items.filter((i) => i.status !== "SCHEDULED" || new Date(i.scheduledAt).getTime() <= Date.now());
+  const pendingBooking = items.filter((i) => i.status === "PENDING_CANDIDATE_BOOKING");
+  const upcoming = items.filter(
+    (i) => i.status === "SCHEDULED" && i.scheduledAt && new Date(i.scheduledAt).getTime() > Date.now()
+  );
+  const pastOrCancelled = items.filter(
+    (i) =>
+      i.status !== "PENDING_CANDIDATE_BOOKING" &&
+      (i.status !== "SCHEDULED" || !i.scheduledAt || new Date(i.scheduledAt).getTime() <= Date.now())
+  );
 
   return (
     <div className="space-y-6">
@@ -68,9 +87,16 @@ export function CandidateInterviewsTab() {
             Coordinate upcoming video screenings and synchronize schedules with your personal calendar.
           </p>
         </div>
-        <span className="text-xs font-mono px-2 py-0.5 rounded bg-secondary text-muted-foreground border border-border">
-          {upcoming.length} Active
-        </span>
+        <div className="flex items-center gap-2">
+          {pendingBooking.length > 0 && (
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-semibold animate-pulse">
+              {pendingBooking.length} Action Required
+            </span>
+          )}
+          <span className="text-xs font-mono px-2 py-0.5 rounded bg-secondary text-muted-foreground border border-border">
+            {upcoming.length} Active
+          </span>
+        </div>
       </div>
 
       {isLoading ? (
@@ -94,6 +120,133 @@ export function CandidateInterviewsTab() {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Action Required: Pending Candidate Self-Booking (Calendly style) */}
+          {pendingBooking.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-amber-500 font-mono text-xs uppercase tracking-wider font-semibold">
+                <CalendarCheck2 className="size-4" />
+                <span>Interview Self-Booking Pending ({pendingBooking.length})</span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {pendingBooking.map((interview) => {
+                  const slots = interview.proposedSlots || [];
+                  const activeChoice = selectedSlots[interview.id] || (slots.length > 0 ? slots[0] : "");
+
+                  return (
+                    <div
+                      key={interview.id}
+                      className="p-5 rounded-xl bg-card border-2 border-amber-500/30 shadow-md space-y-4 relative overflow-hidden"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase">
+                            <Sparkles className="size-3" />
+                            <span>Action Required • Choose a Time Slot</span>
+                          </div>
+                          <h4 className="text-base font-bold text-foreground">
+                            {interview.title}
+                          </h4>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Building2 className="size-3.5 text-muted-foreground" />
+                            <span className="font-medium text-foreground">{interview.companyName}</span>
+                            <span>•</span>
+                            <span>{interview.jobTitle}</span>
+                            <span>•</span>
+                            <span className="font-mono">{interview.durationMinutes} mins</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {interview.notes && (
+                        <div className="p-3 rounded-lg bg-secondary/50 border border-border text-xs text-muted-foreground space-y-1">
+                          <div className="font-semibold text-foreground text-[11px] font-mono uppercase tracking-wider">
+                            Recruiter Note
+                          </div>
+                          <p className="leading-relaxed whitespace-pre-line">{interview.notes}</p>
+                        </div>
+                      )}
+
+                      {/* Proposed Time Slots List */}
+                      <div className="space-y-2 pt-1">
+                        <div className="text-xs font-semibold text-foreground flex items-center justify-between">
+                          <span>Select your preferred interview time:</span>
+                          <span className="text-[11px] font-mono text-muted-foreground">
+                            {slots.length} available slots
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                          {slots.map((slotStr, sIdx) => {
+                            const d = new Date(slotStr);
+                            const isSelected = activeChoice === slotStr;
+
+                            return (
+                              <button
+                                key={sIdx}
+                                type="button"
+                                onClick={() =>
+                                  setSelectedSlots((prev) => ({
+                                    ...prev,
+                                    [interview.id]: slotStr,
+                                  }))
+                                }
+                                className={`p-3 rounded-lg border text-left transition-all cursor-pointer ${
+                                  isSelected
+                                    ? "bg-primary/10 border-primary text-foreground shadow-xs ring-1 ring-primary"
+                                    : "bg-background border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                }`}
+                              >
+                                <div className="text-xs font-bold text-foreground">
+                                  {d.toLocaleDateString(undefined, {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                </div>
+                                <div className="text-xs font-semibold text-primary font-mono mt-0.5">
+                                  {d.toLocaleTimeString(undefined, {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Confirmation Action */}
+                      <div className="pt-3 border-t border-border flex items-center justify-between gap-3">
+                        <span className="text-[11px] text-muted-foreground">
+                          Selecting a slot instantly locks the calendar and notifies the recruiter.
+                        </span>
+                        <Button
+                          size="sm"
+                          disabled={!activeChoice || selectSlotMutation.isPending}
+                          onClick={() => handleSelectSlotConfirm(interview.id)}
+                          className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium gap-1.5 shadow-sm"
+                        >
+                          {selectSlotMutation.isPending ? (
+                            <>
+                              <Loader2 className="size-3.5 animate-spin" />
+                              <span>Booking Slot...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="size-3.5" />
+                              <span>Confirm This Time Slot</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Upcoming Section */}
           {upcoming.length > 0 && (
             <div className="space-y-3">
@@ -104,7 +257,7 @@ export function CandidateInterviewsTab() {
 
               <div className="grid grid-cols-1 gap-4">
                 {upcoming.map((interview) => {
-                  const dateObj = new Date(interview.scheduledAt);
+                  const dateObj = new Date(interview.scheduledAt || "");
                   const isToday = dateObj.toDateString() === new Date().toDateString();
 
                   return (
@@ -241,7 +394,7 @@ export function CandidateInterviewsTab() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 font-mono">
-                      <span>{new Date(interview.scheduledAt).toLocaleDateString()}</span>
+                      <span>{interview.scheduledAt ? new Date(interview.scheduledAt).toLocaleDateString() : "Unscheduled"}</span>
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                           interview.status === "CANCELLED"
@@ -262,3 +415,4 @@ export function CandidateInterviewsTab() {
     </div>
   );
 }
+

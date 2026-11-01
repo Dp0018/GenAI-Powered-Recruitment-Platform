@@ -34,6 +34,8 @@ import {
   ToggleRight,
   Clock,
   AlertTriangle,
+  Eye,
+  TrendingUp,
 } from "lucide-react";
 
 interface EmployerHeaderProps {
@@ -122,9 +124,11 @@ interface EmployerMetricsGridProps {
 
 export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGridProps) {
   const publishedCount = jobs.filter((j) => j.status === "PUBLISHED" && !j.expired).length;
+  const totalViews = jobs.reduce((acc, j) => acc + (j.viewsCount || 0), 0);
+  const conversionRate = totalViews > 0 ? ((totalApplicants / totalViews) * 100).toFixed(1) : "0.0";
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
         <div className="flex items-center justify-between text-muted-foreground text-xs">
           <span>Active Requisitions</span>
@@ -136,20 +140,29 @@ export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGr
 
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
         <div className="flex items-center justify-between text-muted-foreground text-xs">
-          <span>Candidate Applicants</span>
-          <Users className="size-4 text-primary" />
+          <span>Total Job Views</span>
+          <Eye className="size-4 text-purple-400" />
         </div>
-        <div className="text-2xl font-bold text-foreground tracking-tight">{totalApplicants}</div>
-        <p className="text-[11px] text-muted-foreground">Total applications received across roles</p>
+        <div className="text-2xl font-bold text-foreground tracking-tight">{totalViews}</div>
+        <p className="text-[11px] text-muted-foreground">Candidate views across postings</p>
       </div>
 
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
         <div className="flex items-center justify-between text-muted-foreground text-xs">
-          <span>Total Positions</span>
-          <Briefcase className="size-4 text-emerald-400" />
+          <span>Candidate Applicants</span>
+          <Users className="size-4 text-primary" />
         </div>
-        <div className="text-2xl font-bold text-foreground tracking-tight">{jobs.length}</div>
-        <p className="text-[11px] text-muted-foreground">Requisitions created under company</p>
+        <div className="text-2xl font-bold text-foreground tracking-tight">{totalApplicants}</div>
+        <p className="text-[11px] text-muted-foreground">Total applications received</p>
+      </div>
+
+      <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
+        <div className="flex items-center justify-between text-muted-foreground text-xs">
+          <span>Conversion Funnel</span>
+          <TrendingUp className="size-4 text-emerald-400" />
+        </div>
+        <div className="text-2xl font-bold text-emerald-400 tracking-tight">{conversionRate}%</div>
+        <p className="text-[11px] text-muted-foreground">Applications per 100 views</p>
       </div>
     </div>
   );
@@ -279,7 +292,7 @@ export function EmployerRequisitionsTable({
                   <th className="py-3 px-4 font-semibold">Location</th>
                   <th className="py-3 px-4 font-semibold">Compensation</th>
                   <th className="py-3 px-4 font-semibold">Status</th>
-                  <th className="py-3 px-4 font-semibold">Applicants</th>
+                  <th className="py-3 px-4 font-semibold">Funnel (Views / Apps)</th>
                   <th className="py-3 px-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -350,8 +363,20 @@ export function EmployerRequisitionsTable({
                         </button>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-muted-foreground">
-                      {job.applicantCount || 0}
+                    <td className="py-3.5 px-4 font-mono text-xs">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <Users className="size-3 text-primary" />
+                        <span>{job.applicantCount || 0} apps</span>
+                      </div>
+                      <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Eye className="size-3 text-muted-foreground/70" />
+                        <span>{job.viewsCount || 0} views</span>
+                        {job.viewsCount && job.viewsCount > 0 ? (
+                          <span className="text-emerald-400 font-bold ml-1">
+                            ({((job.applicantCount / job.viewsCount) * 100).toFixed(0)}%)
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">

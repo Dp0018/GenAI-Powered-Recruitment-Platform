@@ -47,6 +47,15 @@ class ApplicationServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private com.example.job_portal.repository.ApplicationAnswerRepository applicationAnswerRepository;
+
+    @Mock
+    private com.example.job_portal.repository.ApplicationScreeningNoteRepository screeningNoteRepository;
+
     @InjectMocks
     private ApplicationService applicationService;
 

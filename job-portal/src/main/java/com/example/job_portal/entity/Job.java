@@ -71,6 +71,30 @@ public class Job {
     @Builder.Default
     private String currency = "USD";
 
+    @Column(name = "salary_period", length = 20)
+    @Builder.Default
+    private String salaryPeriod = "YEARLY";
+
+    @Column(name = "has_equity")
+    @Builder.Default
+    private Boolean hasEquity = false;
+
+    @Column(name = "equity_range", length = 100)
+    private String equityRange;
+
+    @Column(name = "has_sign_on_bonus")
+    @Builder.Default
+    private Boolean hasSignOnBonus = false;
+
+    @Column(name = "sign_on_bonus")
+    private Integer signOnBonus;
+
+    @Column(name = "annual_bonus_percentage")
+    private Integer annualBonusPercentage;
+
+    @Column(name = "compensation_notes", columnDefinition = "TEXT")
+    private String compensationNotes;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "job_tags", joinColumns = @JoinColumn(name = "job_id"))
     @Column(name = "tag")
@@ -94,6 +118,10 @@ public class Job {
     @Column(name = "applicant_count")
     @Builder.Default
     private int applicantCount = 0;
+
+    @Column(name = "views_count")
+    @Builder.Default
+    private long viewsCount = 0;
 
     @CreationTimestamp
     @Column(updatable = false)

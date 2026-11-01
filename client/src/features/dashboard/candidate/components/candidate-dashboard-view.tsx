@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CandidateProfileView } from "@/features/profile/components/candidate-profile-view";
 import { CandidateSavedJobsTab } from "./candidate-saved-jobs-tab";
 import { CandidateInterviewsTab } from "./candidate-interviews-tab";
+import { CandidateDraftsTab } from "./candidate-drafts-tab";
 import { useSavedJobsQuery } from "@/features/jobs/hooks/use-jobs";
 import { useCandidateInterviewsQuery } from "@/features/interviews/hooks/use-interviews";
 import {
@@ -26,7 +27,12 @@ import {
   Calendar,
   Bookmark,
   ArrowRight,
+  Bell,
+  FileEdit,
 } from "lucide-react";
+import { CandidateJobAlertsTab } from "./candidate-job-alerts-tab";
+import { CandidateOffersTab } from "@/features/offers/components/candidate-offers-tab";
+import { useCandidateOffersQuery } from "@/features/offers/hooks/use-offers";
 
 export function CandidateHeader() {
   const { user } = useAuth();
@@ -323,12 +329,14 @@ export function CandidateDashboardView() {
   const { data, isLoading } = useMyApplicationsQuery();
   const { data: savedJobsData } = useSavedJobsQuery();
   const { data: interviewsData } = useCandidateInterviewsQuery();
+  const { data: offersData = [] } = useCandidateOffersQuery();
   const applications = data?.content || [];
   const totalElements = data?.totalElements || 0;
   const totalSaved = savedJobsData?.totalElements || 0;
   const totalInterviews = (interviewsData || []).filter(
-    (i) => i.status === "SCHEDULED" && new Date(i.scheduledAt).getTime() > Date.now()
+    (i) => i.status === "SCHEDULED" && i.scheduledAt && new Date(i.scheduledAt).getTime() > Date.now()
   ).length;
+  const pendingOffers = offersData.filter((o) => o.status === "SENT").length;
 
   return (
     <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6">
@@ -342,6 +350,22 @@ export function CandidateDashboardView() {
           >
             <FileText className="size-3.5" />
             <span>Applications ({totalElements})</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="offers"
+            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
+          >
+            <ShieldCheck className="size-3.5 text-emerald-400" />
+            <span>Offers</span>
+            {pendingOffers > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-emerald-500 text-slate-950 animate-pulse">
+                {pendingOffers} action
+              </span>
+            ) : offersData.length > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-secondary text-muted-foreground">
+                {offersData.length}
+              </span>
+            ) : null}
           </TabsTrigger>
           <TabsTrigger
             value="interviews"
@@ -363,6 +387,20 @@ export function CandidateDashboardView() {
             <span>Saved Jobs ({totalSaved})</span>
           </TabsTrigger>
           <TabsTrigger
+            value="drafts"
+            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
+          >
+            <FileEdit className="size-3.5" />
+            <span>Drafts</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="alerts"
+            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
+          >
+            <Bell className="size-3.5" />
+            <span>Job Alerts</span>
+          </TabsTrigger>
+          <TabsTrigger
             value="profile"
             className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
           >
@@ -381,12 +419,24 @@ export function CandidateDashboardView() {
           <CandidateProfileSummary />
         </TabsContent>
 
+        <TabsContent value="offers" className="outline-none">
+          <CandidateOffersTab />
+        </TabsContent>
+
         <TabsContent value="interviews" className="outline-none">
           <CandidateInterviewsTab />
         </TabsContent>
 
         <TabsContent value="saved" className="outline-none">
           <CandidateSavedJobsTab />
+        </TabsContent>
+
+        <TabsContent value="drafts" className="outline-none">
+          <CandidateDraftsTab />
+        </TabsContent>
+
+        <TabsContent value="alerts" className="outline-none">
+          <CandidateJobAlertsTab />
         </TabsContent>
 
         <TabsContent value="profile" className="outline-none">

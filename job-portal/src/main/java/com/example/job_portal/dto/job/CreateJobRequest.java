@@ -38,6 +38,13 @@ public class CreateJobRequest {
     private Integer minSalary;
     private Integer maxSalary;
     private String currency;
+    private String salaryPeriod;
+    private Boolean hasEquity;
+    private String equityRange;
+    private Boolean hasSignOnBonus;
+    private Integer signOnBonus;
+    private Integer annualBonusPercentage;
+    private String compensationNotes;
 
     private List<String> tags;
     private List<String> benefits;
@@ -45,5 +52,6 @@ public class CreateJobRequest {
 
     private String status;
     private String experienceLevel;
+    private List<JobQuestionDto> screeningQuestions;
 }
 

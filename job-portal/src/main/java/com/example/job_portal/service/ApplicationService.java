@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,9 @@ public class ApplicationService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final com.example.job_portal.repository.ApplicationAnswerRepository applicationAnswerRepository;
+    private final com.example.job_portal.repository.ApplicationScreeningNoteRepository screeningNoteRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public ApplicationResponse applyToJob(String jobId, SubmitApplicationRequest request, UserPrincipal candidateUser) {
@@ -65,10 +70,26 @@ public class ApplicationService {
                 .resumeUrl(request.getResumeUrl().trim())
                 .coverLetter(StringUtils.hasText(request.getCoverLetter()) ? request.getCoverLetter().trim() : null)
                 .phone(StringUtils.hasText(request.getPhone()) ? request.getPhone().trim() : candidate.getPhone())
+                .referralCode(StringUtils.hasText(request.getReferralCode()) ? request.getReferralCode().trim() : null)
+                .referredBy(StringUtils.hasText(request.getReferredBy()) ? request.getReferredBy().trim() : null)
                 .status(Application.ApplicationStatus.APPLIED)
                 .build();
 
         Application saved = applicationRepository.save(application);
+
+        // Save screening answers if provided
+        if (request.getScreeningAnswers() != null && !request.getScreeningAnswers().isEmpty()) {
+            for (com.example.job_portal.dto.application.ScreeningAnswerDto ansDto : request.getScreeningAnswers()) {
+                if (ansDto == null || !StringUtils.hasText(ansDto.getAnswerText())) continue;
+                com.example.job_portal.entity.ApplicationAnswer answer = com.example.job_portal.entity.ApplicationAnswer.builder()
+                        .application(saved)
+                        .questionId(ansDto.getQuestionId())
+                        .questionText(ansDto.getQuestionText() != null ? ansDto.getQuestionText().trim() : "Screening Question")
+                        .answerText(ansDto.getAnswerText().trim())
+                        .build();
+                applicationAnswerRepository.save(answer);
+            }
+        }
 
         // Increment applicant count on job
         job.setApplicantCount(job.getApplicantCount() + 1);
@@ -81,7 +102,19 @@ public class ApplicationService {
         String companyName = job.getCompany() != null ? job.getCompany().getName() : "Hiring Organization";
         emailService.sendApplicationReceivedEmail(candidate.getEmail(), candidate.getName(), job.getTitle(), companyName);
 
-        return ApplicationResponse.fromEntity(saved);
+        try {
+            notificationService.sendNotification(
+                    candidate,
+                    "Application Submitted",
+                    "Your application for '" + job.getTitle() + "' at " + companyName + " was received successfully.",
+                    com.example.job_portal.entity.Notification.NotificationType.APPLICATION_STATUS,
+                    "/candidate/applications"
+            );
+        } catch (Exception ex) {
+            log.warn("Failed to create in-app notification: {}", ex.getMessage());
+        }
+
+        return enrichApplicationResponse(ApplicationResponse.fromEntity(saved));
     }
 
     @Transactional(readOnly = true)
@@ -140,17 +173,29 @@ public class ApplicationService {
 
         // Send automated status update email asynchronously via Resend
         if (application.getCandidate() != null && application.getJob() != null) {
-            String companyName = application.getJob().getCompany() != null
+            String cName = application.getJob().getCompany() != null
                     ? application.getJob().getCompany().getName()
                     : "Hiring Organization";
             emailService.sendApplicationStatusUpdateEmail(
                     application.getCandidate().getEmail(),
                     application.getCandidate().getName(),
                     application.getJob().getTitle(),
-                    companyName,
+                    cName,
                     updated.getStatus(),
                     request.getNotes()
             );
+
+            try {
+                notificationService.sendNotification(
+                        application.getCandidate(),
+                        "Application Status Updated",
+                        "Your application for '" + application.getJob().getTitle() + "' was updated to " + updated.getStatus().name() + ".",
+                        com.example.job_portal.entity.Notification.NotificationType.APPLICATION_STATUS,
+                        "/candidate/applications"
+                );
+            } catch (Exception ex) {
+                log.warn("Failed to create in-app notification: {}", ex.getMessage());
+            }
         }
 
         return ApplicationResponse.fromEntity(updated);
@@ -175,11 +220,33 @@ public class ApplicationService {
         log.info("Candidate '{}' ({}) withdrew application '{}' for job '{}'",
                 candidateUser.getEmail(), candidateUser.getId(), applicationId, application.getJob().getTitle());
 
-        return ApplicationResponse.fromEntity(updated);
+        return enrichApplicationResponse(ApplicationResponse.fromEntity(updated));
     }
 
     private PagedResponse<ApplicationResponse> mapToPagedResponse(Page<Application> page) {
-        Page<ApplicationResponse> dtoPage = page.map(ApplicationResponse::fromEntity);
+        Page<ApplicationResponse> dtoPage = page.map(app -> enrichApplicationResponse(ApplicationResponse.fromEntity(app)));
         return PagedResponse.from(dtoPage);
+    }
+
+    private ApplicationResponse enrichApplicationResponse(ApplicationResponse response) {
+        if (response == null || response.getId() == null) return response;
+
+        List<com.example.job_portal.entity.ApplicationAnswer> answers = applicationAnswerRepository.findByApplicationId(response.getId());
+        List<com.example.job_portal.dto.application.ScreeningAnswerDto> answerDtos = answers.stream()
+                .map(a -> com.example.job_portal.dto.application.ScreeningAnswerDto.builder()
+                        .questionId(a.getQuestionId())
+                        .questionText(a.getQuestionText())
+                        .answerText(a.getAnswerText())
+                        .build())
+                .toList();
+        response.setScreeningAnswers(answerDtos);
+
+        Double avgRating = screeningNoteRepository.calculateAverageRatingByApplicationId(response.getId());
+        response.setAverageRating(avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : null);
+
+        List<com.example.job_portal.entity.ApplicationScreeningNote> notes = screeningNoteRepository.findByApplicationIdWithAuthor(response.getId());
+        response.setReviewCount(notes.size());
+
+        return response;
     }
 }

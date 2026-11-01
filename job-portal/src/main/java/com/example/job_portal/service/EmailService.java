@@ -19,5 +19,14 @@ public interface EmailService {
     void sendInterviewScheduledEmail(String candidateEmail, String candidateName, String jobTitle,
             String companyName, String interviewTitle, java.time.Instant scheduledAt, int durationMinutes,
             String meetingLink, String notes);
+
+    void sendJobAlertDigestEmail(String candidateEmail, String candidateName, String alertKeyword,
+            java.util.List<com.example.job_portal.entity.Job> matchingJobs);
+
+    void sendOfferExtendedEmail(String candidateEmail, String candidateName, String jobTitle,
+            String companyName, Integer baseSalary, String currency, String signUrl);
+
+    void sendOfferAcceptedEmail(String recruiterEmail, String candidateName, String jobTitle,
+            String companyName, java.time.Instant signedAt);
 }
 

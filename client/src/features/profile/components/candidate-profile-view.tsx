@@ -27,8 +27,12 @@ import {
   Camera,
   Loader2,
   Save,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { WorkExperienceSection } from "./work-experience-section";
+import { EducationHistorySection } from "./education-history-section";
+import { ResumeLibrarySection } from "./resume-library-section";
 
 export function CandidateProfileView() {
   const { data: profile, isLoading, refetch } = useProfileQuery();
@@ -57,6 +61,66 @@ export function CandidateProfileView() {
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [isParsingResume, setIsParsingResume] = useState(false);
+
+  const handleAutoExtract = async (targetUrl?: string) => {
+    const urlToParse = targetUrl || resumeUrl;
+    if (!urlToParse) {
+      toast.error("Please upload a resume first before auto-extracting profile");
+      return;
+    }
+
+    try {
+      setIsParsingResume(true);
+      toast.info("Extracting work history, skills & bio from resume...");
+      const parsed = await profileApi.parseResume({ resumeUrl: urlToParse });
+
+      if (parsed.headline && !headline) {
+        setHeadline(parsed.headline);
+      }
+      if (parsed.bio && !bio) {
+        setBio(parsed.bio);
+      }
+      if (parsed.phone && !phone) {
+        setPhone(parsed.phone);
+      }
+      if (parsed.skills && parsed.skills.length > 0) {
+        setSkills((prev) => Array.from(new Set([...prev, ...(parsed.skills || [])])));
+      }
+
+      // If work experiences parsed and candidate doesn't have any, save them
+      if (parsed.workExperiences && parsed.workExperiences.length > 0 && (!profile?.workExperiences || profile.workExperiences.length === 0)) {
+        for (const exp of parsed.workExperiences) {
+          try {
+            await profileApi.addWorkExperience(exp);
+          } catch {
+            // ignore item failure
+          }
+        }
+      }
+
+      // If education history parsed and candidate doesn't have any, save them
+      if (parsed.educationHistory && parsed.educationHistory.length > 0 && (!profile?.educationHistory || profile.educationHistory.length === 0)) {
+        for (const edu of parsed.educationHistory) {
+          try {
+            await profileApi.addEducationHistory(edu);
+          } catch {
+            // ignore item failure
+          }
+        }
+      }
+
+      refetch();
+      toast.success(
+        `Resume parsed! Auto-extracted ${parsed.skills?.length || 0} skills, bio & credential details.`
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to extract from resume";
+      toast.error(msg);
+    } finally {
+      setIsParsingResume(false);
+    }
+  };
 
   useEffect(() => {
     if (profile) {
@@ -125,7 +189,9 @@ export function CandidateProfileView() {
       const res = await applicationsApi.uploadResume(file);
       setResumeUrl(res.url);
       setResumeFileName(file.name);
-      toast.success("Default resume updated");
+      toast.success("Resume uploaded! Extracting profile details...");
+      // Auto-populate profile from uploaded resume
+      handleAutoExtract(res.url);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to upload resume";
       toast.error(msg);
@@ -458,6 +524,12 @@ export function CandidateProfileView() {
         </div>
       </div>
 
+      {/* Work Experience Timeline */}
+      <WorkExperienceSection experiences={profile?.workExperiences} />
+
+      {/* Education & Credentials */}
+      <EducationHistorySection educationHistory={profile?.educationHistory} />
+
       {/* Online Profiles & Links */}
       <div className="p-6 rounded-lg border border-border bg-card shadow-sm space-y-4">
         <h3 className="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2 border-b border-border pb-3">
@@ -513,114 +585,9 @@ export function CandidateProfileView() {
         </div>
       </div>
 
-      {/* Default Cloud Resume */}
-      <div className="p-6 rounded-lg border border-border bg-card shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-border pb-3">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2">
-              <FileText className="size-4 text-primary" />
-              <span>Default Cloud Resume (1-Click Apply)</span>
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Saved to your ImageKit cloud vault. Auto-fills your job applications automatically.
-            </p>
-          </div>
-        </div>
+      {/* Multi-Resume Library & Targeted Versions */}
+      <ResumeLibrarySection />
 
-        {resumeUrl ? (
-          <div className="p-4 rounded-lg border border-border bg-secondary/30 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="size-10 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <FileText className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-semibold text-foreground truncate flex items-center gap-1.5">
-                  <span className="truncate">{resumeFileName || "Primary Resume"}</span>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                    <CheckCircle2 className="size-2.5" />
-                    Active Default
-                  </span>
-                </div>
-                <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
-                  Hosted on ImageKit CDN • Ready for 1-Click Apply
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <a
-                href={resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-secondary border border-border text-xs text-foreground font-mono hover:bg-secondary/80 transition-colors"
-              >
-                <ExternalLink className="size-3.5" />
-                <span>View</span>
-              </a>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => resumeInputRef.current?.click()}
-                className="h-8 text-xs border-border"
-              >
-                Replace
-              </Button>
-              <button
-                type="button"
-                onClick={() => {
-                  setResumeUrl("");
-                  setResumeFileName("");
-                }}
-                className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                title="Remove resume"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div
-            onClick={() => resumeInputRef.current?.click()}
-            className="border-2 border-dashed border-border hover:border-primary/50 rounded-lg p-6 text-center cursor-pointer bg-secondary/20 hover:bg-secondary/40 transition-colors"
-          >
-            {isUploadingResume ? (
-              <div className="flex flex-col items-center justify-center py-2 space-y-2">
-                <Loader2 className="size-6 animate-spin text-primary" />
-                <span className="text-xs font-medium text-foreground">
-                  Uploading to ImageKit cloud storage...
-                </span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center space-y-1.5">
-                <div className="size-9 rounded-full bg-secondary border border-border flex items-center justify-center text-primary">
-                  <UploadCloud className="size-4" />
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-foreground">
-                    Upload your master resume
-                  </span>{" "}
-                  <span className="text-xs text-muted-foreground">to enable 1-Click Apply</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  PDF or Word documents up to 10MB
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        <input
-          ref={resumeInputRef}
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleResumeUpload(file);
-          }}
-          className="hidden"
-        />
-      </div>
 
       {/* Save Action */}
       <div className="flex justify-end pt-2">

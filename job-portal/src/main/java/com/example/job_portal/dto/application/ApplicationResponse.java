@@ -22,7 +22,12 @@ public class ApplicationResponse {
     private String coverLetter;
     private String phone;
     private String feedbackNote;
+    private String referralCode;
+    private String referredBy;
     private Application.ApplicationStatus status;
+    private java.util.List<ScreeningAnswerDto> screeningAnswers;
+    private Double averageRating;
+    private Integer reviewCount;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -85,6 +90,8 @@ public class ApplicationResponse {
                 .coverLetter(app.getCoverLetter())
                 .phone(app.getPhone())
                 .feedbackNote(app.getFeedbackNote())
+                .referralCode(app.getReferralCode())
+                .referredBy(app.getReferredBy())
                 .status(app.getStatus())
                 .createdAt(app.getCreatedAt())
                 .updatedAt(app.getUpdatedAt())

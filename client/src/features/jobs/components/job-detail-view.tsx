@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useJobDetailQuery } from "../hooks/use-jobs";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useApplicationStatusQuery } from "@/features/applications/hooks/use-applications";
@@ -26,7 +26,15 @@ import {
   Sparkles,
   Clock,
   Send,
+  Zap,
+  Eye,
+  Gift,
+  Coins,
+  Scale,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useProfileQuery } from "@/features/profile/hooks/use-profile";
+import { useSubmitApplicationMutation } from "@/features/applications/hooks/use-applications";
 import { COMPANY_BENEFITS, getBenefitLabel } from "../types/benefits";
 import { SkillsMatchBreakdownCard } from "./skills-match-breakdown-card";
 
@@ -36,6 +44,7 @@ interface JobDetailViewProps {
 
 export function JobDetailView({ slug }: JobDetailViewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isAuthenticated } = useAuth();
   const { data: job, isLoading, isError } = useJobDetailQuery(slug);
   const { data: hasApplied = false } = useApplicationStatusQuery(
@@ -44,13 +53,67 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
   );
 
   const [copied, setCopied] = useState(false);
+  const [copiedReferral, setCopiedReferral] = useState(false);
   const [applyModalOpen, setApplyModalOpen] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | undefined>(undefined);
+
+  const referralFromUrl = searchParams.get("ref");
+
+  useEffect(() => {
+    if (referralFromUrl) {
+      setReferralCode(referralFromUrl);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("job_portal_referral", referralFromUrl);
+      }
+    } else if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("job_portal_referral");
+      if (saved) setReferralCode(saved);
+    }
+  }, [referralFromUrl]);
+
+  const isCandidate = isAuthenticated && (!user?.role || user.role === "CANDIDATE");
+  const { data: profile } = useProfileQuery(Boolean(isCandidate));
+  const submitMutation = useSubmitApplicationMutation(job?.id || "");
+
+  const hasRequiredQuestions = Boolean(
+    job?.screeningQuestions && job.screeningQuestions.some((q) => q.required)
+  );
+  const canQuickApply = Boolean(
+    isCandidate &&
+      profile?.resumeUrl &&
+      !hasRequiredQuestions &&
+      !job?.expired &&
+      !hasApplied
+  );
+
+  const handleQuickApply = () => {
+    if (!profile?.resumeUrl || !job?.id) return;
+    submitMutation.mutate({
+      resumeUrl: profile.resumeUrl,
+      phone: profile.phone || "",
+      referralCode: referralCode || undefined,
+      referredBy: referralCode ? `Referral (${referralCode})` : undefined,
+    });
+  };
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const handleCopyReferral = () => {
+    if (typeof window !== "undefined") {
+      const myRef = user
+        ? `emp_${(user.name?.toLowerCase().replace(/\s+/g, "_") || user.id.slice(0, 8))}`
+        : "advocate_link";
+      const referralUrl = `${window.location.origin}/jobs/${slug}?ref=${myRef}`;
+      navigator.clipboard.writeText(referralUrl);
+      setCopiedReferral(true);
+      toast.success(`Referral link copied (${myRef})! Anyone applying with this link will be tracked.`);
+      setTimeout(() => setCopiedReferral(false), 2500);
     }
   };
 
@@ -99,8 +162,8 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
 
   return (
     <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-8">
-      {/* Top Navigation */}
-      <div className="flex items-center justify-between">
+      {/* Top Navigation & Referral Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <Link
           href="/jobs"
           className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
@@ -109,14 +172,40 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
           <span>Back to Openings</span>
         </Link>
 
-        <button
-          onClick={handleShare}
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded border border-border bg-card"
-        >
-          <Share2 className="size-3.5" />
-          <span>{copied ? "Link Copied!" : "Share Requisition"}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyReferral}
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 hover:text-emerald-300 transition-colors px-2.5 py-1 rounded border border-emerald-500/30 bg-emerald-500/10 cursor-pointer"
+            title="Generate and copy unique referral tracking link to attribute incoming hires"
+          >
+            <Gift className="size-3.5" />
+            <span>{copiedReferral ? "Referral Link Copied!" : "Referral Link"}</span>
+          </button>
+
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded border border-border bg-card cursor-pointer"
+          >
+            <Share2 className="size-3.5" />
+            <span>{copied ? "Link Copied!" : "Share Requisition"}</span>
+          </button>
+        </div>
       </div>
+
+      {/* Referral Tracking Banner */}
+      {referralCode && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-between text-xs shadow-xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="size-4 shrink-0 text-emerald-400" />
+            <span>
+              <strong>Referral Program Active:</strong> You are viewing this opening via referral link (<code>{referralCode}</code>).
+            </span>
+          </div>
+          <span className="font-mono text-[10px] uppercase bg-emerald-500/20 px-2 py-0.5 rounded font-semibold shrink-0">
+            Source Tracked
+          </span>
+        </div>
+      )}
 
       {/* Expiration Alert Banner */}
       {job.expired && (
@@ -202,6 +291,10 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   <span>{job.applicantCount} applicants</span>
                 </span>
               )}
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary border border-border text-muted-foreground">
+                <Eye className="size-3" />
+                <span>{job.viewsCount || 0} views</span>
+              </span>
             </div>
           </div>
 
@@ -211,17 +304,35 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
               {job.minSalary && job.maxSalary ? (
                 <div className="font-mono text-lg font-bold text-foreground">
                   ${(job.minSalary / 1000).toFixed(0)}k - ${(job.maxSalary / 1000).toFixed(0)}k{" "}
-                  <span className="text-xs text-muted-foreground">{job.currency} / yr</span>
+                  <span className="text-xs text-muted-foreground">
+                    {job.currency} {job.salaryPeriod === "HOURLY" ? "/ hr" : job.salaryPeriod === "MONTHLY" ? "/ mo" : "/ yr"}
+                  </span>
                 </div>
               ) : job.minSalary ? (
                 <div className="font-mono text-lg font-bold text-foreground">
                   From ${(job.minSalary / 1000).toFixed(0)}k{" "}
-                  <span className="text-xs text-muted-foreground">{job.currency} / yr</span>
+                  <span className="text-xs text-muted-foreground">
+                    {job.currency} {job.salaryPeriod === "HOURLY" ? "/ hr" : job.salaryPeriod === "MONTHLY" ? "/ mo" : "/ yr"}
+                  </span>
                 </div>
               ) : (
                 <span className="text-xs font-mono text-muted-foreground">
                   Competitive Compensation Band
                 </span>
+              )}
+              {(job.hasEquity || job.hasSignOnBonus) && (
+                <div className="flex items-center sm:justify-end gap-1.5 pt-1">
+                  {job.hasEquity && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-800/40">
+                      + Equity
+                    </span>
+                  )}
+                  {job.hasSignOnBonus && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium text-indigo-400 bg-indigo-950/40 border border-indigo-800/40">
+                      + Bonus
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
@@ -246,6 +357,29 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-emerald-950/40 border border-emerald-700/50 text-emerald-300 text-xs font-medium font-mono">
                   <CheckCircle2 className="size-4 text-emerald-400" />
                   <span>Application Submitted</span>
+                </div>
+              ) : canQuickApply ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleQuickApply}
+                    disabled={submitMutation.isPending}
+                    className="h-10 px-5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-bold text-xs rounded-md shadow-md gap-1.5 transition-all"
+                  >
+                    {submitMutation.isPending ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Zap className="size-3.5 fill-current" />
+                    )}
+                    <span>1-Click Quick Apply</span>
+                  </Button>
+                  <Button
+                    onClick={handleApplyClick}
+                    variant="outline"
+                    className="h-10 px-3 text-xs font-medium border-border"
+                    title="Apply with custom resume or cover letter"
+                  >
+                    Custom
+                  </Button>
                 </div>
               ) : (
                 <Button
@@ -290,6 +424,83 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
             </h2>
             <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line font-sans">
               {job.description}
+            </div>
+          </section>
+
+          {/* Compensation & Pay Transparency Breakdown */}
+          <section className="p-6 rounded-xl bg-card/60 border border-border space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border gap-2">
+              <h2 className="text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
+                <Coins className="size-5 text-primary" />
+                <span>Compensation & Total Rewards Transparency</span>
+              </h2>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/40">
+                <Scale className="size-3 text-emerald-400" />
+                <span>Pay Transparency Compliance</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Base Salary Band */}
+              <div className="p-4 rounded-lg bg-secondary/30 border border-border space-y-1">
+                <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+                  Base Salary Band
+                </div>
+                <div className="text-base font-bold text-foreground font-mono">
+                  {job.minSalary && job.maxSalary
+                    ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
+                    : job.minSalary
+                    ? `From $${job.minSalary.toLocaleString()}`
+                    : "Competitive Base"}
+                </div>
+                <div className="text-[10px] text-muted-foreground font-mono">
+                  {job.currency} {job.salaryPeriod === "HOURLY" ? "per hour" : job.salaryPeriod === "MONTHLY" ? "per month" : "per year"}
+                </div>
+              </div>
+
+              {/* Equity / Stock Options */}
+              <div className="p-4 rounded-lg bg-secondary/30 border border-border space-y-1">
+                <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+                  Equity Incentive
+                </div>
+                <div className="text-base font-bold text-foreground font-mono">
+                  {job.hasEquity ? (job.equityRange || "Equity Included") : "Not Applicable"}
+                </div>
+                <div className="text-[10px] text-muted-foreground font-mono">
+                  {job.hasEquity ? "RSUs / ISO stock options" : "Base cash compensation"}
+                </div>
+              </div>
+
+              {/* Bonus / Variable Comp */}
+              <div className="p-4 rounded-lg bg-secondary/30 border border-border space-y-1">
+                <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+                  Variable & Sign-On
+                </div>
+                <div className="text-base font-bold text-foreground font-mono">
+                  {job.hasSignOnBonus && job.signOnBonus
+                    ? `$${job.signOnBonus.toLocaleString()} Sign-On`
+                    : job.annualBonusPercentage
+                    ? `${job.annualBonusPercentage}% Target Bonus`
+                    : "Discretionary"}
+                </div>
+                <div className="text-[10px] text-muted-foreground font-mono">
+                  {job.annualBonusPercentage && job.hasSignOnBonus
+                    ? `+ ${job.annualBonusPercentage}% annual target`
+                    : "Performance based incentives"}
+                </div>
+              </div>
+            </div>
+
+            {/* Compliance & Geographic Disclosure Banner */}
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                <Scale className="size-3.5 text-primary" />
+                <span>Statutory Pay Transparency Disclosure</span>
+              </div>
+              <p className="leading-relaxed">
+                {job.compensationNotes ||
+                  "In compliance with California SB 1162, New York City Local Law 32, Colorado EPEW, and the EU Pay Transparency Directive, our disclosed compensation range reflects expected base salary for this requisition. Individual compensation offers depend on domain expertise, seniority, candidate geographic location, and demonstrable market experience."}
+              </p>
             </div>
           </section>
 
@@ -404,6 +615,8 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
         jobId={job.id}
         jobTitle={job.title}
         companyName={job.company?.name || "Corporate Employer"}
+        screeningQuestions={job.screeningQuestions}
+        referralCode={referralCode}
       />
     </div>
   );

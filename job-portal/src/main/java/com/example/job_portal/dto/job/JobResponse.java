@@ -28,13 +28,22 @@ public class JobResponse {
     private Integer minSalary;
     private Integer maxSalary;
     private String currency;
+    private String salaryPeriod;
+    private Boolean hasEquity;
+    private String equityRange;
+    private Boolean hasSignOnBonus;
+    private Integer signOnBonus;
+    private Integer annualBonusPercentage;
+    private String compensationNotes;
     private List<String> tags;
     private List<String> benefits;
     private Instant expiresAt;
     private boolean expired;
     private String status;
     private int applicantCount;
+    private long viewsCount;
     private CompanyResponse company;
+    private List<JobQuestionDto> screeningQuestions;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -70,12 +79,20 @@ public class JobResponse {
                 .minSalary(job.getMinSalary())
                 .maxSalary(job.getMaxSalary())
                 .currency(job.getCurrency() != null ? job.getCurrency() : "USD")
+                .salaryPeriod(job.getSalaryPeriod() != null ? job.getSalaryPeriod() : "YEARLY")
+                .hasEquity(job.getHasEquity() != null ? job.getHasEquity() : false)
+                .equityRange(job.getEquityRange())
+                .hasSignOnBonus(job.getHasSignOnBonus() != null ? job.getHasSignOnBonus() : false)
+                .signOnBonus(job.getSignOnBonus())
+                .annualBonusPercentage(job.getAnnualBonusPercentage())
+                .compensationNotes(job.getCompensationNotes())
                 .tags(job.getTags() != null ? job.getTags() : List.of())
                 .benefits(job.getBenefits() != null ? job.getBenefits() : List.of())
                 .expiresAt(job.getExpiresAt())
                 .expired(isExpired)
                 .status(job.getStatus().name())
                 .applicantCount(job.getApplicantCount())
+                .viewsCount(job.getViewsCount())
                 .company(companyResp)
                 .createdAt(job.getCreatedAt())
                 .updatedAt(job.getUpdatedAt())

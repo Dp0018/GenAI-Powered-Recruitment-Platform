@@ -47,6 +47,12 @@ public class Application {
     @Column(name = "feedback_note", columnDefinition = "TEXT")
     private String feedbackNote;
 
+    @Column(name = "referral_code", length = 50)
+    private String referralCode;
+
+    @Column(name = "referred_by", length = 150)
+    private String referredBy;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default

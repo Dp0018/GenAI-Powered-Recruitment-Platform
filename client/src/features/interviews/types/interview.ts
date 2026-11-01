@@ -1,4 +1,4 @@
-export type InterviewStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED";
+export type InterviewStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED" | "PENDING_CANDIDATE_BOOKING";
 
 export interface InterviewItem {
   id: string;
@@ -12,11 +12,12 @@ export interface InterviewItem {
   candidateName: string;
   candidateEmail: string;
   title: string;
-  scheduledAt: string;
+  scheduledAt?: string;
   durationMinutes: number;
   meetingLink?: string;
   notes?: string;
   status: InterviewStatus;
+  proposedSlots?: string[];
   createdAt: string;
   updatedAt?: string;
 }
@@ -28,4 +29,18 @@ export interface CreateInterviewPayload {
   durationMinutes: number;
   meetingLink?: string;
   notes?: string;
+}
+
+export interface ProposeSlotsPayload {
+  applicationId: string;
+  title: string;
+  proposedSlots: string[];
+  durationMinutes: number;
+  meetingLink?: string;
+  notes?: string;
+}
+
+export interface SelectSlotPayload {
+  interviewId: string;
+  selectedSlot: string;
 }

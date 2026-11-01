@@ -39,6 +39,7 @@ public class JobService {
 
     private final JobRepository jobRepository;
     private final CompanyRepository companyRepository;
+    private final com.example.job_portal.repository.JobQuestionRepository jobQuestionRepository;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -125,11 +126,27 @@ public class JobService {
         return PagedResponse.from(jobPage.map(JobResponse::fromEntity));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public JobResponse getJobBySlug(String slug) {
         Job job = jobRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Job", "slug", slug));
-        return JobResponse.fromEntity(job);
+        try {
+            jobRepository.incrementViewsCount(job.getId());
+            job.setViewsCount(job.getViewsCount() + 1);
+        } catch (Exception ex) {
+            log.warn("Failed to increment viewsCount for job {}: {}", job.getId(), ex.getMessage());
+        }
+        JobResponse response = JobResponse.fromEntity(job);
+        List<com.example.job_portal.entity.JobQuestion> questions = jobQuestionRepository.findByJobIdOrderByOrderIndexAsc(job.getId());
+        response.setScreeningQuestions(questions.stream().map(q -> com.example.job_portal.dto.job.JobQuestionDto.builder()
+                .id(q.getId())
+                .questionText(q.getQuestionText())
+                .questionType(q.getQuestionType())
+                .required(q.isRequired())
+                .options(q.getOptions())
+                .orderIndex(q.getOrderIndex())
+                .build()).toList());
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -197,6 +214,13 @@ public class JobService {
                 .minSalary(request.getMinSalary())
                 .maxSalary(request.getMaxSalary())
                 .currency(request.getCurrency() != null ? request.getCurrency() : "USD")
+                .salaryPeriod(request.getSalaryPeriod() != null ? request.getSalaryPeriod() : "YEARLY")
+                .hasEquity(request.getHasEquity() != null ? request.getHasEquity() : false)
+                .equityRange(request.getEquityRange())
+                .hasSignOnBonus(request.getHasSignOnBonus() != null ? request.getHasSignOnBonus() : false)
+                .signOnBonus(request.getSignOnBonus())
+                .annualBonusPercentage(request.getAnnualBonusPercentage())
+                .compensationNotes(request.getCompensationNotes())
                 .tags(request.getTags() != null ? request.getTags() : new ArrayList<>())
                 .benefits(request.getBenefits() != null ? request.getBenefits() : new ArrayList<>())
                 .expiresAt(expiresAt)
@@ -205,8 +229,11 @@ public class JobService {
                 .build();
 
         Job savedJob = jobRepository.save(job);
+        List<com.example.job_portal.dto.job.JobQuestionDto> savedQuestions = syncQuestions(savedJob, request.getScreeningQuestions());
         log.info("Created job requisition '{}' [ID: {}] for company '{}'", savedJob.getTitle(), savedJob.getId(), company.getName());
-        return JobResponse.fromEntity(savedJob);
+        JobResponse response = JobResponse.fromEntity(savedJob);
+        response.setScreeningQuestions(savedQuestions);
+        return response;
     }
 
     @Transactional
@@ -247,6 +274,13 @@ public class JobService {
         job.setMinSalary(request.getMinSalary());
         job.setMaxSalary(request.getMaxSalary());
         if (request.getCurrency() != null) job.setCurrency(request.getCurrency());
+        if (request.getSalaryPeriod() != null) job.setSalaryPeriod(request.getSalaryPeriod());
+        if (request.getHasEquity() != null) job.setHasEquity(request.getHasEquity());
+        job.setEquityRange(request.getEquityRange());
+        if (request.getHasSignOnBonus() != null) job.setHasSignOnBonus(request.getHasSignOnBonus());
+        job.setSignOnBonus(request.getSignOnBonus());
+        job.setAnnualBonusPercentage(request.getAnnualBonusPercentage());
+        job.setCompensationNotes(request.getCompensationNotes());
         if (request.getTags() != null) job.setTags(request.getTags());
         if (request.getBenefits() != null) job.setBenefits(request.getBenefits());
 
@@ -259,7 +293,41 @@ public class JobService {
         }
 
         Job updated = jobRepository.save(job);
-        return JobResponse.fromEntity(updated);
+        JobResponse resp = JobResponse.fromEntity(updated);
+        if (request.getScreeningQuestions() != null) {
+            jobQuestionRepository.deleteByJobId(job.getId());
+            List<com.example.job_portal.dto.job.JobQuestionDto> synced = syncQuestions(updated, request.getScreeningQuestions());
+            resp.setScreeningQuestions(synced);
+        }
+        return resp;
+    }
+
+    private List<com.example.job_portal.dto.job.JobQuestionDto> syncQuestions(Job job, List<com.example.job_portal.dto.job.JobQuestionDto> questionDtos) {
+        if (questionDtos == null || questionDtos.isEmpty()) return List.of();
+        List<com.example.job_portal.dto.job.JobQuestionDto> result = new ArrayList<>();
+        for (int i = 0; i < questionDtos.size(); i++) {
+            com.example.job_portal.dto.job.JobQuestionDto dto = questionDtos.get(i);
+            if (!org.springframework.util.StringUtils.hasText(dto.getQuestionText())) continue;
+
+            com.example.job_portal.entity.JobQuestion q = com.example.job_portal.entity.JobQuestion.builder()
+                    .job(job)
+                    .questionText(dto.getQuestionText().trim())
+                    .questionType(dto.getQuestionType() != null ? dto.getQuestionType() : com.example.job_portal.entity.JobQuestion.QuestionType.TEXT)
+                    .required(dto.isRequired())
+                    .options(dto.getOptions() != null ? dto.getOptions() : List.of())
+                    .orderIndex(i)
+                    .build();
+            com.example.job_portal.entity.JobQuestion saved = jobQuestionRepository.save(q);
+            result.add(com.example.job_portal.dto.job.JobQuestionDto.builder()
+                    .id(saved.getId())
+                    .questionText(saved.getQuestionText())
+                    .questionType(saved.getQuestionType())
+                    .required(saved.isRequired())
+                    .options(saved.getOptions())
+                    .orderIndex(saved.getOrderIndex())
+                    .build());
+        }
+        return result;
     }
 
     @Transactional
