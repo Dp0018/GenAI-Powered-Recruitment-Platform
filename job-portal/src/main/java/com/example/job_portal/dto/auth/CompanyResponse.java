@@ -20,4 +20,6 @@ public class CompanyResponse {
     private String companySize;
     private String location;
     private Company.VerificationStatus verificationStatus;
+    private java.util.List<String> benefits;
 }
+

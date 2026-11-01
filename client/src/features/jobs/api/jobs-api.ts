@@ -10,6 +10,11 @@ export const jobsApi = {
     if (params.workplaceType && params.workplaceType !== "ALL")
       searchParams.set("workplaceType", params.workplaceType);
     if (params.jobType && params.jobType !== "ALL") searchParams.set("jobType", params.jobType);
+    if (params.experienceLevel && params.experienceLevel !== "ALL")
+      searchParams.set("experienceLevel", params.experienceLevel);
+    if (params.minSalary && params.minSalary > 0)
+      searchParams.set("minSalary", params.minSalary.toString());
+    if (params.sortBy) searchParams.set("sortBy", params.sortBy);
     if (params.page !== undefined) searchParams.set("page", params.page.toString());
     if (params.size !== undefined) searchParams.set("size", params.size.toString());
 
@@ -64,6 +69,14 @@ export const jobsApi = {
       body: JSON.stringify(payload),
     });
     if (!res.data) throw new Error("Job update response was empty");
+    return res.data;
+  },
+
+  updateJobStatus: async (id: string, status: "PUBLISHED" | "CLOSED" | "DRAFT"): Promise<JobItem> => {
+    const res = await apiClient<JobItem>(`/jobs/${id}/status?status=${status}`, {
+      method: "PATCH",
+    });
+    if (!res.data) throw new Error("Job status update response was empty");
     return res.data;
   },
 

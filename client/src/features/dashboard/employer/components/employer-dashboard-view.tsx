@@ -3,10 +3,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { useCompanyJobsQuery, useDeleteJobMutation } from "@/features/jobs/hooks/use-jobs";
+import {
+  useCompanyJobsQuery,
+  useDeleteJobMutation,
+  useUpdateJobStatusMutation,
+} from "@/features/jobs/hooks/use-jobs";
 import { useCompanyApplicationsQuery } from "@/features/applications/hooks/use-applications";
 import { EmployerApplicantsTable } from "@/features/applications/components/employer-applicants-table";
 import { CreateJobModal } from "@/features/jobs/components/create-job-modal";
+import { EditJobModal } from "@/features/jobs/components/edit-job-modal";
+import { EmployerTeamTab } from "./employer-team-tab";
+import { EmployerCompanyBrandingTab } from "./employer-company-branding-tab";
 import { Button } from "@/components/ui/button";
 import { JobItem } from "@/features/jobs/types/job";
 import {
@@ -19,13 +26,21 @@ import {
   FileSpreadsheet,
   ExternalLink,
   Trash2,
-  MapPin,
-  DollarSign,
   Loader2,
   CheckCircle2,
+  Edit2,
+  Copy,
+  ToggleLeft,
+  ToggleRight,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 
-export function EmployerHeader() {
+interface EmployerHeaderProps {
+  onNavigateToTeam: () => void;
+}
+
+export function EmployerHeader({ onNavigateToTeam }: EmployerHeaderProps) {
   const { user } = useAuth();
 
   return (
@@ -48,7 +63,7 @@ export function EmployerHeader() {
           variant="outline"
           size="sm"
           className="h-8 border-border text-foreground hover:bg-secondary rounded-md text-xs gap-1.5"
-          onClick={() => alert("Recruiter team invites will be enabled in the upcoming company team milestone.")}
+          onClick={onNavigateToTeam}
         >
           <UserPlus className="size-3.5" />
           <span>Invite Recruiter</span>
@@ -58,7 +73,7 @@ export function EmployerHeader() {
           triggerButton={
             <Button
               size="sm"
-              className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium gap-1.5 shadow-sm shadow-primary/20"
+              className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium gap-1.5 shadow-xs shadow-primary/20"
             >
               <Plus className="size-3.5" />
               <span>Create Job Requisition</span>
@@ -106,7 +121,7 @@ interface EmployerMetricsGridProps {
 }
 
 export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGridProps) {
-  const publishedCount = jobs.filter((j) => j.status === "PUBLISHED").length;
+  const publishedCount = jobs.filter((j) => j.status === "PUBLISHED" && !j.expired).length;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -116,7 +131,7 @@ export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGr
           <Briefcase className="size-4 text-primary" />
         </div>
         <div className="text-2xl font-bold text-foreground tracking-tight">{publishedCount}</div>
-        <p className="text-[11px] text-muted-foreground">Published to live candidate board</p>
+        <p className="text-[11px] text-muted-foreground">Live & accepting applications</p>
       </div>
 
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
@@ -130,11 +145,11 @@ export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGr
 
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
         <div className="flex items-center justify-between text-muted-foreground text-xs">
-          <span>Team Members</span>
-          <Users className="size-4 text-primary" />
+          <span>Total Positions</span>
+          <Briefcase className="size-4 text-emerald-400" />
         </div>
-        <div className="text-2xl font-bold text-foreground tracking-tight">1</div>
-        <p className="text-[11px] text-muted-foreground">1 Employer Admin active</p>
+        <div className="text-2xl font-bold text-foreground tracking-tight">{jobs.length}</div>
+        <p className="text-[11px] text-muted-foreground">Requisitions created under company</p>
       </div>
     </div>
   );
@@ -152,7 +167,16 @@ export function EmployerRequisitionsTable({
   totalElements,
 }: EmployerRequisitionsTableProps) {
   const deleteMutation = useDeleteJobMutation();
+  const statusMutation = useUpdateJobStatusMutation();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Edit Requisition Modal State
+  const [editingJob, setEditingJob] = useState<JobItem | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  // Duplicate Requisition Modal State
+  const [duplicatingJob, setDuplicatingJob] = useState<JobItem | null>(null);
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
 
   const handleDelete = (id: string, title: string) => {
     if (confirm(`Are you sure you want to delete requisition "${title}"?`)) {
@@ -161,6 +185,45 @@ export function EmployerRequisitionsTable({
         onSettled: () => setDeletingId(null),
       });
     }
+  };
+
+  const handleToggleStatus = (job: JobItem) => {
+    const nextStatus = job.status === "PUBLISHED" ? "CLOSED" : "PUBLISHED";
+    statusMutation.mutate({ id: job.id, status: nextStatus });
+  };
+
+  const handleEdit = (job: JobItem) => {
+    setEditingJob(job);
+    setEditModalOpen(true);
+  };
+
+  const handleDuplicate = (job: JobItem) => {
+    setDuplicatingJob(job);
+    setDuplicateModalOpen(true);
+  };
+
+  const getExpirationBadge = (job: JobItem) => {
+    if (job.expired) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+          <AlertTriangle className="size-3" />
+          <span>Expired</span>
+        </span>
+      );
+    }
+    if (job.expiresAt) {
+      const msLeft = new Date(job.expiresAt).getTime() - Date.now();
+      const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+      if (daysLeft <= 7 && daysLeft > 0) {
+        return (
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-950/40 text-amber-400 border border-amber-800/40">
+            <Clock className="size-3" />
+            <span>Expires in {daysLeft}d</span>
+          </span>
+        );
+      }
+    }
+    return null;
   };
 
   return (
@@ -206,7 +269,7 @@ export function EmployerRequisitionsTable({
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
+        <div className="rounded-lg border border-border bg-card overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-secondary/60 border-b border-border text-muted-foreground font-mono uppercase text-[11px]">
@@ -224,7 +287,10 @@ export function EmployerRequisitionsTable({
                 {jobs.map((job) => (
                   <tr key={job.id} className="hover:bg-secondary/30 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-foreground text-sm">{job.title}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground text-sm">{job.title}</span>
+                        {getExpirationBadge(job)}
+                      </div>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {job.tags?.slice(0, 3).map((tag, i) => (
                           <span
@@ -251,21 +317,67 @@ export function EmployerRequisitionsTable({
                         : "Competitive"}
                     </td>
                     <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
-                          job.status === "PUBLISHED"
-                            ? "bg-emerald-950/40 text-emerald-400 border border-emerald-800/40"
-                            : "bg-secondary text-muted-foreground border border-border"
-                        }`}
-                      >
-                        {job.status}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
+                            job.status === "PUBLISHED" && !job.expired
+                              ? "bg-emerald-950/40 text-emerald-400 border border-emerald-800/40"
+                              : job.status === "CLOSED" || job.expired
+                              ? "bg-secondary text-muted-foreground border border-border"
+                              : "bg-amber-950/40 text-amber-400 border border-amber-800/40"
+                          }`}
+                        >
+                          {job.expired ? "EXPIRED" : job.status}
+                        </span>
+
+                        {/* 1-Click Status Toggle Action */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStatus(job)}
+                          disabled={statusMutation.isPending}
+                          title={
+                            job.status === "PUBLISHED"
+                              ? "Click to close requisition"
+                              : "Click to publish requisition"
+                          }
+                          className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          {job.status === "PUBLISHED" ? (
+                            <ToggleRight className="size-4 text-emerald-400" />
+                          ) : (
+                            <ToggleLeft className="size-4 text-muted-foreground" />
+                          )}
+                        </button>
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 font-mono text-muted-foreground">
                       {job.applicantCount || 0}
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1">
+                        {/* Edit Action */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(job)}
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                          title="Edit requisition specifications"
+                        >
+                          <Edit2 className="size-3.5" />
+                        </Button>
+
+                        {/* Duplicate Action */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDuplicate(job)}
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
+                          title="Duplicate / Clone this requisition"
+                        >
+                          <Copy className="size-3.5" />
+                        </Button>
+
+                        {/* Live Link */}
                         <Link
                           href={`/jobs/${job.slug}`}
                           target="_blank"
@@ -274,6 +386,8 @@ export function EmployerRequisitionsTable({
                         >
                           <ExternalLink className="size-3.5" />
                         </Link>
+
+                        {/* Delete Action */}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -297,14 +411,26 @@ export function EmployerRequisitionsTable({
           </div>
         </div>
       )}
+
+      {/* Edit Job Modal */}
+      <EditJobModal
+        job={editingJob}
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+      />
+
+      {/* Duplicate / Clone Job Modal */}
+      <CreateJobModal
+        open={duplicateModalOpen}
+        onOpenChange={setDuplicateModalOpen}
+        initialValues={duplicatingJob}
+      />
     </div>
   );
 }
 
-import { EmployerCompanyBrandingTab } from "./employer-company-branding-tab";
-
 export function EmployerDashboardView() {
-  const [activeTab, setActiveTab] = useState<"requisitions" | "applicants" | "branding">("requisitions");
+  const [activeTab, setActiveTab] = useState<"requisitions" | "applicants" | "branding" | "team">("requisitions");
   const { data: jobsData, isLoading: jobsLoading } = useCompanyJobsQuery();
   const { data: appsData } = useCompanyApplicationsQuery();
 
@@ -314,15 +440,15 @@ export function EmployerDashboardView() {
 
   return (
     <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-8">
-      <EmployerHeader />
+      <EmployerHeader onNavigateToTeam={() => setActiveTab("team")} />
       <EmployerKycBanner />
       <EmployerMetricsGrid jobs={jobs} totalApplicants={totalApplicants} />
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-border">
+      <div className="flex items-center gap-2 border-b border-border overflow-x-auto">
         <button
           onClick={() => setActiveTab("requisitions")}
-          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
             activeTab === "requisitions"
               ? "border-primary text-foreground font-semibold"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -337,7 +463,7 @@ export function EmployerDashboardView() {
 
         <button
           onClick={() => setActiveTab("applicants")}
-          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
             activeTab === "applicants"
               ? "border-primary text-foreground font-semibold"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -352,7 +478,7 @@ export function EmployerDashboardView() {
 
         <button
           onClick={() => setActiveTab("branding")}
-          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
             activeTab === "branding"
               ? "border-primary text-foreground font-semibold"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -360,6 +486,18 @@ export function EmployerDashboardView() {
         >
           <Building2 className="size-3.5" />
           <span>Company Branding</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("team")}
+          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+            activeTab === "team"
+              ? "border-primary text-foreground font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Users className="size-3.5" />
+          <span>Team & Recruiters</span>
         </button>
       </div>
 
@@ -371,8 +509,10 @@ export function EmployerDashboardView() {
         />
       ) : activeTab === "applicants" ? (
         <EmployerApplicantsTable />
-      ) : (
+      ) : activeTab === "branding" ? (
         <EmployerCompanyBrandingTab />
+      ) : (
+        <EmployerTeamTab />
       )}
     </div>
   );

@@ -56,6 +56,11 @@ public class Job {
     @Builder.Default
     private JobType jobType = JobType.FULL_TIME;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "experience_level", length = 30)
+    @Builder.Default
+    private ExperienceLevel experienceLevel = ExperienceLevel.MID_LEVEL;
+
     @Column(name = "min_salary")
     private Integer minSalary;
 
@@ -71,6 +76,15 @@ public class Job {
     @Column(name = "tag")
     @Builder.Default
     private List<String> tags = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "job_benefits", joinColumns = @JoinColumn(name = "job_id"))
+    @Column(name = "benefit")
+    @Builder.Default
+    private List<String> benefits = new ArrayList<>();
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -105,5 +119,13 @@ public class Job {
         DRAFT,
         PUBLISHED,
         CLOSED
+    }
+
+    public enum ExperienceLevel {
+        ENTRY_LEVEL,
+        MID_LEVEL,
+        SENIOR,
+        LEAD,
+        EXECUTIVE
     }
 }

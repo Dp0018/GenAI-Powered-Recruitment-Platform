@@ -75,3 +75,21 @@ export function useUpdateApplicationStatusMutation(onSuccess?: () => void) {
     },
   });
 }
+
+export function useWithdrawApplicationMutation(onSuccess?: () => void) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (applicationId: string) =>
+      applicationsApi.withdrawApplication(applicationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["application-status"] });
+      toast.success("Application withdrawn successfully");
+      if (onSuccess) onSuccess();
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to withdraw application");
+    },
+  });
+}

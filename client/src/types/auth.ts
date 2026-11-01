@@ -13,6 +13,7 @@ export interface CompanyResponse {
   companySize?: string | null;
   location?: string | null;
   description?: string | null;
+  benefits?: string[];
   verificationStatus: VerificationStatus;
 }
 

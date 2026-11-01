@@ -28,11 +28,14 @@ public class JobController {
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String workplaceType,
             @RequestParam(required = false) String jobType,
+            @RequestParam(required = false) String experienceLevel,
+            @RequestParam(required = false) Integer minSalary,
+            @RequestParam(defaultValue = "NEWEST") String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         PagedResponse<JobResponse> jobs = jobService.searchPublishedJobs(
-                query, location, workplaceType, jobType, page, size);
+                query, location, workplaceType, jobType, experienceLevel, minSalary, sortBy, page, size);
         return ResponseEntity.ok(ApiResponse.success(jobs));
     }
 
@@ -77,6 +80,18 @@ public class JobController {
     ) {
         JobResponse job = jobService.updateJob(id, request, principal);
         return ResponseEntity.ok(ApiResponse.success("Job requisition updated successfully", job));
+    }
+
+    // Employer: 1-click status toggle (PUBLISHED <-> CLOSED)
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'RECRUITER')")
+    public ResponseEntity<ApiResponse<JobResponse>> updateJobStatus(
+            @PathVariable String id,
+            @RequestParam String status,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        JobResponse job = jobService.updateJobStatus(id, status, principal);
+        return ResponseEntity.ok(ApiResponse.success("Job requisition status updated successfully", job));
     }
 
     // Employer: Delete job requisition

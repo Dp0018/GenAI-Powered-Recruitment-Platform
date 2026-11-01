@@ -86,6 +86,17 @@ export const applicationsApi = {
     return res.data;
   },
 
+  withdrawApplication: async (applicationId: string): Promise<ApplicationItem> => {
+    const res = await apiClient<ApplicationItem>(
+      `/applications/${applicationId}/withdraw`,
+      {
+        method: "PUT",
+      }
+    );
+    if (!res.data) throw new Error("Application withdrawal failed");
+    return res.data;
+  },
+
   uploadResume: async (file: File): Promise<{
     fileId: string;
     name: string;

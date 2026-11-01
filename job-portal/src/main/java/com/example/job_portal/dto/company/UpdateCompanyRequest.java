@@ -37,4 +37,7 @@ public class UpdateCompanyRequest {
 
     @Size(max = 500, message = "Banner URL cannot exceed 500 characters")
     private String bannerUrl;
+
+    private java.util.List<String> benefits;
 }
+

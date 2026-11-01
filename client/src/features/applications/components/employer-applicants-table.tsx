@@ -23,9 +23,12 @@ import {
   Phone,
   Briefcase,
   CheckCircle2,
+  Calendar,
 } from "lucide-react";
 
 import { ResumePreviewModal } from "./resume-preview-modal";
+import { ScheduleInterviewModal } from "@/features/interviews/components/schedule-interview-modal";
+import { ApplicationMatchBadge } from "./application-match-badge";
 
 interface EmployerApplicantsTableProps {
   jobId?: string;
@@ -39,18 +42,23 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
     note: string;
   } | null>(null);
   const [previewingApp, setPreviewingApp] = useState<ApplicationItem | null>(null);
+  const [schedulingApp, setSchedulingApp] = useState<ApplicationItem | null>(null);
 
   const applications = data?.content || [];
   const totalElements = data?.totalElements || 0;
 
   const handleStatusChange = (
-    applicationId: string,
+    app: ApplicationItem,
     newStatus: ApplicationStatus
   ) => {
     updateStatusMutation.mutate({
-      applicationId,
+      applicationId: app.id,
       payload: { status: newStatus },
     });
+
+    if (newStatus === "INTERVIEWING") {
+      setSchedulingApp(app);
+    }
   };
 
   return (
@@ -93,6 +101,7 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                 <tr>
                   <th className="py-3 px-4 font-semibold">Candidate</th>
                   <th className="py-3 px-4 font-semibold">Requisition Applied</th>
+                  <th className="py-3 px-4 font-semibold">Match Fit</th>
                   <th className="py-3 px-4 font-semibold">Applied Date</th>
                   <th className="py-3 px-4 font-semibold">Resume / Docs</th>
                   <th className="py-3 px-4 font-semibold">Hiring Pipeline Stage</th>
@@ -129,6 +138,11 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                       </div>
                     </td>
 
+                    {/* Match Fit Score */}
+                    <td className="py-3.5 px-4">
+                      <ApplicationMatchBadge applicationId={app.id} />
+                    </td>
+
                     {/* Applied Date */}
                     <td className="py-3.5 px-4 font-mono text-muted-foreground">
                       {new Date(app.createdAt).toLocaleDateString()}
@@ -146,23 +160,34 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                       </button>
                     </td>
 
-                    {/* Status Dropdown */}
+                    {/* Status Dropdown & Schedule Action */}
                     <td className="py-3.5 px-4">
-                      <select
-                        value={app.status}
-                        onChange={(e) =>
-                          handleStatusChange(app.id, e.target.value as ApplicationStatus)
-                        }
-                        className="h-8 px-2.5 rounded bg-background border border-border text-xs font-mono font-medium focus:outline-none focus:border-primary cursor-pointer text-foreground"
-                      >
-                        <option value="APPLIED">Applied</option>
-                        <option value="REVIEWING">Reviewing</option>
-                        <option value="SHORTLISTED">Shortlisted</option>
-                        <option value="INTERVIEWING">Interviewing</option>
-                        <option value="OFFERED">Offered</option>
-                        <option value="REJECTED">Rejected</option>
-                        <option value="WITHDRAWN">Withdrawn</option>
-                      </select>
+                      <div className="flex items-center gap-1.5">
+                        <select
+                          value={app.status}
+                          onChange={(e) =>
+                            handleStatusChange(app, e.target.value as ApplicationStatus)
+                          }
+                          className="h-8 px-2.5 rounded bg-background border border-border text-xs font-mono font-medium focus:outline-none focus:border-primary cursor-pointer text-foreground"
+                        >
+                          <option value="APPLIED">Applied</option>
+                          <option value="REVIEWING">Reviewing</option>
+                          <option value="SHORTLISTED">Shortlisted</option>
+                          <option value="INTERVIEWING">Interviewing</option>
+                          <option value="OFFERED">Offered</option>
+                          <option value="REJECTED">Rejected</option>
+                          <option value="WITHDRAWN">Withdrawn</option>
+                        </select>
+
+                        <button
+                          type="button"
+                          onClick={() => setSchedulingApp(app)}
+                          title="Schedule live video interview"
+                          className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-primary transition-colors cursor-pointer border border-border/60 hover:border-border"
+                        >
+                          <Calendar className="size-3.5" />
+                        </button>
+                      </div>
                     </td>
 
                     {/* Pitch / Cover Note Button */}
@@ -227,6 +252,15 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
         open={Boolean(previewingApp)}
         onOpenChange={(open) => {
           if (!open) setPreviewingApp(null);
+        }}
+      />
+
+      {/* Live Interview Scheduling Modal */}
+      <ScheduleInterviewModal
+        application={schedulingApp}
+        open={Boolean(schedulingApp)}
+        onOpenChange={(open) => {
+          if (!open) setSchedulingApp(null);
         }}
       />
     </div>

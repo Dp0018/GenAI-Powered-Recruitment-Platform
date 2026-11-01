@@ -24,10 +24,14 @@ public class JobResponse {
     private String location;
     private String workplaceType;
     private String jobType;
+    private String experienceLevel;
     private Integer minSalary;
     private Integer maxSalary;
     private String currency;
     private List<String> tags;
+    private List<String> benefits;
+    private Instant expiresAt;
+    private boolean expired;
     private String status;
     private int applicantCount;
     private CompanyResponse company;
@@ -47,8 +51,11 @@ public class JobResponse {
                     .companySize(job.getCompany().getCompanySize())
                     .location(job.getCompany().getLocation())
                     .verificationStatus(job.getCompany().getVerificationStatus())
+                    .benefits(job.getCompany().getBenefits() != null ? job.getCompany().getBenefits() : List.of())
                     .build();
         }
+
+        boolean isExpired = job.getExpiresAt() != null && job.getExpiresAt().isBefore(Instant.now());
 
         return JobResponse.builder()
                 .id(job.getId())
@@ -59,10 +66,14 @@ public class JobResponse {
                 .location(job.getLocation())
                 .workplaceType(job.getWorkplaceType().name())
                 .jobType(job.getJobType().name())
+                .experienceLevel(job.getExperienceLevel() != null ? job.getExperienceLevel().name() : Job.ExperienceLevel.MID_LEVEL.name())
                 .minSalary(job.getMinSalary())
                 .maxSalary(job.getMaxSalary())
                 .currency(job.getCurrency() != null ? job.getCurrency() : "USD")
-                .tags(job.getTags())
+                .tags(job.getTags() != null ? job.getTags() : List.of())
+                .benefits(job.getBenefits() != null ? job.getBenefits() : List.of())
+                .expiresAt(job.getExpiresAt())
+                .expired(isExpired)
                 .status(job.getStatus().name())
                 .applicantCount(job.getApplicantCount())
                 .company(companyResp)

@@ -58,6 +58,12 @@ public class Company {
 
     private Instant verifiedAt;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "company_benefits", joinColumns = @JoinColumn(name = "company_id"))
+    @Column(name = "benefit")
+    @Builder.Default
+    private List<String> benefits = new ArrayList<>();
+
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<User> members = new ArrayList<>();

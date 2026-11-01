@@ -44,6 +44,9 @@ public class Application {
     @Column(length = 30)
     private String phone;
 
+    @Column(name = "feedback_note", columnDefinition = "TEXT")
+    private String feedbackNote;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default

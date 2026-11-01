@@ -21,6 +21,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { COMPANY_BENEFITS } from "@/features/jobs/types/benefits";
 
 interface CompanyDetailViewProps {
   slug: string;
@@ -188,6 +189,35 @@ export function CompanyDetailView({ slug }: CompanyDetailViewProps) {
                 {company.description || "This organization has not added a detailed public overview yet."}
               </p>
             </div>
+
+            {/* Benefits & Culture Badges */}
+            {company.benefits && company.benefits.length > 0 && (
+              <div className="p-6 rounded-2xl bg-card/60 border border-border space-y-4">
+                <h2 className="text-base font-bold text-foreground tracking-tight flex items-center gap-2">
+                  <Sparkles className="size-4 text-primary" />
+                  <span>Company Perks & Employee Benefits</span>
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {company.benefits.map((bKey) => {
+                    const meta = COMPANY_BENEFITS.find((b) => b.key === bKey);
+                    return (
+                      <div
+                        key={bKey}
+                        className="p-3.5 rounded-xl bg-secondary/40 border border-border space-y-1"
+                      >
+                        <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <span className="text-primary font-mono">•</span>
+                          <span>{meta ? meta.label : bKey.replace(/_/g, " ")}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-relaxed">
+                          {meta?.description || "Corporate benefit package provided to verified hires."}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Active Requisitions */}
             <div className="space-y-4">

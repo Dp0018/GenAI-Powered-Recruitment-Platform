@@ -41,6 +41,10 @@ public class ApplicationService {
             throw new BadRequestException("This job requisition is not currently accepting applications");
         }
 
+        if (job.getExpiresAt() != null && job.getExpiresAt().isBefore(java.time.Instant.now())) {
+            throw new BadRequestException("This job requisition has expired and is no longer accepting applications");
+        }
+
         if (applicationRepository.existsByJobIdAndCandidateId(jobId, candidateUser.getId())) {
             throw new BadRequestException("You have already submitted an application for this position");
         }
@@ -126,6 +130,9 @@ public class ApplicationService {
         }
 
         application.setStatus(request.getStatus());
+        if (StringUtils.hasText(request.getNotes())) {
+            application.setFeedbackNote(request.getNotes().trim());
+        }
         Application updated = applicationRepository.save(application);
 
         log.info("Application '{}' status updated to {} by employer member '{}'",
@@ -145,6 +152,28 @@ public class ApplicationService {
                     request.getNotes()
             );
         }
+
+        return ApplicationResponse.fromEntity(updated);
+    }
+
+    @Transactional
+    public ApplicationResponse withdrawApplication(String applicationId, UserPrincipal candidateUser) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application", "id", applicationId));
+
+        if (!application.getCandidate().getId().equals(candidateUser.getId())) {
+            throw new ForbiddenException("You are not authorized to withdraw another candidate's application");
+        }
+
+        if (application.getStatus() == Application.ApplicationStatus.WITHDRAWN) {
+            throw new BadRequestException("Application has already been withdrawn");
+        }
+
+        application.setStatus(Application.ApplicationStatus.WITHDRAWN);
+        Application updated = applicationRepository.save(application);
+
+        log.info("Candidate '{}' ({}) withdrew application '{}' for job '{}'",
+                candidateUser.getEmail(), candidateUser.getId(), applicationId, application.getJob().getTitle());
 
         return ApplicationResponse.fromEntity(updated);
     }

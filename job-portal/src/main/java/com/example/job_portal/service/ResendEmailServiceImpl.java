@@ -360,4 +360,136 @@ public class ResendEmailServiceImpl implements EmailService {
             }
         });
     }
+
+    @Override
+    public void sendRecruiterInviteEmail(String recipientEmail, String recipientName, String companyName, String inviterName) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (!StringUtils.hasText(resendApiKey)) {
+                    log.info("[Email Skipped] Resend API key not configured for recruiter invite to {}", recipientEmail);
+                    return;
+                }
+
+                String dashboardUrl = frontendUrl + "/dashboard/employer";
+                String htmlContent = """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0B0F19; color: #FFFFFF; margin: 0; padding: 40px 20px; }
+                            .container { max-width: 560px; margin: 0 auto; background: #111827; border: 1px solid #1F2937; border-radius: 16px; padding: 36px; }
+                            .brand { font-size: 18px; font-weight: 700; color: #6366F1; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .title { font-size: 22px; font-weight: 700; color: #F9FAFB; margin-bottom: 12px; }
+                            .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; background: #4F46E5; color: #FFFFFF; margin-bottom: 16px; }
+                            .text { font-size: 14px; color: #9CA3AF; line-height: 1.6; margin-bottom: 24px; }
+                            .btn { display: inline-block; background-color: #4F46E5; color: #FFFFFF !important; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
+                            .footer { font-size: 12px; color: #6B7280; border-top: 1px solid #1F2937; padding-top: 20px; margin-top: 32px; }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <div class="brand">JobPortal Talent Suite</div>
+                            <div class="badge">TEAM INVITATION</div>
+                            <div class="title">Join %s on JobPortal</div>
+                            <div class="text">
+                              Hello %s,<br><br>
+                              <strong>%s</strong> has invited you to join the hiring team for <strong>%s</strong> on JobPortal.<br><br>
+                              As a team member, you can review candidate submissions, manage job requisitions, and advance candidates through the hiring pipeline.
+                            </div>
+                            <div>
+                              <a href="%s" class="btn">Accept Invitation & View Portal</a>
+                            </div>
+                            <div class="footer">
+                              &copy; 2026 JobPortal Platform Inc. All rights reserved.
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """.formatted(companyName, recipientName, inviterName, companyName, dashboardUrl);
+
+                executeEmailSend(recipientEmail, "Invitation to join " + companyName + " on JobPortal", htmlContent, false);
+            } catch (Exception e) {
+                log.error("Failed to send recruiter invitation email to {}: {}", recipientEmail, e.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void sendInterviewScheduledEmail(String candidateEmail, String candidateName, String jobTitle,
+            String companyName, String interviewTitle, java.time.Instant scheduledAt, int durationMinutes,
+            String meetingLink, String notes) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (!StringUtils.hasText(resendApiKey)) {
+                    log.info("[Email Skipped] Resend API key not configured for interview invite to {}", candidateEmail);
+                    return;
+                }
+
+                String dashboardUrl = frontendUrl + "/dashboard/candidate";
+                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                        .ofPattern("EEEE, MMMM d, yyyy 'at' hh:mm a 'UTC'")
+                        .withZone(java.time.ZoneOffset.UTC);
+                String formattedDate = formatter.format(scheduledAt);
+
+                String meetingLinkHtml = StringUtils.hasText(meetingLink)
+                        ? "<div style=\"margin: 16px 0;\"><a href=\"" + meetingLink + "\" style=\"display: inline-block; background-color: #059669; color: #FFFFFF; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600;\">Join Video Meeting</a></div>"
+                        : "<div style=\"font-size: 13px; color: #9CA3AF; margin-top: 6px;\">Meeting link will be shared prior to the session.</div>";
+
+                String notesHtml = StringUtils.hasText(notes)
+                        ? "<div style=\"background: #1F2937; border-left: 3px solid #6366F1; padding: 12px 16px; margin: 18px 0; border-radius: 6px; font-size: 13px; color: #E5E7EB;\"><strong>Preparation Notes:</strong><br>" + notes + "</div>"
+                        : "";
+
+                String htmlContent = """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0B0F19; color: #FFFFFF; margin: 0; padding: 40px 20px; }
+                            .container { max-width: 560px; margin: 0 auto; background: #111827; border: 1px solid #1F2937; border-radius: 16px; padding: 36px; }
+                            .brand { font-size: 18px; font-weight: 700; color: #6366F1; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .title { font-size: 22px; font-weight: 700; color: #F9FAFB; margin-bottom: 12px; }
+                            .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; background: #F59E0B; color: #000000; margin-bottom: 16px; }
+                            .text { font-size: 14px; color: #9CA3AF; line-height: 1.6; margin-bottom: 20px; }
+                            .card { background: #1F2937; border-radius: 10px; padding: 18px 22px; margin-bottom: 24px; border-left: 4px solid #F59E0B; }
+                            .interview-title { font-size: 16px; font-weight: 700; color: #FFFFFF; margin-bottom: 6px; }
+                            .detail-row { font-size: 13px; color: #D1D5DB; margin-top: 4px; }
+                            .btn { display: inline-block; background-color: #4F46E5; color: #FFFFFF !important; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
+                            .footer { font-size: 12px; color: #6B7280; border-top: 1px solid #1F2937; padding-top: 20px; margin-top: 32px; }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <div class="brand">JobPortal</div>
+                            <div class="badge">INTERVIEW INVITATION</div>
+                            <div class="title">Interview Scheduled</div>
+                            <div class="text">
+                              Hello %s,<br><br>
+                              The recruitment team at <strong>%s</strong> has scheduled a live interview session with you for the <strong>%s</strong> position.
+                            </div>
+                            <div class="card">
+                              <div class="interview-title">%s</div>
+                              <div class="detail-row"><strong>Date & Time:</strong> %s</div>
+                              <div class="detail-row"><strong>Duration:</strong> %d minutes</div>
+                              %s
+                            </div>
+                            %s
+                            <div style="margin-top: 24px;">
+                              <a href="%s" class="btn">View in Candidate Dashboard</a>
+                            </div>
+                            <div class="footer">
+                              &copy; 2026 JobPortal Platform Inc. All rights reserved.
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """.formatted(candidateName, companyName, jobTitle, interviewTitle, formattedDate, durationMinutes, meetingLinkHtml, notesHtml, dashboardUrl);
+
+                executeEmailSend(candidateEmail, "Interview Confirmed: " + jobTitle + " with " + companyName, htmlContent, false);
+            } catch (Exception e) {
+                log.error("Failed to send interview invitation email to {}: {}", candidateEmail, e.getMessage());
+            }
+        });
+    }
 }

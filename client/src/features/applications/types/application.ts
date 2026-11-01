@@ -34,6 +34,7 @@ export interface ApplicationItem {
   resumeUrl: string;
   coverLetter?: string | null;
   phone?: string | null;
+  feedbackNote?: string | null;
   status: ApplicationStatus;
   createdAt: string;
   updatedAt?: string | null;

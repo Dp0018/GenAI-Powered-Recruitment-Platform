@@ -9,10 +9,14 @@ export interface JobItem {
   location: string;
   workplaceType: "REMOTE" | "HYBRID" | "ONSITE";
   jobType: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP";
+  experienceLevel?: "ENTRY_LEVEL" | "MID_LEVEL" | "SENIOR" | "LEAD" | "EXECUTIVE" | string | null;
   minSalary?: number | null;
   maxSalary?: number | null;
   currency: string;
   tags: string[];
+  benefits?: string[];
+  expiresAt?: string | null;
+  expired?: boolean;
   status: "DRAFT" | "PUBLISHED" | "CLOSED";
   applicantCount: number;
   company: CompanyResponse;
@@ -27,10 +31,13 @@ export interface CreateJobPayload {
   location: string;
   workplaceType: string;
   jobType: string;
+  experienceLevel?: string;
   minSalary?: number;
   maxSalary?: number;
   currency?: string;
   tags?: string[];
+  benefits?: string[];
+  expirationDays?: number;
   status?: string;
 }
 
@@ -39,6 +46,9 @@ export interface SearchJobsParams {
   location?: string;
   workplaceType?: string;
   jobType?: string;
+  experienceLevel?: string;
+  minSalary?: number;
+  sortBy?: "NEWEST" | "SALARY_DESC" | "SALARY_ASC" | "POPULAR" | string;
   page?: number;
   size?: number;
 }

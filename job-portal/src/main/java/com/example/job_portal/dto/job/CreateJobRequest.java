@@ -40,6 +40,10 @@ public class CreateJobRequest {
     private String currency;
 
     private List<String> tags;
+    private List<String> benefits;
+    private Integer expirationDays;
 
     private String status;
+    private String experienceLevel;
 }
+

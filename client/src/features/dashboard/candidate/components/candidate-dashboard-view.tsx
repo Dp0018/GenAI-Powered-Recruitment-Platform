@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CandidateProfileView } from "@/features/profile/components/candidate-profile-view";
 import { CandidateSavedJobsTab } from "./candidate-saved-jobs-tab";
+import { CandidateInterviewsTab } from "./candidate-interviews-tab";
 import { useSavedJobsQuery } from "@/features/jobs/hooks/use-jobs";
+import { useCandidateInterviewsQuery } from "@/features/interviews/hooks/use-interviews";
 import {
   User,
   Briefcase,
@@ -23,6 +25,7 @@ import {
   Loader2,
   Calendar,
   Bookmark,
+  ArrowRight,
 } from "lucide-react";
 
 export function CandidateHeader() {
@@ -138,11 +141,21 @@ interface CandidateApplicationsListProps {
   totalElements: number;
 }
 
+import { ApplicationDetailDrawer } from "@/features/applications/components/application-detail-drawer";
+
 export function CandidateApplicationsList({
   applications,
   isLoading,
   totalElements,
 }: CandidateApplicationsListProps) {
+  const [selectedApp, setSelectedApp] = React.useState<ApplicationItem | null>(null);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  const handleOpenDrawer = (app: ApplicationItem) => {
+    setSelectedApp(app);
+    setDrawerOpen(true);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -180,7 +193,7 @@ export function CandidateApplicationsList({
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
+        <div className="rounded-lg border border-border bg-card overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-secondary/60 border-b border-border text-muted-foreground font-mono uppercase text-[11px]">
@@ -190,14 +203,16 @@ export function CandidateApplicationsList({
                   <th className="py-3 px-4 font-semibold">Submitted</th>
                   <th className="py-3 px-4 font-semibold">Resume Document</th>
                   <th className="py-3 px-4 font-semibold">Hiring Status</th>
-                  <th className="py-3 px-4 font-semibold text-right">Listing</th>
+                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {applications.map((app) => (
                   <tr key={app.id} className="hover:bg-secondary/30 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-foreground text-sm">{app.job?.title}</div>
+                      <div className="font-semibold text-foreground text-sm hover:text-primary transition-colors cursor-pointer" onClick={() => handleOpenDrawer(app)}>
+                        {app.job?.title}
+                      </div>
                       <div className="text-xs text-primary font-mono mt-0.5">
                         {app.job?.companyName || "Verified Organization"}
                       </div>
@@ -223,24 +238,38 @@ export function CandidateApplicationsList({
                       </a>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium border ${getStatusBadge(
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDrawer(app)}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium border cursor-pointer hover:opacity-85 ${getStatusBadge(
                           app.status
                         )}`}
                       >
                         {app.status}
-                      </span>
+                      </button>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      {app.job?.slug && (
-                        <Link
-                          href={`/jobs/${app.job.slug}`}
-                          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground font-mono p-1 rounded hover:bg-secondary transition-colors"
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenDrawer(app)}
+                          className="h-7 px-2 text-xs font-mono text-primary hover:text-primary/80 hover:bg-primary/10 gap-1 rounded"
                         >
-                          <span>Specs</span>
-                          <ExternalLink className="size-3" />
-                        </Link>
-                      )}
+                          <span>Timeline</span>
+                          <ArrowRight className="size-3" />
+                        </Button>
+
+                        {app.job?.slug && (
+                          <Link
+                            href={`/jobs/${app.job.slug}`}
+                            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground font-mono p-1 rounded hover:bg-secondary transition-colors"
+                            title="View job listing"
+                          >
+                            <ExternalLink className="size-3" />
+                          </Link>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -249,6 +278,13 @@ export function CandidateApplicationsList({
           </div>
         </div>
       )}
+
+      {/* Interactive Application Detail & Timeline Drawer */}
+      <ApplicationDetailDrawer
+        application={selectedApp}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   );
 }
@@ -286,9 +322,13 @@ export function CandidateProfileSummary() {
 export function CandidateDashboardView() {
   const { data, isLoading } = useMyApplicationsQuery();
   const { data: savedJobsData } = useSavedJobsQuery();
+  const { data: interviewsData } = useCandidateInterviewsQuery();
   const applications = data?.content || [];
   const totalElements = data?.totalElements || 0;
   const totalSaved = savedJobsData?.totalElements || 0;
+  const totalInterviews = (interviewsData || []).filter(
+    (i) => i.status === "SCHEDULED" && new Date(i.scheduledAt).getTime() > Date.now()
+  ).length;
 
   return (
     <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6">
@@ -302,6 +342,18 @@ export function CandidateDashboardView() {
           >
             <FileText className="size-3.5" />
             <span>Applications ({totalElements})</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="interviews"
+            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
+          >
+            <Calendar className="size-3.5" />
+            <span>Interviews</span>
+            {totalInterviews > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-primary text-primary-foreground">
+                {totalInterviews}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger
             value="saved"
@@ -327,6 +379,10 @@ export function CandidateDashboardView() {
             totalElements={totalElements}
           />
           <CandidateProfileSummary />
+        </TabsContent>
+
+        <TabsContent value="interviews" className="outline-none">
+          <CandidateInterviewsTab />
         </TabsContent>
 
         <TabsContent value="saved" className="outline-none">

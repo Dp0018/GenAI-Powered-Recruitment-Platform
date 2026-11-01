@@ -21,9 +21,14 @@ import {
   Share2,
   ShieldCheck,
   Loader2,
-  Send,
   AlertCircle,
+  AlertTriangle,
+  Sparkles,
+  Clock,
+  Send,
 } from "lucide-react";
+import { COMPANY_BENEFITS, getBenefitLabel } from "../types/benefits";
+import { SkillsMatchBreakdownCard } from "./skills-match-breakdown-card";
 
 interface JobDetailViewProps {
   slug: string;
@@ -113,6 +118,16 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
         </button>
       </div>
 
+      {/* Expiration Alert Banner */}
+      {job.expired && (
+        <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-3 text-xs">
+          <AlertTriangle className="size-4 shrink-0" />
+          <span>
+            <strong>Requisition Expired:</strong> This position reached its posting duration deadline and is no longer accepting candidate submissions.
+          </span>
+        </div>
+      )}
+
       {/* Main Header Banner */}
       <div className="p-6 sm:p-8 rounded-xl bg-card border border-border shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
@@ -159,6 +174,28 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary border border-border text-foreground">
                 <span>{job.jobType.replace("_", " ")}</span>
               </span>
+              {job.experienceLevel && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary border border-border text-foreground">
+                  <span>{job.experienceLevel.replace("_", " ")}</span>
+                </span>
+              )}
+              {job.expired ? (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-destructive/10 border border-destructive/20 text-destructive">
+                  <AlertTriangle className="size-3" />
+                  <span>Expired</span>
+                </span>
+              ) : job.expiresAt ? (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary border border-border text-muted-foreground">
+                  <Clock className="size-3" />
+                  <span>
+                    Expires{" "}
+                    {new Date(job.expiresAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </span>
+              ) : null}
               {job.applicantCount !== undefined && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary border border-border text-muted-foreground">
                   <Users className="size-3" />
@@ -196,7 +233,16 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                 showText
                 className="h-10 border-border"
               />
-              {hasApplied ? (
+              {job.expired ? (
+                <Button
+                  disabled
+                  variant="outline"
+                  className="h-10 px-5 border-border text-muted-foreground text-xs font-mono cursor-not-allowed opacity-60 gap-1.5"
+                >
+                  <AlertTriangle className="size-3.5" />
+                  <span>Requisition Expired</span>
+                </Button>
+              ) : hasApplied ? (
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-emerald-950/40 border border-emerald-700/50 text-emerald-300 text-xs font-medium font-mono">
                   <CheckCircle2 className="size-4 text-emerald-400" />
                   <span>Application Submitted</span>
@@ -234,6 +280,9 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Job Description & Qualifications */}
         <div className="lg:col-span-8 space-y-8">
+          {/* Candidate Skills Match Breakdown */}
+          <SkillsMatchBreakdownCard jobId={job.id} />
+
           {/* Overview */}
           <section className="p-6 rounded-xl bg-card/60 border border-border space-y-4">
             <h2 className="text-lg font-bold text-foreground tracking-tight border-b border-border pb-3">
@@ -252,6 +301,35 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
               </h2>
               <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line font-sans">
                 {job.requirements}
+              </div>
+            </section>
+          )}
+
+          {/* Perks & Benefits Badges */}
+          {((job.benefits && job.benefits.length > 0) || (job.company?.benefits && job.company.benefits.length > 0)) && (
+            <section className="p-6 rounded-xl bg-card/60 border border-border space-y-4">
+              <h2 className="text-lg font-bold text-foreground tracking-tight border-b border-border pb-3 flex items-center gap-2">
+                <Sparkles className="size-4 text-primary" />
+                <span>Perks & Corporate Benefits</span>
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {(job.benefits && job.benefits.length > 0 ? job.benefits : job.company?.benefits || []).map((bKey) => {
+                  const meta = COMPANY_BENEFITS.find((b) => b.key === bKey);
+                  return (
+                    <div
+                      key={bKey}
+                      className="p-3.5 rounded-lg bg-secondary/40 border border-border space-y-1"
+                    >
+                      <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                        <span className="text-primary font-mono">•</span>
+                        <span>{meta ? meta.label : bKey.replace(/_/g, " ")}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        {meta?.description || "Corporate benefit package provided to verified hires."}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}

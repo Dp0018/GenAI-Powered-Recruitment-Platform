@@ -49,6 +49,53 @@ export function useCreateJobMutation(onSuccess?: () => void) {
   });
 }
 
+export function useUpdateJobMutation(onSuccess?: () => void) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: CreateJobPayload }) =>
+      jobsApi.updateJob(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["company-jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["job-detail"] });
+      toast.success("Job requisition updated successfully");
+      if (onSuccess) onSuccess();
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to update job requisition");
+    },
+  });
+}
+
+export function useUpdateJobStatusMutation(onSuccess?: () => void) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: "PUBLISHED" | "CLOSED" | "DRAFT";
+    }) => jobsApi.updateJobStatus(id, status),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["company-jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["job-detail"] });
+      toast.success(
+        vars.status === "PUBLISHED"
+          ? "Requisition reopened & published"
+          : "Requisition closed to new applicants"
+      );
+      if (onSuccess) onSuccess();
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to change requisition status");
+    },
+  });
+}
+
 export function useDeleteJobMutation() {
   const queryClient = useQueryClient();
 

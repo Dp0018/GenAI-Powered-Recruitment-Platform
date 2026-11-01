@@ -78,4 +78,13 @@ public class ApplicationController {
         ApplicationResponse response = applicationService.updateApplicationStatus(applicationId, request, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Application status updated", response));
     }
+
+    @PutMapping("/{applicationId}/withdraw")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> withdrawApplication(
+            @PathVariable String applicationId,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        ApplicationResponse response = applicationService.withdrawApplication(applicationId, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Application withdrawn successfully", response));
+    }
 }

@@ -25,6 +25,7 @@ public class CompanyResponse {
     private String location;
     private String description;
     private VerificationStatus verificationStatus;
+    private java.util.List<String> benefits;
     private long activeJobsCount;
     private Instant createdAt;
     private Instant updatedAt;
@@ -43,6 +44,7 @@ public class CompanyResponse {
                 .location(company.getLocation())
                 .description(company.getDescription())
                 .verificationStatus(company.getVerificationStatus())
+                .benefits(company.getBenefits() != null ? company.getBenefits() : java.util.List.of())
                 .activeJobsCount(activeJobsCount)
                 .createdAt(company.getCreatedAt())
                 .updatedAt(company.getUpdatedAt())

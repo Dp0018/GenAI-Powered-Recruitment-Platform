@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { COMPANY_BENEFITS } from "@/features/jobs/types/benefits";
+
 export function EmployerCompanyBrandingTab() {
   const { data: company, isLoading } = useMyCompanyQuery();
   const updateMutation = useUpdateMyCompanyMutation();
@@ -41,6 +43,7 @@ export function EmployerCompanyBrandingTab() {
   const [description, setDescription] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -58,8 +61,15 @@ export function EmployerCompanyBrandingTab() {
       setDescription(company.description || "");
       setLogoUrl(company.logoUrl || null);
       setBannerUrl(company.bannerUrl || null);
+      setSelectedBenefits(company.benefits || []);
     }
   }, [company]);
+
+  const toggleBenefit = (key: string) => {
+    setSelectedBenefits((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
 
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -97,6 +107,7 @@ export function EmployerCompanyBrandingTab() {
       description: description.trim() || undefined,
       logoUrl: logoUrl || undefined,
       bannerUrl: bannerUrl || undefined,
+      benefits: selectedBenefits,
     });
   };
 
@@ -322,6 +333,39 @@ export function EmployerCompanyBrandingTab() {
               placeholder="Describe your company's mission, engineering culture, and products..."
               className="bg-secondary/40 border-border text-xs resize-y"
             />
+          </div>
+
+          {/* Corporate Perks & Culture Badges */}
+          <div className="space-y-2.5 sm:col-span-2 pt-2 border-t border-border/60">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="size-4 text-primary" />
+              <Label className="text-xs font-semibold text-foreground">
+                Company Perks & Culture Badges
+              </Label>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Select company-wide benefits to display prominently on your public company profile and job postings.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {COMPANY_BENEFITS.map((b) => {
+                const isSelected = selectedBenefits.includes(b.key);
+                return (
+                  <button
+                    key={b.key}
+                    type="button"
+                    onClick={() => toggleBenefit(b.key)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                        : "bg-secondary/60 hover:bg-secondary text-muted-foreground border-border"
+                    }`}
+                  >
+                    {isSelected ? "✓ " : "+ "}
+                    {b.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

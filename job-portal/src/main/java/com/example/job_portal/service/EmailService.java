@@ -13,4 +13,11 @@ public interface EmailService {
 
     void sendCompanyVerificationEmail(String recipientEmail, String recipientName, String companyName,
             boolean verified, String notes);
+
+    void sendRecruiterInviteEmail(String recipientEmail, String recipientName, String companyName, String inviterName);
+
+    void sendInterviewScheduledEmail(String candidateEmail, String candidateName, String jobTitle,
+            String companyName, String interviewTitle, java.time.Instant scheduledAt, int durationMinutes,
+            String meetingLink, String notes);
 }
+

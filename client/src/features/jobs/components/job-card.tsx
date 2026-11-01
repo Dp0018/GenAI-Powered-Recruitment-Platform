@@ -10,8 +10,12 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
+  AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 import { BookmarkButton } from "./bookmark-button";
+import { getBenefitLabel } from "../types/benefits";
+import { SkillsMatchBadge } from "./skills-match-badge";
 
 interface JobCardProps {
   job: JobItem;
@@ -20,15 +24,39 @@ interface JobCardProps {
 export function JobCard({ job }: JobCardProps) {
   const isVerified = job.company?.verificationStatus === "VERIFIED";
 
+  const getExpirationBadge = () => {
+    if (job.expired) {
+      return (
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono text-destructive bg-destructive/10 border border-destructive/20">
+          <AlertTriangle className="size-3" />
+          <span>Expired</span>
+        </span>
+      );
+    }
+    if (job.expiresAt) {
+      const msLeft = new Date(job.expiresAt).getTime() - Date.now();
+      const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+      if (daysLeft <= 7 && daysLeft > 0) {
+        return (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono text-amber-400 bg-amber-950/40 border border-amber-800/40">
+            <Clock className="size-3" />
+            <span>Expires in {daysLeft}d</span>
+          </span>
+        );
+      }
+    }
+    return null;
+  };
+
   return (
     <Link
       href={`/jobs/${job.slug}`}
-      className="block p-5 sm:p-6 rounded-xl bg-card/70 border border-border hover:border-primary/50 transition-all shadow-sm hover:shadow-md group"
+      className="block p-5 sm:p-6 rounded-xl bg-card/70 border border-border hover:border-primary/50 transition-all shadow-xs hover:shadow-md group"
     >
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-2">
-          {/* Company Badge */}
-          <div className="flex items-center gap-2">
+          {/* Company Badge & Expiration */}
+          <div className="flex items-center flex-wrap gap-2">
             <span className="text-xs font-semibold text-primary font-mono flex items-center gap-1.5">
               <Building2 className="size-3.5 text-primary" />
               <span>{job.company?.name || "Verified Organization"}</span>
@@ -39,6 +67,8 @@ export function JobCard({ job }: JobCardProps) {
                 <span>Verified Entity</span>
               </span>
             )}
+            {getExpirationBadge()}
+            <SkillsMatchBadge jobId={job.id} />
           </div>
 
           {/* Job Title */}
@@ -65,6 +95,29 @@ export function JobCard({ job }: JobCardProps) {
               {job.tags.length > 4 && (
                 <span className="text-[10px] font-mono text-muted-foreground self-center">
                   +{job.tags.length - 4} more
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Benefits Preview */}
+          {job.benefits && job.benefits.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span className="text-[10px] font-mono text-muted-foreground/80 flex items-center gap-1">
+                <Sparkles className="size-2.5 text-primary" />
+                <span>Perks:</span>
+              </span>
+              {job.benefits.slice(0, 3).map((b, idx) => (
+                <span
+                  key={idx}
+                  className="px-1.5 py-0.2 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-medium text-primary"
+                >
+                  {getBenefitLabel(b)}
+                </span>
+              ))}
+              {job.benefits.length > 3 && (
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  +{job.benefits.length - 3} more
                 </span>
               )}
             </div>
@@ -97,9 +150,16 @@ export function JobCard({ job }: JobCardProps) {
               <MapPin className="size-3 text-muted-foreground" />
               <span>{job.location}</span>
             </span>
-            <span className="font-mono text-[11px] uppercase tracking-wider text-primary font-medium">
-              [{job.workplaceType}]
-            </span>
+            <div className="flex items-center gap-1.5 font-mono text-[11px]">
+              {job.experienceLevel && (
+                <span className="text-secondary-foreground bg-secondary px-1.5 py-0.2 rounded border border-border">
+                  {job.experienceLevel.replace("_", " ")}
+                </span>
+              )}
+              <span className="uppercase tracking-wider text-primary font-medium">
+                [{job.workplaceType}]
+              </span>
+            </div>
           </div>
         </div>
       </div>

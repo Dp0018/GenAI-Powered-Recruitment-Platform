@@ -21,6 +21,7 @@ public class ApplicationResponse {
     private String resumeUrl;
     private String coverLetter;
     private String phone;
+    private String feedbackNote;
     private Application.ApplicationStatus status;
     private Instant createdAt;
     private Instant updatedAt;
@@ -83,6 +84,7 @@ public class ApplicationResponse {
                 .resumeUrl(app.getResumeUrl())
                 .coverLetter(app.getCoverLetter())
                 .phone(app.getPhone())
+                .feedbackNote(app.getFeedbackNote())
                 .status(app.getStatus())
                 .createdAt(app.getCreatedAt())
                 .updatedAt(app.getUpdatedAt())

@@ -14,6 +14,7 @@ export interface Company {
   companySize?: string | null;
   location?: string | null;
   description?: string | null;
+  benefits?: string[];
   verificationStatus: VerificationStatus;
   activeJobsCount: number;
   createdAt?: string;
@@ -29,6 +30,7 @@ export interface UpdateCompanyPayload {
   description?: string;
   logoUrl?: string;
   bannerUrl?: string;
+  benefits?: string[];
 }
 
 export interface PublicCompanyDetail {

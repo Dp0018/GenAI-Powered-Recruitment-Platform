@@ -122,6 +122,9 @@ public class CompanyServiceImpl implements CompanyService {
         if (request.getBannerUrl() != null) {
             company.setBannerUrl(request.getBannerUrl().trim());
         }
+        if (request.getBenefits() != null) {
+            company.setBenefits(request.getBenefits());
+        }
 
         Company savedCompany = companyRepository.save(company);
         long activeJobsCount = jobRepository.countByCompanyIdAndStatus(savedCompany.getId(), Job.JobStatus.PUBLISHED);
