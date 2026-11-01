@@ -10,7 +10,9 @@ This document outlines the architectural specifications, implemented systems, an
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | **Interview Scheduling & Calendar Sync System** | ✅ **Completed** | Full RFC 5545 `.ics` generator, Resend meeting invites, recruiter scheduling modal, candidate countdown, and 1-click Google Calendar / Outlook sync |
 | **Phase 2** | **Candidate Skills Match Scoring Engine** | ✅ **Completed** | Heuristic taxonomy matching, `90% Match` card badges, detailed breakdown matrix, and employer screening fit column |
-| **Phase 3** | **Candidate Job Alerts & Automated Email Digest** | ⏳ **In Progress** | Background `@Scheduled` matching engine & automated weekly/daily digests via Resend |
+| **Phase 3** | **Candidate Job Alerts & Automated Email Digest** | ✅ **Completed** | Background `@Scheduled` matching engine & automated weekly/daily digests via Resend |
+| **Phase 4** | **In-App Notification Bell & Real-Time Alert Feed** | ✅ **Completed** | Navbar notification bell, unread badge counter, and automated alerts on status updates, interview invites, and applications |
+| **Phase 5** | **1-Click Quick Apply & Requisition Funnel Analytics** | ✅ **Completed** | 1-Click application using profile resume, job view tracking, conversion rate calculation (`apps / views`), full candidate profile inspector, and rejection templates |
 
 ---
 
@@ -33,9 +35,9 @@ An exhaustive audit of standard enterprise job board features (e.g., LinkedIn Jo
 | **Duplicate Application Prevention** | ✅ **Full** | Enforced at database level (`uk_job_candidate_application`) and validated in `ApplicationService`. | — |
 | **Application Withdrawal** | ✅ **Full** | Candidates can withdraw an active application with 1-click (`PUT /api/v1/applications/{id}/withdraw`). | — |
 | **Job Expiration Guard** | ✅ **Full** | Automatically rejects application attempts if the requisition has expired (`expiresAt` timestamp). | — |
-| **Custom Job Screening Questions** | ❌ **Missing** | Not currently supported. Applications only capture resume and cover letter. | **GAP:** Employers cannot define custom qualifying questions (e.g., *"Do you have 4+ years of Java experience?"*, *"Are you authorized to work in the US?"*, *"Expected salary?"*). |
-| **Multiple Saved Resumes / Version Selector** | ❌ **Missing** | Candidate profile only stores 1 single `resumeUrl`. | **GAP:** Candidates cannot save targeted versions (e.g., "Fullstack Resume", "DevOps Resume") and pick which version to submit. |
-| **1-Click Quick Apply** | ❌ **Missing** | Every application currently requires opening the full modal. | **GAP:** No 1-click apply button for candidates who already have an active profile and uploaded resume. |
+| **Custom Job Screening Questions** | ✅ **Full** | Employers can configure custom text, yes/no, and multiple-choice screening questions in create/edit modal. Candidates answer in `ApplyJobModal`, and answers are reviewed in recruiter `ResumePreviewModal` and `ApplicationDetailDrawer`. | — |
+| **1-Click Quick Apply** | ✅ **Full** | Direct 1-Click apply on `/jobs/[slug]` using candidate's saved profile resume and contact info when no mandatory screening questions exist. | — |
+| **Multiple Saved Resumes / Version Selector** | ✅ **Full** | `CandidateResume` entity, labeled versions (e.g., Backend CV, DevOps Lead), ImageKit CDN storage, auto-default synchronization, and interactive variant picker in `ApplyJobModal`. | — |
 
 ---
 
@@ -49,10 +51,10 @@ An exhaustive audit of standard enterprise job board features (e.g., LinkedIn Jo
 | **Recruiter Feedback Notes to Candidate** | ✅ **Full** | Recruiters can provide stage feedback persisted in `applications.feedback_note` and delivered via Resend email. | — |
 | **Live Interview Coordination** | ✅ **Full** | Recruiter scheduling modal with duration selector, Google Meet/Zoom video link, and `.ics` generation. | — |
 | **Applicant Skills Match Badge** | ✅ **Full** | Displays compatibility score (`92% Fit`) directly on each candidate row in `EmployerApplicantsTable`. | — |
-| **Private Internal Screening Notes & Rating** | ❌ **Missing** | Recruiters only have `feedbackNote`, which is sent to the candidate. | **GAP:** No private recruiter-only notes (e.g., *"Great communication, weak on SQL"*) or 1–5 star scorecard ratings for team review. |
-| **Direct Candidate Profile Inspector Drawer** | ⚠️ **Partial** | Recruiter can see email, phone, and resume in modal, but cannot inspect candidate's full profile without opening profile page. | **GAP:** Side-by-side drawer displaying full candidate bio, skills, years of experience, and links while viewing resume. |
-| **Bulk Applicant Actions & CSV Export** | ❌ **Missing** | Recruiters must advance candidates one-by-one. | **GAP:** No multi-select checkboxes to bulk shortlist, bulk reject, or export applicant rosters to CSV/Excel. |
-| **Rejection Email Reason Templates** | ⚠️ **Partial** | Generic rejection email sent via Resend. | **GAP:** No customizable rejection templates (e.g., "Experience mismatch", "Position closed", "Salary misalignment"). |
+| **Private Internal Screening Notes & Rating** | ✅ **Full** | `ApplicationScreeningNote` entity, 1–5 star rating scorecard selector, confidential internal reviewer timeline, and average star rating badge on applicant rows. | — |
+| **Direct Candidate Profile Inspector Tab** | ✅ **Full** | Built-in "Profile" tab inside `ResumePreviewModal` rendering candidate headline, bio, verified skills cloud, career experience timeline, and academic credentials. | — |
+| **Bulk Applicant Actions & CSV Export** | ✅ **Full** | Multi-select checkbox toolbar in `EmployerApplicantsTable` allowing bulk shortlisting, bulk interviewing, bulk rejection, and 1-click formatted CSV applicant roster export. | — |
+| **Structured Rejection Email Reason Templates** | ✅ **Full** | Quick-select dropdown selector in recruiter modal ("Position Filled", "Skills Specialization", "Experience Requirement", "Location / Timezone") automatically populating polite feedback notes. | — |
 
 ---
 
@@ -64,8 +66,8 @@ An exhaustive audit of standard enterprise job board features (e.g., LinkedIn Jo
 | **Headline & Professional Bio** | ✅ **Full** | Stored in `CandidateProfile.headline` and `CandidateProfile.bio`. | — |
 | **Skill Cloud & Tags** | ✅ **Full** | Dynamic skill tags stored in `candidate_skills` collection table, used by the Skills Match Engine. | — |
 | **Social & Portfolio Links** | ✅ **Full** | GitHub, LinkedIn, and personal website URLs. | — |
-| **Structured Work Experience History** | ❌ **Missing** | Only single `yearsOfExperience`, `currentRole`, and `currentCompany` string fields exist. | **GAP:** No structured list of past positions (`WorkExperience` entity with company, title, start/end dates, achievements). |
-| **Structured Education & Degree Credentials** | ❌ **Missing** | No education fields exist in the database or profile UI. | **GAP:** No `Education` entity (institution, degree, field of study, graduation year, GPA). |
+| **Structured Work Experience History** | ✅ **Full** | `WorkExperience` entity, interactive chronological timeline in `CandidateProfileView`, "Currently working" toggles, and REST CRUD endpoints. | — |
+| **Structured Education & Degree Credentials** | ✅ **Full** | `EducationHistory` entity, academic credentials timeline in `CandidateProfileView`, degree/institution/GPA tracking, and REST CRUD endpoints. | — |
 | **Certifications & Licensures** | ❌ **Missing** | Not supported in profile. | **GAP:** Cannot list AWS, Google Cloud, PMP, or other industry certifications. |
 
 ---
@@ -76,8 +78,8 @@ An exhaustive audit of standard enterprise job board features (e.g., LinkedIn Jo
 | :--- | :---: | :--- | :--- |
 | **Transactional Email Notifications** | ✅ **Full** | Resend API integration for application confirmation, status changes, recruiter invites, and interview bookings. | — |
 | **Calendar File Integration** | ✅ **Full** | RFC 5545 standard `.ics` generator for Google Calendar, Outlook, and Apple Calendar. | — |
-| **In-App Messaging / Recruiter-Candidate Q&A** | ❌ **Missing** | Communication is strictly one-way via automated email notifications. | **GAP:** No direct messaging thread between recruiter and applicant tied to a specific requisition. |
-| **In-App Notification Bell & Center** | ❌ **Missing** | Notifications are only sent to external email inbox. | **GAP:** No dropdown notification bell in the top navbar showing real-time updates when an application changes stage. |
+| **In-App Notification Bell & Real-Time Alert Center** | ✅ **Full** | Navbar notification bell, unread badge counter, and automated alerts on status updates, interview invites, and applications (`/api/v1/notifications`). | — |
+| **In-App Messaging / Recruiter-Candidate Q&A** | ❌ **Missing** | Communication is strictly one-way via automated notifications. | **GAP:** No direct messaging chat thread between recruiter and applicant tied to a specific requisition. |
 
 ---
 
@@ -90,29 +92,73 @@ An exhaustive audit of standard enterprise job board features (e.g., LinkedIn Jo
 | **Public Company Page** | ✅ **Full** | Dynamic route `/companies/[slug]` displaying active requisitions, verification badges, and company story. | — |
 | **Team Management & Recruiter Invitations** | ✅ **Full** | Invite team members by email, assign `RECRUITER` role, list active roster, and revoke access. | — |
 | **KYC Entity Verification Badge** | ✅ **Full** | Platform admin verification workflow with cryptographic verification badge on job cards. | — |
-| **Requisition Analytics & Funnel Metrics** | ⚠️ **Partial** | Basic metrics cards (Active Jobs, Total Applicants, Total Positions). | **GAP:** No view counts, click-through rates, applicant conversion percentage, or time-to-hire graphs. |
+| **Requisition View Tracking & Funnel Analytics** | ✅ **Full** | Unique view tracking on job requisitions (`Job.viewsCount`), total views metrics card, and application conversion rate funnel (`(applicants / views) * 100%`) in Employer Dashboard. | — |
 
 ---
 
-## 3. 🎯 Priority Implementation Plan for Missing Core Features
+## 3. 🔮 Planned Future Roadmap (Unimplemented Features to Implement Later)
 
-To bring the platform to **100% feature parity with top commercial job boards**, the missing features identified above should be implemented in the following sequence:
+The following advanced features represent the next major capabilities planned for future implementation sprints, expanding the platform into an enterprise-grade recruitment and employer brand operating system.
 
-### 🥇 Priority Tier 1: Core ATS Screening & Candidate Experience Gaps
-1. **Recruiter Private Screening Notes & 1–5 Star Scorecard:**
-   - Entity: `ApplicationScreeningNote.java` (`id`, `application`, `author`, `rating` 1-5, `internalNote`, `createdAt`).
-   - Private recruiter evaluation cards inside `ResumePreviewModal` without alerting the candidate.
-2. **Job Custom Screening Questions:**
-   - Requisition question definitions (`JobQuestion.java`) with answer submission (`ApplicationAnswer.java`).
-   - Step in `ApplyJobModal` to answer required pre-screening criteria before submitting.
-3. **Structured Work Experience & Education Timeline on Candidate Profile:**
-   - Entities: `WorkExperience.java` and `EducationHistory.java`.
-   - Rich profile editor tabs and screening drawer for recruiters.
+---
 
-### 🥈 Priority Tier 2: Recruiter Productivity & Engagement
-4. **Candidate Job Alerts & Automated Email Digest (Phase 2):**
-   - Background Spring Boot `@Scheduled` matching engine & Resend email digests.
-5. **Bulk Applicant Actions & CSV Export:**
-   - Multi-select checkbox toolbar in `EmployerApplicantsTable` to bulk update statuses or export CSV.
-6. **In-App Notification Bell Center:**
-   - Real-time notification feed in navbar for application updates, interview invites, and recruiter notes.
+### 3.1 📊 Interactive Kanban ATS Pipeline Board (Ashby / Greenhouse Style)
+* **Overview:** A visual, drag-and-drop recruitment pipeline view for corporate recruiters and hiring teams.
+* **Key Requirements & Architecture:**
+  * Multi-column board displaying applicant cards across all pipeline stages: `APPLIED` $\rightarrow$ `REVIEWING` $\rightarrow$ `SHORTLISTED` $\rightarrow$ `INTERVIEWING` $\rightarrow$ `OFFERED` $\rightarrow$ `REJECTED`.
+  * Drag-and-drop card interaction (powered by `@hello-pangea/dnd` or `@dnd-kit`) with instant optimistic stage movement.
+  * Backend bulk and reorder endpoints updating application stages and audit trails in real time.
+  * Per-column metrics (candidate counts, average stage velocity, conversion rates).
+  * Quick-action triggers on card drop (e.g. dropping into `INTERVIEWING` prompts the interview scheduler modal; dropping into `REJECTED` opens structured rejection template).
+
+---
+
+### 3.2 💬 In-App Direct Recruiter-Candidate Messaging (Application Chat Thread)
+* **Overview:** Seamless, real-time two-way communication between candidates and hiring managers tied directly to specific job applications.
+* **Key Requirements & Architecture:**
+  * `ApplicationMessage` entity linking `application_id`, `sender_id`, `recipient_id`, `content`, `attachment_url`, and `read_at` timestamps.
+  * Real-time WebSocket / SSE connection or polling for instant message delivery without page reloads.
+  * In-app chat drawer in both Candidate and Employer dashboards.
+  * Email notification bridge via Resend API: if recipient is offline for $>15$ minutes, deliver an email alert with a direct deep-link to reply.
+  * Support for secure document and assignment sharing (take-home projects, portfolios).
+
+---
+
+### 3.3 🔎 Candidate Sourcing & Reverse Talent Pool Search Directory
+* **Overview:** Enables verified enterprise employers to proactively discover, filter, and reach out to top talent who have opted into the public talent pool.
+* **Key Requirements & Architecture:**
+  * Candidate privacy controls: `"Open to Opportunities"` profile toggle and privacy shields (ability to hide profile from current employer's company domain).
+  * Recruiter talent discovery portal (`/candidates/search`) with multi-faceted search:
+    * Skills matrix matching and boolean query parsing.
+    * Experience range, preferred work mode (Remote/Hybrid/Onsite), and minimum target compensation.
+    * Location / timezone matching.
+  * Direct Recruiter Reachout: 1-click `"Invite to Apply"` or `"Send InMail"` mechanism linked directly to active open requisitions.
+  * Sourcing funnel analytics: track reachout response rates and sourcing channel ROI.
+
+---
+
+### 3.4 📝 Multi-Interviewer Structured Hiring Scorecard & Rubrics
+* **Overview:** Collaborative, unbiased candidate interview evaluation system for cross-functional hiring panels (engineering, design, product, culture).
+* **Key Requirements & Architecture:**
+  * Configurable evaluation rubrics per job requisition (e.g., *System Architecture*, *Live Coding*, *Team Leadership*, *Values Fit*).
+  * Individual interviewer submission forms with weighted 1–5 scoring and concrete behavioral evidence fields.
+  * Private score isolation: panel interviewers cannot see each other's scorecards until after submitting their own evaluation (eliminating groupthink bias).
+  * Consolidated Hiring Committee Summary: average section scores, radar chart visualization, and final recommendation votes (`Strong Hire`, `Hire`, `No Hire`, `Strong No Hire`).
+
+---
+
+### 3.5 ⭐ Company Reviews & Interview Experience Insights (Glassdoor / Levels.fyi Style)
+* **Overview:** Transparent employer ratings and interview insight repository providing social proof and realistic expectations for applicants.
+* **Key Requirements & Architecture:**
+  * `CompanyReview` entity with verified submission requirements (candidate must have applied or verified employee status).
+  * Multi-dimensional rating criteria:
+    * Culture & Values (1–5)
+    * Compensation & Benefits (1–5)
+    * Work/Life Balance & Remote Flexibility (1–5)
+    * CEO Approval & Positive Business Outlook
+  * Interview Experience Repository:
+    * Overall interview difficulty rating (Easy $\rightarrow$ Hard).
+    * Interview timeline length (e.g., 2 weeks, 4 rounds).
+    * Sample interview questions and candidate outcome (Offer Accepted, Offer Declined, No Offer).
+  * Moderation queue in Platform Admin dashboard to filter defamatory or non-compliant reviews.
+
