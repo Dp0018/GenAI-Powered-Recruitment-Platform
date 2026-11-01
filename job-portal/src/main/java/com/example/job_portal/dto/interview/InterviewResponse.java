@@ -29,6 +29,7 @@ public class InterviewResponse {
     private Integer durationMinutes;
     private String meetingLink;
     private String notes;
+    private java.util.List<Instant> proposedSlots;
     private InterviewStatus status;
     private Instant createdAt;
     private Instant updatedAt;

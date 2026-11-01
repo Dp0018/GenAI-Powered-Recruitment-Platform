@@ -33,6 +33,27 @@ public class InterviewController {
         return ResponseEntity.ok(ApiResponse.success("Interview scheduled successfully", response));
     }
 
+    @PostMapping("/propose-slots")
+    @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<InterviewResponse>> proposeSlots(
+            @Valid @RequestBody com.example.job_portal.dto.interview.ProposeInterviewSlotsRequest request,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        InterviewResponse response = interviewService.proposeSlots(request, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Interview slots proposed successfully to candidate", response));
+    }
+
+    @PostMapping("/{id}/select-slot")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<ApiResponse<InterviewResponse>> selectSlot(
+            @PathVariable String id,
+            @Valid @RequestBody com.example.job_portal.dto.interview.SelectInterviewSlotRequest request,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        InterviewResponse response = interviewService.selectSlot(id, request, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Interview slot confirmed successfully", response));
+    }
+
     @GetMapping("/employer")
     @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
     public ResponseEntity<ApiResponse<List<InterviewResponse>>> getEmployerInterviews(

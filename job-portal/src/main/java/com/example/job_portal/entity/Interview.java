@@ -40,7 +40,7 @@ public class Interview {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(name = "scheduled_at", nullable = false)
+    @Column(name = "scheduled_at")
     private Instant scheduledAt;
 
     @Column(name = "duration_minutes", nullable = false)
@@ -52,6 +52,12 @@ public class Interview {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "interview_proposed_slots", joinColumns = @JoinColumn(name = "interview_id"))
+    @Column(name = "slot_time")
+    @Builder.Default
+    private java.util.List<Instant> proposedSlots = new java.util.ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -68,6 +74,7 @@ public class Interview {
 
     public enum InterviewStatus {
         SCHEDULED,
+        PENDING_CANDIDATE_BOOKING,
         COMPLETED,
         CANCELLED,
         RESCHEDULED

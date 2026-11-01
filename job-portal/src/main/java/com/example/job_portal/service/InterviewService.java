@@ -10,6 +10,10 @@ public interface InterviewService {
 
     InterviewResponse scheduleInterview(CreateInterviewRequest request, UserPrincipal currentUser);
 
+    InterviewResponse proposeSlots(com.example.job_portal.dto.interview.ProposeInterviewSlotsRequest request, UserPrincipal currentUser);
+
+    InterviewResponse selectSlot(String interviewId, com.example.job_portal.dto.interview.SelectInterviewSlotRequest request, UserPrincipal candidateUser);
+
     List<InterviewResponse> getEmployerInterviews(UserPrincipal currentUser);
 
     List<InterviewResponse> getCandidateInterviews(UserPrincipal currentUser);

@@ -52,6 +52,9 @@ class InterviewServiceTest {
     @Mock
     private IcsCalendarService icsCalendarService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private InterviewServiceImpl interviewService;
 
@@ -193,6 +196,98 @@ class InterviewServiceTest {
 
         assertThat(response.getStatus()).isEqualTo(InterviewStatus.CANCELLED);
         verify(interviewRepository, times(1)).save(interview);
+    }
+
+    @Test
+    @DisplayName("Should propose multiple open slots for candidate self-booking")
+    void proposeSlots_Success() {
+        Instant slot1 = Instant.now().plus(2, ChronoUnit.DAYS);
+        Instant slot2 = Instant.now().plus(3, ChronoUnit.DAYS);
+        com.example.job_portal.dto.interview.ProposeInterviewSlotsRequest request =
+                com.example.job_portal.dto.interview.ProposeInterviewSlotsRequest.builder()
+                        .applicationId("app-1")
+                        .title("Self-Book Technical Screening")
+                        .proposedSlots(List.of(slot1, slot2))
+                        .durationMinutes(45)
+                        .meetingLink("https://meet.google.com/test")
+                        .notes("Pick a slot that suits your schedule.")
+                        .build();
+
+        when(applicationRepository.findById("app-1")).thenReturn(Optional.of(application));
+        when(userRepository.findById("employer-1")).thenReturn(Optional.of(employerUser));
+        when(interviewRepository.save(any(Interview.class))).thenAnswer(invocation -> {
+            Interview i = invocation.getArgument(0);
+            i.setId("interview-self-1");
+            i.setCreatedAt(Instant.now());
+            return i;
+        });
+
+        InterviewResponse response = interviewService.proposeSlots(request, employerPrincipal);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo("interview-self-1");
+        assertThat(response.getStatus()).isEqualTo(InterviewStatus.PENDING_CANDIDATE_BOOKING);
+        assertThat(response.getProposedSlots()).hasSize(2);
+        assertThat(application.getStatus()).isEqualTo(ApplicationStatus.INTERVIEWING);
+        verify(notificationService, times(1)).sendNotification(
+                eq(candidateUser),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    @DisplayName("Should confirm candidate slot selection, transition to SCHEDULED, and dispatch calendar invite")
+    void selectSlot_Success() {
+        Instant slot1 = Instant.now().plus(2, ChronoUnit.DAYS);
+        Instant slot2 = Instant.now().plus(3, ChronoUnit.DAYS);
+        Interview interview = Interview.builder()
+                .id("interview-self-1")
+                .application(application)
+                .candidate(candidateUser)
+                .employer(employerUser)
+                .status(InterviewStatus.PENDING_CANDIDATE_BOOKING)
+                .proposedSlots(List.of(slot1, slot2))
+                .durationMinutes(45)
+                .title("Self-Book Technical Screening")
+                .meetingLink("https://meet.google.com/test")
+                .notes("Pick a slot")
+                .build();
+
+        when(interviewRepository.findById("interview-self-1")).thenReturn(Optional.of(interview));
+        when(interviewRepository.save(any(Interview.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        com.example.job_portal.dto.interview.SelectInterviewSlotRequest request =
+                com.example.job_portal.dto.interview.SelectInterviewSlotRequest.builder()
+                        .selectedSlot(slot2)
+                        .build();
+
+        UserPrincipal candidatePrincipal = UserPrincipal.builder()
+                .id("candidate-1")
+                .email("john@dev.com")
+                .name("John Developer")
+                .role(Role.CANDIDATE)
+                .build();
+
+        InterviewResponse response = interviewService.selectSlot("interview-self-1", request, candidatePrincipal);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(InterviewStatus.SCHEDULED);
+        assertThat(response.getScheduledAt()).isEqualTo(slot2);
+
+        verify(emailService, times(1)).sendInterviewScheduledEmail(
+                eq("john@dev.com"),
+                eq("John Developer"),
+                eq("Senior Backend Engineer"),
+                eq("Acme Corp"),
+                eq("Self-Book Technical Screening"),
+                eq(slot2),
+                eq(45),
+                eq("https://meet.google.com/test"),
+                eq("Pick a slot")
+        );
     }
 
     @Test

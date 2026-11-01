@@ -20,7 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.example.job_portal.dto.interview.ProposeInterviewSlotsRequest;
+import com.example.job_portal.dto.interview.SelectInterviewSlotRequest;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final IcsCalendarService icsCalendarService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -93,7 +97,125 @@ public class InterviewServiceImpl implements InterviewService {
                 saved.getNotes()
         );
 
+        try {
+            notificationService.sendNotification(
+                    candidate,
+                    "Interview Scheduled: " + saved.getTitle(),
+                    "An interview has been scheduled for " + application.getJob().getTitle() + " on " + saved.getScheduledAt(),
+                    com.example.job_portal.entity.Notification.NotificationType.INTERVIEW_INVITE,
+                    "/candidate/interviews"
+            );
+        } catch (Exception ex) {
+            log.warn("Failed to create in-app notification for interview: {}", ex.getMessage());
+        }
+
         return mapToResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public InterviewResponse proposeSlots(ProposeInterviewSlotsRequest request, UserPrincipal currentUser) {
+        String companyId = currentUser.getCompanyId();
+        if (!StringUtils.hasText(companyId)) {
+            throw new ForbiddenException("Authenticated user is not linked to an employer organization");
+        }
+
+        Application application = applicationRepository.findById(request.getApplicationId())
+                .orElseThrow(() -> new ResourceNotFoundException("Application", "id", request.getApplicationId()));
+
+        if (!application.getJob().getCompany().getId().equals(companyId)) {
+            throw new ForbiddenException("Application does not belong to your company's requisitions");
+        }
+
+        User employer = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", currentUser.getId()));
+
+        User candidate = application.getCandidate();
+
+        Interview interview = Interview.builder()
+                .application(application)
+                .candidate(candidate)
+                .employer(employer)
+                .title(request.getTitle())
+                .scheduledAt(null)
+                .durationMinutes(request.getDurationMinutes() != null ? request.getDurationMinutes() : 45)
+                .meetingLink(request.getMeetingLink())
+                .notes(request.getNotes())
+                .proposedSlots(new ArrayList<>(request.getProposedSlots()))
+                .status(InterviewStatus.PENDING_CANDIDATE_BOOKING)
+                .build();
+
+        Interview saved = interviewRepository.save(interview);
+
+        if (application.getStatus() == ApplicationStatus.APPLIED ||
+            application.getStatus() == ApplicationStatus.REVIEWING ||
+            application.getStatus() == ApplicationStatus.SHORTLISTED) {
+            application.setStatus(ApplicationStatus.INTERVIEWING);
+            applicationRepository.save(application);
+        }
+
+        try {
+            notificationService.sendNotification(
+                    candidate,
+                    "Interview Self-Scheduling: " + saved.getTitle(),
+                    "The hiring team at " + application.getJob().getCompany().getName() + " has sent you interview slots. Choose your preferred time.",
+                    com.example.job_portal.entity.Notification.NotificationType.INTERVIEW_INVITE,
+                    "/candidate/interviews"
+            );
+        } catch (Exception ex) {
+            log.warn("Failed to create in-app notification for proposed slots: {}", ex.getMessage());
+        }
+
+        return mapToResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public InterviewResponse selectSlot(String interviewId, SelectInterviewSlotRequest request, UserPrincipal candidateUser) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview", "id", interviewId));
+
+        if (!interview.getCandidate().getId().equals(candidateUser.getId())) {
+            throw new ForbiddenException("You are not authorized to book this interview");
+        }
+
+        if (interview.getStatus() != InterviewStatus.PENDING_CANDIDATE_BOOKING) {
+            throw new BadRequestException("Interview is not pending candidate booking");
+        }
+
+        interview.setScheduledAt(request.getSelectedSlot());
+        interview.setStatus(InterviewStatus.SCHEDULED);
+        Interview updated = interviewRepository.save(interview);
+
+        log.info("Candidate '{}' booked slot {} for interview id='{}'",
+                candidateUser.getEmail(), request.getSelectedSlot(), interviewId);
+
+        // Dispatch invitation email with meeting details & ICS calendar attachment
+        emailService.sendInterviewScheduledEmail(
+                interview.getCandidate().getEmail(),
+                interview.getCandidate().getName(),
+                interview.getApplication().getJob().getTitle(),
+                interview.getApplication().getJob().getCompany().getName(),
+                updated.getTitle(),
+                updated.getScheduledAt(),
+                updated.getDurationMinutes(),
+                updated.getMeetingLink(),
+                updated.getNotes()
+        );
+
+        try {
+            notificationService.sendNotification(
+                    interview.getCandidate(),
+                    "Interview Confirmed: " + updated.getTitle(),
+                    "Your interview for " + interview.getApplication().getJob().getTitle() + " has been booked for " + updated.getScheduledAt(),
+                    com.example.job_portal.entity.Notification.NotificationType.INTERVIEW_INVITE,
+                    "/candidate/interviews"
+            );
+        } catch (Exception ex) {
+            log.warn("Failed to dispatch candidate confirmation: {}", ex.getMessage());
+        }
+
+        return mapToResponse(updated);
     }
 
     @Override
@@ -140,6 +262,20 @@ public class InterviewServiceImpl implements InterviewService {
         Interview updated = interviewRepository.save(interview);
         log.info("Interview id='{}' cancelled by user '{}'", interviewId, currentUser.getEmail());
 
+        try {
+            if (isEmployer && interview.getCandidate() != null) {
+                notificationService.sendNotification(
+                        interview.getCandidate(),
+                        "Interview Cancelled: " + interview.getTitle(),
+                        "Your interview for " + interview.getApplication().getJob().getTitle() + " has been cancelled.",
+                        com.example.job_portal.entity.Notification.NotificationType.INTERVIEW_CANCELLED,
+                        "/candidate/interviews"
+                );
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to dispatch cancel notification: {}", ex.getMessage());
+        }
+
         return mapToResponse(updated);
     }
 
@@ -171,6 +307,7 @@ public class InterviewServiceImpl implements InterviewService {
                 .durationMinutes(interview.getDurationMinutes())
                 .meetingLink(interview.getMeetingLink())
                 .notes(interview.getNotes())
+                .proposedSlots(interview.getProposedSlots() != null ? new ArrayList<>(interview.getProposedSlots()) : List.of())
                 .status(interview.getStatus())
                 .createdAt(interview.getCreatedAt())
                 .updatedAt(interview.getUpdatedAt())
