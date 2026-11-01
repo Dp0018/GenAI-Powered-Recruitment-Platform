@@ -42,6 +42,10 @@ public class JobResponse {
     private String status;
     private int applicantCount;
     private long viewsCount;
+    private Integer fraudRiskScore;
+    private String fraudRiskLevel;
+    private String fraudReasons;
+    private Boolean isQuarantined;
     private CompanyResponse company;
     private List<JobQuestionDto> screeningQuestions;
     private Instant createdAt;
@@ -93,6 +97,10 @@ public class JobResponse {
                 .status(job.getStatus().name())
                 .applicantCount(job.getApplicantCount())
                 .viewsCount(job.getViewsCount())
+                .fraudRiskScore(job.getFraudRiskScore())
+                .fraudRiskLevel(job.getFraudRiskLevel())
+                .fraudReasons(job.getFraudReasons())
+                .isQuarantined(job.getIsQuarantined())
                 .company(companyResp)
                 .createdAt(job.getCreatedAt())
                 .updatedAt(job.getUpdatedAt())

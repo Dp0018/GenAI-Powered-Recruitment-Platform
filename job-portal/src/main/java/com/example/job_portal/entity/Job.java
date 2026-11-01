@@ -123,6 +123,21 @@ public class Job {
     @Builder.Default
     private long viewsCount = 0;
 
+    @Column(name = "fraud_risk_score")
+    @Builder.Default
+    private Integer fraudRiskScore = 0;
+
+    @Column(name = "fraud_risk_level", length = 30)
+    @Builder.Default
+    private String fraudRiskLevel = "LOW";
+
+    @Column(name = "fraud_reasons", columnDefinition = "TEXT")
+    private String fraudReasons;
+
+    @Column(name = "is_quarantined")
+    @Builder.Default
+    private Boolean isQuarantined = false;
+
     @CreationTimestamp
     @Column(updatable = false)
     private Instant createdAt;

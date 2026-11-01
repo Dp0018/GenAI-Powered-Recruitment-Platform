@@ -28,6 +28,10 @@ public class ApplicationResponse {
     private java.util.List<ScreeningAnswerDto> screeningAnswers;
     private Double averageRating;
     private Integer reviewCount;
+    private Integer matchScore;
+    private String xaiExplanation;
+    private Integer resumeAnomalyScore;
+    private String resumeAnomalyFlags;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -93,6 +97,10 @@ public class ApplicationResponse {
                 .referralCode(app.getReferralCode())
                 .referredBy(app.getReferredBy())
                 .status(app.getStatus())
+                .matchScore(app.getMatchScore())
+                .xaiExplanation(app.getXaiExplanation())
+                .resumeAnomalyScore(app.getResumeAnomalyScore())
+                .resumeAnomalyFlags(app.getResumeAnomalyFlags())
                 .createdAt(app.getCreatedAt())
                 .updatedAt(app.getUpdatedAt())
                 .build();

@@ -26,6 +26,10 @@ public interface JobRepository extends JpaRepository<Job, String>, JpaSpecificat
 
     long countByStatus(Job.JobStatus status);
 
+    Page<Job> findAllByIsQuarantinedTrue(Pageable pageable);
+
+    long countByIsQuarantinedTrue();
+
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("UPDATE Job j SET j.viewsCount = j.viewsCount + 1 WHERE j.id = :jobId")
     void incrementViewsCount(@org.springframework.data.repository.query.Param("jobId") String jobId);

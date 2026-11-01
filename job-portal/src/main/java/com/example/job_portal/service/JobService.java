@@ -40,6 +40,8 @@ public class JobService {
     private final JobRepository jobRepository;
     private final CompanyRepository companyRepository;
     private final com.example.job_portal.repository.JobQuestionRepository jobQuestionRepository;
+    private final com.example.job_portal.service.ai.GeminiService geminiService;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -59,9 +61,10 @@ public class JobService {
         Specification<Job> spec = (root, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Status MUST be published and not expired
+            // Status MUST be published and not expired, and not quarantined by AI Fraud Guard
             predicates.add(cb.equal(root.get("status"), Job.JobStatus.PUBLISHED));
             predicates.add(cb.or(cb.isNull(root.get("expiresAt")), cb.greaterThan(root.get("expiresAt"), Instant.now())));
+            predicates.add(cb.or(cb.isNull(root.get("isQuarantined")), cb.isFalse(root.get("isQuarantined"))));
 
             // Join with Company for fetching
             Join<Job, Company> companyJoin = root.join("company", JoinType.LEFT);
@@ -228,6 +231,19 @@ public class JobService {
                 .applicantCount(0)
                 .build();
 
+        // Gemini AI Anti-Fraud & Scam Analysis
+        try {
+            com.example.job_portal.dto.ai.JobFraudAnalysisResponse fraudAnalysis = geminiService.analyzeJobFraud(job);
+            job.setFraudRiskScore(fraudAnalysis.getFraudScore());
+            job.setFraudRiskLevel(fraudAnalysis.getRiskLevel());
+            job.setIsQuarantined(fraudAnalysis.getIsQuarantined());
+            if (fraudAnalysis.getReasons() != null) {
+                job.setFraudReasons(objectMapper.writeValueAsString(fraudAnalysis.getReasons()));
+            }
+        } catch (Exception ex) {
+            log.warn("Gemini AI job fraud analysis failed: {}", ex.getMessage());
+        }
+
         Job savedJob = jobRepository.save(job);
         List<com.example.job_portal.dto.job.JobQuestionDto> savedQuestions = syncQuestions(savedJob, request.getScreeningQuestions());
         log.info("Created job requisition '{}' [ID: {}] for company '{}'", savedJob.getTitle(), savedJob.getId(), company.getName());
@@ -290,6 +306,18 @@ public class JobService {
             } else {
                 job.setExpiresAt(null);
             }
+        }
+
+        try {
+            com.example.job_portal.dto.ai.JobFraudAnalysisResponse fraudAnalysis = geminiService.analyzeJobFraud(job);
+            job.setFraudRiskScore(fraudAnalysis.getFraudScore());
+            job.setFraudRiskLevel(fraudAnalysis.getRiskLevel());
+            job.setIsQuarantined(fraudAnalysis.getIsQuarantined());
+            if (fraudAnalysis.getReasons() != null) {
+                job.setFraudReasons(objectMapper.writeValueAsString(fraudAnalysis.getReasons()));
+            }
+        } catch (Exception ex) {
+            log.warn("Gemini AI job fraud re-evaluation failed: {}", ex.getMessage());
         }
 
         Job updated = jobRepository.save(job);
@@ -363,6 +391,32 @@ public class JobService {
 
         jobRepository.delete(job);
         log.info("Deleted job requisition [ID: {}] by user {}", jobId, principal.getEmail());
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<JobResponse> getQuarantinedJobs(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Job> jobPage = jobRepository.findAllByIsQuarantinedTrue(pageable);
+        return PagedResponse.from(jobPage.map(JobResponse::fromEntity));
+    }
+
+    @Transactional
+    public JobResponse approveQuarantinedJob(String jobId) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+        job.setIsQuarantined(false);
+        job.setFraudRiskLevel("APPROVED_BY_ADMIN");
+        return JobResponse.fromEntity(jobRepository.save(job));
+    }
+
+    @Transactional
+    public JobResponse rejectQuarantinedJob(String jobId) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+        job.setStatus(Job.JobStatus.CLOSED);
+        job.setIsQuarantined(true);
+        job.setFraudRiskLevel("REJECTED_BY_ADMIN");
+        return JobResponse.fromEntity(jobRepository.save(job));
     }
 
     private String toSlug(String input) {

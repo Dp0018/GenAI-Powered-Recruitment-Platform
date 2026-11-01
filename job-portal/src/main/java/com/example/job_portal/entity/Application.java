@@ -53,6 +53,18 @@ public class Application {
     @Column(name = "referred_by", length = 150)
     private String referredBy;
 
+    @Column(name = "match_score")
+    private Integer matchScore;
+
+    @Column(name = "xai_explanation", columnDefinition = "TEXT")
+    private String xaiExplanation;
+
+    @Column(name = "resume_anomaly_score")
+    private Integer resumeAnomalyScore;
+
+    @Column(name = "resume_anomaly_flags", columnDefinition = "TEXT")
+    private String resumeAnomalyFlags;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default
