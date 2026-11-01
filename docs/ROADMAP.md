@@ -13,6 +13,10 @@ This document outlines the architectural specifications, implemented systems, an
 | **Phase 3** | **Candidate Job Alerts & Automated Email Digest** | ✅ **Completed** | Background `@Scheduled` matching engine & automated weekly/daily digests via Resend |
 | **Phase 4** | **In-App Notification Bell & Real-Time Alert Feed** | ✅ **Completed** | Navbar notification bell, unread badge counter, and automated alerts on status updates, interview invites, and applications |
 | **Phase 5** | **1-Click Quick Apply & Requisition Funnel Analytics** | ✅ **Completed** | 1-Click application using profile resume, job view tracking, conversion rate calculation (`apps / views`), full candidate profile inspector, and rejection templates |
+| **Phase 6** | **Salary Transparency & Offer Letters / E-Signature** | ✅ **Completed** | Compensation breakdown (equity, bonus, pay transparency tags), PDF & HTML offer generation, secure token e-signature workflow, candidate accept/decline |
+| **Phase 7** | **Candidate Multi-Resume Library** | ✅ **Completed** | Multi-variant CV storage, custom labels, ImageKit CDN hosting, auto-default synchronization, and application-time resume variant selector |
+| **Phase 8** | **Google Gemini AI: Trust Guardian & Explainable AI (XAI)** | ✅ **Completed** | Gemini 3.5 Flash cyber fraud detection, scam quarantine queue, transparent multi-factor match fit engine, DE&I fairness audit, and resume prompt-injection defense |
+
 
 ---
 
