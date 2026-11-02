@@ -15,7 +15,7 @@ This document outlines the architectural specifications, implemented systems, an
 | **Phase 5** | **1-Click Quick Apply & Requisition Funnel Analytics** | ✅ **Completed** | 1-Click application using profile resume, job view tracking, conversion rate calculation (`apps / views`), full candidate profile inspector, and rejection templates |
 | **Phase 6** | **Salary Transparency & Offer Letters / E-Signature** | ✅ **Completed** | Compensation breakdown (equity, bonus, pay transparency tags), PDF & HTML offer generation, secure token e-signature workflow, candidate accept/decline |
 | **Phase 7** | **Candidate Multi-Resume Library** | ✅ **Completed** | Multi-variant CV storage, custom labels, ImageKit CDN hosting, auto-default synchronization, and application-time resume variant selector |
-| **Phase 8** | **Google Gemini AI: Trust Guardian & Explainable AI (XAI)** | ✅ **Completed** | Gemini 3.5 Flash cyber fraud detection, scam quarantine queue, transparent multi-factor match fit engine, DE&I fairness audit, and resume prompt-injection defense |
+| **Phase 8** | **Google Gemini AI: Trust Guardian & Explainable AI (XAI)** | ✅ **Completed** | Gemini 3.8 Flash cyber fraud detection, scam quarantine queue, transparent multi-factor match fit engine, DE&I fairness audit, and resume prompt-injection defense |
 
 
 ---

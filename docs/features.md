@@ -401,7 +401,7 @@ Powered by the **Resend API** with clean, responsive HTML email templates:
 
 ### 🛡️ AI Trust Guardian & Cyber Fraud Detection
 * **Real-Time Job Requisition Auditing:**
-  * Powered by Google Gemini 3.5 Flash via structured JSON generation (`responseMimeType: "application/json"`).
+  * Powered by Google Gemini 3.8 Flash via structured JSON generation (`responseMimeType: "application/json"`).
   * Automatically scans every incoming job posting for scam patterns: upfront equipment/training fees, phishing vectors, check-cashing schemes, off-platform communication redirections (Telegram handles, WhatsApp numbers, personal unverified emails), and unverified cryptocurrency payments.
   * Computes a structured **Fraud Risk Score (0–100%)**, **Risk Level (`LOW`, `MODERATE`, `HIGH`)**, and specific natural-language **Fraud Reasons**.
 * **Automatic Administrative Quarantine Queue:**

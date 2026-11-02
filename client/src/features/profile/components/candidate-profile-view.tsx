@@ -346,7 +346,7 @@ export function CandidateProfileView() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5 text-left">
             <Label htmlFor="name" className="text-xs font-medium text-foreground">
-              Full Legal Name *
+              Full Name *
             </Label>
             <Input
               id="name"
@@ -391,7 +391,7 @@ export function CandidateProfileView() {
       <div className="p-6 rounded-lg border border-border bg-card shadow-sm space-y-4">
         <h3 className="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2 border-b border-border pb-3">
           <Briefcase className="size-4 text-primary" />
-          <span>Professional Background</span>
+          <span>Work Experience</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -436,7 +436,7 @@ export function CandidateProfileView() {
 
           <div className="space-y-1.5 text-left sm:col-span-2">
             <Label htmlFor="years" className="text-xs font-medium text-foreground">
-              Years of Professional Experience
+              Total Experience (Years)
             </Label>
             <Input
               id="years"
@@ -474,7 +474,7 @@ export function CandidateProfileView() {
       <div className="p-6 rounded-lg border border-border bg-card shadow-sm space-y-4">
         <h3 className="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2 border-b border-border pb-3">
           <FileText className="size-4 text-primary" />
-          <span>Skills & Competencies</span>
+          <span>Key Skills</span>
         </h3>
 
         <div className="space-y-3">
@@ -534,7 +534,7 @@ export function CandidateProfileView() {
       <div className="p-6 rounded-lg border border-border bg-card shadow-sm space-y-4">
         <h3 className="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2 border-b border-border pb-3">
           <Globe className="size-4 text-primary" />
-          <span>Online Links & Portfolio</span>
+          <span>Portfolio & Social Links</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -26,25 +26,25 @@ export function HeroSection() {
         {/* Verification Status Badge */}
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-md bg-secondary/80 border border-border text-xs font-mono text-muted-foreground backdrop-blur-md shadow-sm">
           <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-foreground font-semibold">Multi-Tenant Architecture</span>
+          <span className="text-foreground font-semibold">Verified Employers</span>
           <span className="text-border">|</span>
           <span className="text-muted-foreground flex items-center gap-1.5">
             <CheckCircle2 className="size-3.5 text-primary" />
-            Strict Domain Isolation
+            Direct Hiring
           </span>
         </div>
 
         {/* Hero Headline */}
         <div className="space-y-5 max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.12]">
-            Enterprise Recruitment Infrastructure,{" "}
+            Find Your Dream Job,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-sky-400 to-blue-500">
-              Isolated by Design.
+              Apply in Seconds.
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            A high-assurance recruitment platform connecting verified employer organizations directly with candidates. Built with strict role-based access control, cryptographic email OTP verification, and tenant data partitioning.
+            Connect directly with verified companies, discover opportunities tailored to your skills, and apply with 1-click quick apply.
           </p>
         </div>
 

@@ -312,7 +312,7 @@ export function ApplyJobModal({
               Apply for {jobTitle}
             </DialogTitle>
             <p className="text-xs text-muted-foreground">
-              Submit your credentials directly to the hiring team.
+              Submit your application to the recruiter.
             </p>
           </DialogHeader>
 
@@ -326,7 +326,7 @@ export function ApplyJobModal({
                 </span>
               </div>
               <span className="text-[10px] font-mono uppercase bg-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
-                Priority Source
+                Employee Referral
               </span>
             </div>
           )}
@@ -366,7 +366,7 @@ export function ApplyJobModal({
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-medium text-foreground flex items-center gap-1.5">
                   <FileText className="size-3 text-primary" />
-                  <span>Resume / CV Document *</span>
+                  <span>Resume (PDF, DOCX) *</span>
                 </Label>
                 {libraryResumes.length > 0 ? (
                   selectedResumeId === "custom" ? (
@@ -388,7 +388,7 @@ export function ApplyJobModal({
                       className="text-[11px] text-primary hover:underline flex items-center gap-1"
                     >
                       <FolderOpen className="size-3" />
-                      <span>Choose from Resume Library</span>
+                      <span>Choose from Saved Resumes</span>
                     </button>
                   ) : (
                     <button
@@ -401,7 +401,7 @@ export function ApplyJobModal({
                       className="text-[11px] text-primary hover:underline flex items-center gap-1"
                     >
                       <UploadCloud className="size-3" />
-                      <span>Upload different resume</span>
+                      <span>Upload new resume</span>
                     </button>
                   )
                 ) : (

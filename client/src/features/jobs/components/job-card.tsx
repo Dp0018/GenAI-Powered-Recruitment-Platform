@@ -61,12 +61,12 @@ export function JobCard({ job }: JobCardProps) {
           <div className="flex items-center flex-wrap gap-2">
             <span className="text-xs font-semibold text-primary font-mono flex items-center gap-1.5">
               <Building2 className="size-3.5 text-primary" />
-              <span>{job.company?.name || "Verified Organization"}</span>
+              <span>{job.company?.name || "Company"}</span>
             </span>
             {isVerified && (
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/40">
                 <CheckCircle2 className="size-3" />
-                <span>Verified Entity</span>
+                <span>Verified Company</span>
               </span>
             )}
             {getExpirationBadge()}
@@ -157,7 +157,7 @@ export function JobCard({ job }: JobCardProps) {
                   </span>
                 </div>
               ) : (
-                <span className="text-xs font-mono text-muted-foreground">Competitive Compensation</span>
+                <span className="text-xs font-mono text-muted-foreground">Salary Not Disclosed</span>
               )}
               {/* Equity & Bonus Badges for Pay Transparency */}
               {(job.hasEquity || job.hasSignOnBonus) && (

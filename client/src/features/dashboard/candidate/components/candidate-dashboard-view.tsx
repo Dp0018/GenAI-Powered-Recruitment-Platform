@@ -42,13 +42,13 @@ export function CandidateHeader() {
       <div>
         <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary border border-border text-[11px] font-mono text-secondary-foreground mb-1.5">
           <User className="size-3 text-primary" />
-          <span>Candidate Workspace</span>
+          <span>Candidate Dashboard</span>
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Welcome back, {user?.name || "Candidate"}
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Manage your employment applications, profile credentials, and verification status.
+          Track your job applications, interviews, and profile.
         </p>
       </div>
 

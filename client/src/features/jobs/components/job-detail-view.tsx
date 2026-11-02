@@ -143,7 +143,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 space-y-4">
         <Loader2 className="size-8 animate-spin text-primary" />
         <p className="text-sm font-medium text-muted-foreground">
-          Loading requisition specifications...
+          Loading job details...
         </p>
       </div>
     );
@@ -155,9 +155,9 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
         <div className="size-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
           <AlertCircle className="size-6" />
         </div>
-        <h2 className="text-xl font-bold text-foreground">Requisition Not Found</h2>
+        <h2 className="text-xl font-bold text-foreground">Job Not Found</h2>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          The requested job position may have been closed, archived, or the URL slug is invalid.
+          The requested job position may have been closed or the URL is invalid.
         </p>
         <div className="pt-2">
           <Link href="/jobs">
@@ -200,7 +200,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
             className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded border border-border bg-card cursor-pointer"
           >
             <Share2 className="size-3.5" />
-            <span>{copied ? "Link Copied!" : "Share Requisition"}</span>
+            <span>{copied ? "Link Copied!" : "Share Job"}</span>
           </button>
         </div>
       </div>
@@ -225,7 +225,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
         <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-3 text-xs">
           <AlertTriangle className="size-4 shrink-0" />
           <span>
-            <strong>Requisition Expired:</strong> This position reached its posting duration deadline and is no longer accepting candidate submissions.
+            <strong>Job Closed:</strong> This job has expired and is no longer accepting applications.
           </span>
         </div>
       )}
@@ -242,18 +242,18 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   className="text-sm font-semibold text-primary hover:underline font-mono flex items-center gap-1.5"
                 >
                   <Building2 className="size-4 text-primary" />
-                  <span>{job.company?.name || "Corporate Employer"}</span>
+                  <span>{job.company?.name || "Company"}</span>
                 </Link>
               ) : (
                 <span className="text-sm font-semibold text-primary font-mono flex items-center gap-1.5">
                   <Building2 className="size-4 text-primary" />
-                  <span>{job.company?.name || "Corporate Employer"}</span>
+                  <span>{job.company?.name || "Company"}</span>
                 </span>
               )}
               {isVerified && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/40">
                   <CheckCircle2 className="size-3.5" />
-                  <span>Verified Corporate Entity</span>
+                  <span>Verified Company</span>
                 </span>
               )}
             </div>
@@ -336,7 +336,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                 </div>
               ) : (
                 <span className="text-xs font-mono text-muted-foreground">
-                  Competitive Compensation Band
+                  Salary Not Disclosed
                 </span>
               )}
               {(job.hasEquity || job.hasSignOnBonus) && (
@@ -370,7 +370,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   className="h-10 px-5 border-border text-muted-foreground text-xs font-mono cursor-not-allowed opacity-60 gap-1.5"
                 >
                   <AlertTriangle className="size-3.5" />
-                  <span>Requisition Expired</span>
+                  <span>Job Closed</span>
                 </Button>
               ) : hasApplied ? (
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-emerald-950/40 border border-emerald-700/50 text-emerald-300 text-xs font-medium font-mono">
@@ -389,7 +389,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                     ) : (
                       <Zap className="size-3.5 fill-current" />
                     )}
-                    <span>1-Click Quick Apply</span>
+                    <span>Quick Apply</span>
                   </Button>
                   <Button
                     onClick={handleApplyClick}
@@ -406,7 +406,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   className="h-10 px-6 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-md shadow-sm shadow-primary/20 gap-2"
                 >
                   <Send className="size-3.5" />
-                  <span>{isAuthenticated ? "Submit Candidacy" : "Sign In to Apply"}</span>
+                  <span>{isAuthenticated ? "Apply Now" : "Sign In to Apply"}</span>
                 </Button>
               )}
             </div>
@@ -416,7 +416,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
         {/* Tags */}
         {job.tags && job.tags.length > 0 && (
           <div className="pt-2 border-t border-border/60 flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-mono text-muted-foreground">Domain Competencies:</span>
+            <span className="text-[11px] font-mono text-muted-foreground">Required Skills:</span>
             {job.tags.map((tag, idx) => (
               <span
                 key={idx}
@@ -446,10 +446,10 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                      <span>Explainable AI (XAI) Fit Engine</span>
+                      <span>AI Profile Match</span>
                     </h2>
                     <p className="text-xs text-muted-foreground font-mono">
-                      Transparent multi-factor match synthesis powered by Gemini 3.5 Flash
+                      See how your skills and experience match this job
                     </p>
                   </div>
                 </div>
@@ -467,12 +467,12 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   {isAiMatchLoading ? (
                     <>
                       <Loader2 className="size-3.5 animate-spin" />
-                      <span>Synthesizing...</span>
+                      <span>Analyzing...</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="size-3.5" />
-                      <span>{showAiFit ? "Re-Analyze Match" : "Explain My Fit (AI)"}</span>
+                      <span>{showAiFit ? "Refresh Match" : "Check Match Score"}</span>
                     </>
                   )}
                 </Button>
@@ -483,7 +483,7 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   {isAiMatchLoading ? (
                     <div className="p-8 flex flex-col items-center justify-center space-y-2 text-muted-foreground">
                       <Loader2 className="size-5 animate-spin text-primary" />
-                      <span className="text-xs font-mono">Auditing competencies, experience, domain, and DE&I fairness...</span>
+                      <span className="text-xs font-mono">Analyzing your profile match...</span>
                     </div>
                   ) : aiMatchData ? (
                     <ExplainableMatchCard data={aiMatchData} />
@@ -496,11 +496,18 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
           {/* Overview */}
           <section className="p-6 rounded-xl bg-card/60 border border-border space-y-4">
             <h2 className="text-lg font-bold text-foreground tracking-tight border-b border-border pb-3">
-              Role Specification
+              Job Description
             </h2>
-            <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line font-sans">
-              {job.description}
-            </div>
+            {job.description && job.description.includes("<") && job.description.includes(">") ? (
+              <div
+                className="text-sm text-foreground/90 leading-relaxed font-sans prose prose-invert max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-foreground [&_h3]:text-sm [&_h3]:font-bold [&_h3]:mt-3 [&_h3]:mb-1.5 [&_h3]:text-foreground [&_p]:my-2 [&_li]:my-0.5"
+                dangerouslySetInnerHTML={{ __html: job.description }}
+              />
+            ) : (
+              <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line font-sans">
+                {job.description}
+              </div>
+            )}
           </section>
 
           {/* Compensation & Pay Transparency Breakdown */}
@@ -508,11 +515,11 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border gap-2">
               <h2 className="text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
                 <Coins className="size-5 text-primary" />
-                <span>Compensation & Total Rewards Transparency</span>
+                <span>Salary & Benefits</span>
               </h2>
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/40">
                 <Scale className="size-3 text-emerald-400" />
-                <span>Pay Transparency Compliance</span>
+                <span>Disclosed Salary</span>
               </span>
             </div>
 
