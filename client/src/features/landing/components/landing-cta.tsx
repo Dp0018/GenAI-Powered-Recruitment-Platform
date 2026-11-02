@@ -3,39 +3,34 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 
 export function LandingCta() {
   return (
-    <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background">
-      <div className="container mx-auto max-w-5xl">
-        <div className="p-8 sm:p-14 rounded-3xl bg-radial-[at_center] from-primary/20 via-card to-card border border-primary/30 shadow-2xl relative overflow-hidden text-center space-y-8">
-          {/* Decorative ambient elements */}
-          <div className="absolute -top-24 -left-24 size-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 size-72 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+    <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-background">
+      <div className="container mx-auto max-w-4xl">
+        <div className="p-8 sm:p-14 rounded-2xl bg-card border border-border/80 shadow-sm text-center space-y-8">
+          <div className="space-y-3 max-w-2xl mx-auto">
+            <span className="inline-block text-xs font-medium text-primary uppercase tracking-wider">
+              Get Started Today
+            </span>
 
-          <div className="relative space-y-4 max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-xs font-mono text-primary font-semibold">
-              <Sparkles className="size-3.5" />
-              <span>Join 50,000+ Professionals</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
-              Ready to Accelerate Your Career?
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+              Ready to find your next opportunity?
             </h2>
 
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Create your verified profile in 60 seconds. Get discovered by top engineering and product teams without the spam.
+              Create your profile in minutes. Connect directly with hiring teams at verified companies with complete salary transparency.
             </p>
           </div>
 
-          <div className="relative flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link href="/register" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full sm:w-auto h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-sm rounded-xl gap-2 shadow-lg shadow-primary/25"
+                className="w-full sm:w-auto h-11 px-7 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-sm rounded-lg gap-2"
               >
-                <span>Find Your Next Job</span>
+                <span>Find Jobs</span>
                 <ArrowRight className="size-4" />
               </Button>
             </Link>
@@ -44,25 +39,25 @@ export function LandingCta() {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto h-12 px-8 border-border text-foreground hover:bg-secondary font-semibold text-sm rounded-xl gap-2"
+                className="w-full sm:w-auto h-11 px-7 border-border text-foreground hover:bg-secondary font-medium text-sm rounded-lg"
               >
-                <span>Hire Elite Talent</span>
+                <span>Post a Job as Employer</span>
               </Button>
             </Link>
           </div>
 
-          <div className="relative pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-mono">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="size-3.5 text-emerald-500" />
-              100% Free for candidates
+              <Check className="size-4 text-primary" />
+              Free for candidates
             </span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5 text-emerald-500" />
+              <Check className="size-4 text-primary" />
               Verified companies only
             </span>
             <span className="flex items-center gap-1.5">
-              <Zap className="size-3.5 text-emerald-500" />
-              Fast-track responses
+              <Check className="size-4 text-primary" />
+              No recruiter spam
             </span>
           </div>
         </div>

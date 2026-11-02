@@ -1,16 +1,16 @@
 "use client";
 
 import React from "react";
-import { Star, CheckCircle2, Quote, Sparkles } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 
 const TESTIMONIALS = [
   {
     name: "Sarah Jenkins",
     role: "Senior Full Stack Engineer",
     hiredAt: "Hired at Stripe",
-    compensation: "$185,000 / yr + Equity",
+    compensation: "$185k / yr + Equity",
     quote:
-      "I applied with 1-click on a Tuesday, had my first call on Thursday, and accepted my offer two weeks later. The upfront salary transparency meant zero awkward negotiation surprises.",
+      "I applied directly on a Tuesday, had my first call on Thursday, and accepted an offer two weeks later. The upfront salary transparency meant zero awkward negotiation surprises.",
     rating: 5,
     avatarInitials: "SJ",
   },
@@ -18,9 +18,9 @@ const TESTIMONIALS = [
     name: "Alex Rivera",
     role: "Staff Platform Engineer",
     hiredAt: "Hired at Vercel",
-    compensation: "$215,000 / yr + Stock",
+    compensation: "$215k / yr + Stock",
     quote:
-      "Legacy job boards are filled with recruiter agencies and stale ghost listings. On JobPortal, every company was verified and the hiring manager directly reviewed my application.",
+      "Unlike legacy boards with agency spam and ghost listings, every company on JobPortal was verified and the hiring manager directly reviewed my application.",
     rating: 5,
     avatarInitials: "AR",
   },
@@ -28,9 +28,9 @@ const TESTIMONIALS = [
     name: "Priya Sharma",
     role: "Lead Product Designer",
     hiredAt: "Hired at Figma",
-    compensation: "$175,000 / yr + Equity",
+    compensation: "$175k / yr + Equity",
     quote:
-      "The AI profile fit breakdown was so insightful. It showed me exactly which design systems in my portfolio aligned with the job description before I submitted my application.",
+      "The application process was refreshingly simple. I submitted using my saved profile and scheduled my interviews right from the recruiter's calendar.",
     rating: 5,
     avatarInitials: "PS",
   },
@@ -38,19 +38,18 @@ const TESTIMONIALS = [
 
 export function CandidateTestimonials() {
   return (
-    <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-b border-border/70 bg-background">
+    <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/60 bg-background">
       <div className="container mx-auto max-w-6xl space-y-12">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="text-xs font-mono uppercase tracking-wider text-primary font-semibold flex items-center justify-center gap-1.5">
-            <Sparkles className="size-3.5 text-primary" />
-            <span>Success Stories</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            Loved by Thousands of Hired Engineers & Leaders
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <span className="text-xs font-medium text-primary uppercase tracking-wider">
+            Reviews
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Trusted by candidates hired at top companies
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            See how top candidates found their dream roles and accelerated their career growth.
+          <p className="text-sm text-muted-foreground">
+            Real feedback from professionals who found their roles on JobPortal.
           </p>
         </div>
 
@@ -59,31 +58,28 @@ export function CandidateTestimonials() {
           {TESTIMONIALS.map((t) => (
             <div
               key={t.name}
-              className="p-7 rounded-2xl bg-card border border-border/80 shadow-xs hover:border-primary/40 transition-all flex flex-col justify-between space-y-6"
+              className="p-6 rounded-xl bg-card border border-border/80 flex flex-col justify-between space-y-6"
             >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-amber-400">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="size-4 fill-current" />
-                    ))}
-                  </div>
-                  <Quote className="size-5 text-muted-foreground/40" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-1 text-amber-500">
+                  {[...Array(t.rating)].map((_, i) => (
+                    <Star key={i} className="size-3.5 fill-current" />
+                  ))}
                 </div>
 
-                <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed italic">
+                <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
                   "{t.quote}"
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-border/60 flex items-center gap-3">
-                <div className="size-11 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold font-mono text-sm shrink-0">
+              <div className="pt-4 border-t border-border/50 flex items-center gap-3">
+                <div className="size-9 rounded-full bg-secondary text-foreground flex items-center justify-center font-medium text-xs shrink-0">
                   {t.avatarInitials}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-bold text-sm text-foreground truncate">{t.name}</div>
-                  <div className="text-xs text-muted-foreground truncate">{t.role}</div>
-                  <div className="text-[11px] font-mono text-emerald-400 font-medium truncate pt-0.5">
+                  <div className="font-semibold text-xs text-foreground truncate">{t.name}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">{t.role}</div>
+                  <div className="text-[11px] text-primary truncate font-medium">
                     {t.hiredAt} • {t.compensation}
                   </div>
                 </div>
