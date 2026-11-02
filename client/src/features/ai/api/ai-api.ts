@@ -71,4 +71,13 @@ export const aiApi = {
     if (!res.data) throw new Error("Failed to reject quarantined job");
     return res.data;
   },
+
+  generateJobDescription: async (title: string, notes?: string): Promise<{ description: string }> => {
+    const res = await apiClient<{ description: string }>("/ai/jobs/generate-description", {
+      method: "POST",
+      body: JSON.stringify({ title, notes }),
+    });
+    if (!res.data) throw new Error("Failed to generate job description");
+    return res.data;
+  },
 };

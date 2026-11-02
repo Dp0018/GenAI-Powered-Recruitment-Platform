@@ -471,7 +471,7 @@ export function ResumePreviewModal({
                   <div className="flex items-center justify-between pb-2 border-b border-border">
                     <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-foreground">
                       <Sparkles className="size-3.5 text-primary" />
-                      <span>Gemini 3.5 Flash XAI Audit</span>
+                      <span>Gemini 3.8 Flash XAI Audit</span>
                     </div>
                     <Button
                       size="sm"

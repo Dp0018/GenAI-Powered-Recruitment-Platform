@@ -17,6 +17,7 @@ import { COMPANY_BENEFITS } from "../types/benefits";
 import { Loader2, Edit3, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { JobScreeningQuestionsBuilder } from "./job-screening-questions-builder";
+import { JobDescriptionEditor } from "./job-description-editor";
 
 interface EditJobModalProps {
   job: JobItem | null;
@@ -440,17 +441,21 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
             </div>
           </div>
 
-          <div className="space-y-1 text-left">
-            <Label htmlFor="edit-desc" className="text-xs font-medium text-foreground">
-              Job Description *
-            </Label>
-            <Textarea
-              id="edit-desc"
-              required
-              rows={4}
+          <div className="space-y-1.5 text-left">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium text-foreground">
+                Job Description (TipTap Rich Editor) *
+              </Label>
+              <span className="text-[10px] font-mono text-muted-foreground">
+                Supports Bold, Lists, Headings & AI Drafting
+              </span>
+            </div>
+            <JobDescriptionEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="bg-background border-border text-foreground text-xs rounded-md focus-visible:ring-primary"
+              onChange={setDescription}
+              jobTitle={title}
+              placeholder="Outline the core responsibilities, team structure, and impact of this role..."
+              minHeight="180px"
             />
           </div>
 

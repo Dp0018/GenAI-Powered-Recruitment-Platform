@@ -233,7 +233,7 @@ export function ApplicationDetailDrawer({
                     Explainable AI (XAI) Fit Breakdown
                   </h4>
                   <p className="text-[10px] text-muted-foreground font-mono">
-                    Powered by Gemini 3.5 Flash
+                    Powered by Gemini 3.8 Flash
                   </p>
                 </div>
               </div>

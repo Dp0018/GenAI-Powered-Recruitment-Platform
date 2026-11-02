@@ -56,7 +56,7 @@ export function ExplainableMatchCard({ data, candidateName }: ExplainableMatchCa
               </h4>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-primary/10 text-primary border border-primary/20 font-medium">
                 <Sparkles className="size-2.5 text-primary" />
-                Gemini 3.5 Flash
+                Gemini 3.8 Flash
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">

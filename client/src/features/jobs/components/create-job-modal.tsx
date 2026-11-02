@@ -17,6 +17,7 @@ import { Plus, Loader2, Briefcase, MapPin, DollarSign, Tag, Building2, Sparkles 
 import { toast } from "sonner";
 import { JobItem, JobQuestionItem } from "../types/job";
 import { JobScreeningQuestionsBuilder } from "./job-screening-questions-builder";
+import { JobDescriptionEditor } from "./job-description-editor";
 
 interface CreateJobModalProps {
   open?: boolean;
@@ -465,18 +466,21 @@ export function CreateJobModal({
             </div>
           </div>
 
-          <div className="space-y-1 text-left">
-            <Label htmlFor="description" className="text-xs font-medium text-foreground">
-              Job Description *
-            </Label>
-            <Textarea
-              id="description"
-              required
-              rows={4}
-              placeholder="Outline the core responsibilities, team structure, and impact of this role..."
+          <div className="space-y-1.5 text-left">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium text-foreground">
+                Job Description (TipTap Rich Editor) *
+              </Label>
+              <span className="text-[10px] font-mono text-muted-foreground">
+                Supports Bold, Lists, Headings & AI Drafting
+              </span>
+            </div>
+            <JobDescriptionEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="bg-background border-border text-foreground text-xs rounded-md focus-visible:ring-primary"
+              onChange={setDescription}
+              jobTitle={title}
+              placeholder="Outline the core responsibilities, team structure, and impact of this role..."
+              minHeight="180px"
             />
           </div>
 
