@@ -30,7 +30,7 @@ public class GeminiServiceImpl implements GeminiService {
     @Value("${app.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${app.gemini.model:gemini-3.5-flash}")
+    @Value("${app.gemini.model:gemini-3.8-flash}")
     private String geminiModel;
 
     public GeminiServiceImpl(ObjectMapper objectMapper) {
@@ -118,6 +118,85 @@ public class GeminiServiceImpl implements GeminiService {
         }
 
         return fallbackResumeScan(resumeText);
+    }
+
+    @Override
+    public String generateJobDescription(String jobTitle, String notes) {
+        String safeTitle = StringUtils.hasText(jobTitle) ? jobTitle : "Software Engineering Specialist";
+        if (StringUtils.hasText(geminiApiKey)) {
+            try {
+                String prompt = String.format("""
+                        You are an expert HR copywriter and talent acquisition architect.
+                        Write a professional, comprehensive, and engaging job description in clean semantic HTML for:
+                        Role Title: %s
+                        Key notes/context: %s
+
+                        Structure strictly with:
+                        <h2>Role Overview</h2>
+                        <p>Detailed introductory paragraph highlighting mission, impact, and team context.</p>
+                        <h2>Key Responsibilities</h2>
+                        <ul><li>4-6 specific actionable responsibility bullets</li></ul>
+                        <h2>Qualifications & Requirements</h2>
+                        <ul><li>4-6 concrete technical and domain qualification bullets</li></ul>
+                        <h2>Why Join Us</h2>
+                        <p>Compensation, culture, remote/hybrid flexibility, and career growth.</p>
+
+                        Format ONLY as raw HTML (no markdown code blocks, no ```html tags, no <html> or <body> tags, only the <h2>, <p>, <ul>, <li> elements).
+                        """, safeTitle, StringUtils.hasText(notes) ? notes : "Production engineering, distributed systems, modern web stack");
+
+                String rawText = callGeminiRaw(prompt);
+                if (StringUtils.hasText(rawText)) {
+                    return rawText.replaceAll("(?s)^```html\\s*", "").replaceAll("(?s)```$", "").trim();
+                }
+            } catch (Exception ex) {
+                log.warn("Gemini AI job description generation failed, using structured template: {}", ex.getMessage());
+            }
+        }
+
+        return fallbackJobDescriptionHtml(safeTitle, notes);
+    }
+
+    private String callGeminiRaw(String prompt) {
+        Map<String, Object> part = Map.of("text", prompt);
+        Map<String, Object> content = Map.of("parts", List.of(part));
+        Map<String, Object> requestBody = Map.of("contents", List.of(content));
+
+        String endpoint = String.format("/models/%s:generateContent?key=%s", geminiModel, geminiApiKey);
+
+        String rawResponse = restClient.post()
+                .uri(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestBody)
+                .retrieve()
+                .body(String.class);
+
+        return extractTextFromGeminiResponse(rawResponse);
+    }
+
+    private String fallbackJobDescriptionHtml(String title, String notes) {
+        return String.format("""
+                <h2>Role Overview</h2>
+                <p>We are looking for an exceptional <strong>%s</strong> to join our high-performing team. In this role, you will design, build, and deploy reliable software systems while driving technical excellence across our engineering stack.</p>
+
+                <h2>Key Responsibilities</h2>
+                <ul>
+                  <li>Design, build, and maintain production-grade scalable applications and services.</li>
+                  <li>Collaborate with product managers, designers, and fellow engineers to deliver high-impact features.</li>
+                  <li>Uphold engineering standards through peer code reviews, automated testing, and comprehensive technical documentation.</li>
+                  <li>Participate in architectural discussions, technical planning, and continuous performance optimization.</li>
+                </ul>
+
+                <h2>Qualifications & Requirements</h2>
+                <ul>
+                  <li>Demonstrated professional experience in building and deploying robust production systems.</li>
+                  <li>Strong proficiency in modern backend and frontend software engineering practices.</li>
+                  <li>Solid understanding of relational database management, data modeling, and API design.</li>
+                  <li>Excellent analytical thinking, collaborative mindset, and verbal/written communication skills.</li>
+                </ul>
+
+                <h2>Why Join Us</h2>
+                <p>We offer transparent compensation bands, equity grants, comprehensive health insurance, flexible working hours, and generous remote/hybrid flexibility.</p>
+                """, title);
     }
 
     // -------------------------------------------------------------------------------------------------

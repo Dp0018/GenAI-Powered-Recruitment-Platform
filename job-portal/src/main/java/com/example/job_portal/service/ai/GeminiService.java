@@ -22,4 +22,6 @@ public interface GeminiService {
     );
 
     ResumeAnomalyScanResponse scanResumeText(String resumeText);
+
+    String generateJobDescription(String jobTitle, String notes);
 }

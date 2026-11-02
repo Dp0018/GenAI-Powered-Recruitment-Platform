@@ -117,11 +117,11 @@ public class Job {
 
     @Column(name = "applicant_count")
     @Builder.Default
-    private int applicantCount = 0;
+    private Integer applicantCount = 0;
 
     @Column(name = "views_count")
     @Builder.Default
-    private long viewsCount = 0;
+    private Long viewsCount = 0L;
 
     @Column(name = "fraud_risk_score")
     @Builder.Default
@@ -171,4 +171,21 @@ public class Job {
         LEAD,
         EXECUTIVE
     }
+
+    public long getViewsCount() {
+        return viewsCount == null ? 0L : viewsCount;
+    }
+
+    public int getApplicantCount() {
+        return applicantCount == null ? 0 : applicantCount;
+    }
+
+    public int getFraudRiskScore() {
+        return fraudRiskScore == null ? 0 : fraudRiskScore;
+    }
+
+    public boolean isQuarantined() {
+        return Boolean.TRUE.equals(isQuarantined);
+    }
 }
+

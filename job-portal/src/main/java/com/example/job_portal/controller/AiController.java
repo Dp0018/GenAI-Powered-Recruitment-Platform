@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -48,8 +49,7 @@ public class AiController {
     @GetMapping("/ai/jobs/{jobId}/fraud-analysis")
     public ResponseEntity<ApiResponse<JobFraudAnalysisResponse>> getJobFraudAnalysis(
             @PathVariable String jobId,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) {
+            @AuthenticationPrincipal UserPrincipal principal) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
 
@@ -78,11 +78,19 @@ public class AiController {
 
     @PostMapping("/ai/resumes/scan")
     public ResponseEntity<ApiResponse<ResumeAnomalyScanResponse>> scanResume(
-            @RequestBody Map<String, String> payload
-    ) {
+            @RequestBody Map<String, String> payload) {
         String text = payload.getOrDefault("resumeText", "");
         ResumeAnomalyScanResponse response = geminiService.scanResumeText(text);
         return ResponseEntity.ok(ApiResponse.success("Resume scanned for security anomalies", response));
+    }
+
+    @PostMapping("/ai/jobs/generate-description")
+    public ResponseEntity<ApiResponse<Map<String, String>>> generateJobDescription(
+            @RequestBody Map<String, String> payload) {
+        String title = payload.getOrDefault("title", "Software Engineer");
+        String notes = payload.getOrDefault("notes", "");
+        String description = geminiService.generateJobDescription(title, notes);
+        return ResponseEntity.ok(ApiResponse.success("Job description generated", Map.of("description", description)));
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -93,20 +101,21 @@ public class AiController {
     @PreAuthorize("hasRole('CANDIDATE')")
     public ResponseEntity<ApiResponse<ExplainableMatchResponse>> explainJobMatchForCandidate(
             @PathVariable String jobId,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) {
+            @AuthenticationPrincipal UserPrincipal principal) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
 
-        CandidateProfile profile = candidateProfileRepository.findByUserId(principal.getId())
-                .orElse(CandidateProfile.builder()
-                        .skills(Collections.emptyList())
-                        .yearsOfExperience(1)
-                        .headline("Candidate")
-                        .build());
+        Optional<CandidateProfile> profileOpt = candidateProfileRepository.findByUserId(principal.getId());
+        CandidateProfile profile = profileOpt.orElseGet(() -> CandidateProfile.builder()
+                .skills(Collections.emptyList())
+                .yearsOfExperience(1)
+                .headline("Candidate")
+                .build());
 
-        List<WorkExperience> experiences = workExperienceRepository.findByCandidateProfileUserIdOrderByStartDateDesc(principal.getId());
-        List<EducationHistory> education = educationHistoryRepository.findByCandidateProfileUserIdOrderByStartDateDesc(principal.getId());
+        List<WorkExperience> experiences = profileOpt.map(workExperienceRepository::findByProfileOrderByCreatedAtDesc)
+                .orElse(Collections.emptyList());
+        List<EducationHistory> education = profileOpt.map(educationHistoryRepository::findByProfileOrderByCreatedAtDesc)
+                .orElse(Collections.emptyList());
 
         ExplainableMatchResponse response = geminiService.explainCandidateMatch(job, profile, experiences, education);
         return ResponseEntity.ok(ApiResponse.success("Explainable AI fit breakdown generated", response));
@@ -115,8 +124,7 @@ public class AiController {
     @GetMapping("/ai/applications/{applicationId}/explain-match")
     public ResponseEntity<ApiResponse<ExplainableMatchResponse>> explainApplicationMatch(
             @PathVariable String applicationId,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) {
+            @AuthenticationPrincipal UserPrincipal principal) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", applicationId));
 
@@ -133,23 +141,27 @@ public class AiController {
         // Return cached explanation if present
         if (StringUtils.hasText(application.getXaiExplanation())) {
             try {
-                ExplainableMatchResponse cached = objectMapper.readValue(application.getXaiExplanation(), ExplainableMatchResponse.class);
+                ExplainableMatchResponse cached = objectMapper.readValue(application.getXaiExplanation(),
+                        ExplainableMatchResponse.class);
                 return ResponseEntity.ok(ApiResponse.success("Explainable AI fit retrieved", cached));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         Job job = application.getJob();
         String candidateUserId = application.getCandidate().getId();
 
-        CandidateProfile profile = candidateProfileRepository.findByUserId(candidateUserId)
-                .orElse(CandidateProfile.builder()
-                        .skills(Collections.emptyList())
-                        .yearsOfExperience(1)
-                        .headline(application.getCandidate().getName())
-                        .build());
+        Optional<CandidateProfile> profileOpt = candidateProfileRepository.findByUserId(candidateUserId);
+        CandidateProfile profile = profileOpt.orElseGet(() -> CandidateProfile.builder()
+                .skills(Collections.emptyList())
+                .yearsOfExperience(1)
+                .headline(application.getCandidate().getName())
+                .build());
 
-        List<WorkExperience> experiences = workExperienceRepository.findByCandidateProfileUserIdOrderByStartDateDesc(candidateUserId);
-        List<EducationHistory> education = educationHistoryRepository.findByCandidateProfileUserIdOrderByStartDateDesc(candidateUserId);
+        List<WorkExperience> experiences = profileOpt.map(workExperienceRepository::findByProfileOrderByCreatedAtDesc)
+                .orElse(Collections.emptyList());
+        List<EducationHistory> education = profileOpt.map(educationHistoryRepository::findByProfileOrderByCreatedAtDesc)
+                .orElse(Collections.emptyList());
 
         ExplainableMatchResponse response = geminiService.explainCandidateMatch(job, profile, experiences, education);
 
@@ -173,8 +185,7 @@ public class AiController {
     @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<PagedResponse<JobResponse>>> getQuarantinedJobs(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         PagedResponse<JobResponse> jobs = jobService.getQuarantinedJobs(page, size);
         return ResponseEntity.ok(ApiResponse.success("Quarantined jobs retrieved", jobs));
     }
@@ -182,8 +193,7 @@ public class AiController {
     @PutMapping("/admin/fraud/jobs/{jobId}/approve")
     @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<JobResponse>> approveQuarantinedJob(
-            @PathVariable String jobId
-    ) {
+            @PathVariable String jobId) {
         JobResponse response = jobService.approveQuarantinedJob(jobId);
         return ResponseEntity.ok(ApiResponse.success("Requisition cleared from quarantine and published", response));
     }
@@ -191,9 +201,9 @@ public class AiController {
     @PutMapping("/admin/fraud/jobs/{jobId}/reject")
     @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<JobResponse>> rejectQuarantinedJob(
-            @PathVariable String jobId
-    ) {
+            @PathVariable String jobId) {
         JobResponse response = jobService.rejectQuarantinedJob(jobId);
-        return ResponseEntity.ok(ApiResponse.success("Requisition confirmed as fraudulent and permanently closed", response));
+        return ResponseEntity
+                .ok(ApiResponse.success("Requisition confirmed as fraudulent and permanently closed", response));
     }
 }
