@@ -1,0 +1,13 @@
+.git
+client/
+docs/
+target/
+job-portal/target/
+job-portal/application-local.properties
+job-portal/application-secret.properties
+*.env
+.env*
+.idea/
+.vscode/
+node_modules/
+

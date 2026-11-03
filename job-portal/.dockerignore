@@ -1,0 +1,15 @@
+target/
+.mvn/
+mvnw
+mvnw.cmd
+.git
+.gitignore
+.idea/
+*.iml
+.vscode/
+application-local.properties
+application-secret.properties
+.env
+.env.*
+*.secret
+
