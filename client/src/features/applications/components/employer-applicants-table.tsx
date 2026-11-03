@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   useCompanyApplicationsQuery,
   useUpdateApplicationStatusMutation,
@@ -16,13 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import {
   Users,
-  ExternalLink,
   Loader2,
   FileText,
   Mail,
   Phone,
-  Briefcase,
-  CheckCircle2,
   Calendar,
   Star,
   Download,
@@ -37,6 +33,7 @@ import { ResumePreviewModal } from "./resume-preview-modal";
 import { ScheduleInterviewModal } from "@/features/interviews/components/schedule-interview-modal";
 import { ApplicationMatchBadge } from "./application-match-badge";
 import { CreateOfferModal } from "@/features/offers/components/create-offer-modal";
+import { SkillGapRejectionModal } from "./skill-gap-rejection-modal";
 
 interface EmployerApplicantsTableProps {
   jobId?: string;
@@ -52,6 +49,7 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
   const [previewingApp, setPreviewingApp] = useState<ApplicationItem | null>(null);
   const [schedulingApp, setSchedulingApp] = useState<ApplicationItem | null>(null);
   const [offeringApp, setOfferingApp] = useState<ApplicationItem | null>(null);
+  const [rejectingApp, setRejectingApp] = useState<ApplicationItem | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const applications = data?.content || [];
@@ -119,6 +117,11 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
     app: ApplicationItem,
     newStatus: ApplicationStatus
   ) => {
+    if (newStatus === "REJECTED") {
+      setRejectingApp(app);
+      return;
+    }
+
     updateStatusMutation.mutate({
       applicationId: app.id,
       payload: { status: newStatus },
@@ -216,7 +219,7 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
           <div className="space-y-1">
             <h3 className="text-sm font-medium text-foreground">No candidate applications yet</h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Once candidates submit their resumes to your open requisitions, they will appear here in real time.
+              Once candidates submit their resumes to your open jobs, they will appear here in real time.
             </p>
           </div>
         </div>
@@ -235,7 +238,7 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                     />
                   </th>
                   <th className="py-3 px-4 font-semibold">Candidate</th>
-                  <th className="py-3 px-4 font-semibold">Requisition Applied</th>
+                  <th className="py-3 px-4 font-semibold">Job Applied</th>
                   <th className="py-3 px-4 font-semibold">Match Fit</th>
                   <th className="py-3 px-4 font-semibold">Scorecard</th>
                   <th className="py-3 px-4 font-semibold">Applied Date</th>
@@ -288,10 +291,10 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                       )}
                     </td>
 
-                    {/* Requisition */}
+                    {/* Job */}
                     <td className="py-3.5 px-4">
                       <div className="font-medium text-foreground">
-                        {app.job?.title || "Requisition"}
+                        {app.job?.title || "Job"}
                       </div>
                       <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
                         {app.job?.location} [{app.job?.workplaceType}]
@@ -356,7 +359,7 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
                           onChange={(e) =>
                             handleStatusChange(app, e.target.value as ApplicationStatus)
                           }
-                          className="h-8 px-2.5 rounded bg-background border border-border text-xs font-mono font-medium focus:outline-none focus:border-primary cursor-pointer text-foreground"
+                          className="h-8 px-2.5 rounded bg-background border border-border text-xs font-mono font-medium focus:outline-hidden focus:border-primary cursor-pointer text-foreground"
                         >
                           <option value="APPLIED">Applied</option>
                           <option value="REVIEWING">Reviewing</option>
@@ -470,6 +473,15 @@ export function EmployerApplicantsTable({ jobId }: EmployerApplicantsTableProps)
         open={Boolean(offeringApp)}
         onOpenChange={(open) => {
           if (!open) setOfferingApp(null);
+        }}
+      />
+
+      {/* Intelligent Skill Gap Rejection Modal */}
+      <SkillGapRejectionModal
+        application={rejectingApp}
+        open={Boolean(rejectingApp)}
+        onOpenChange={(open) => {
+          if (!open) setRejectingApp(null);
         }}
       />
     </div>

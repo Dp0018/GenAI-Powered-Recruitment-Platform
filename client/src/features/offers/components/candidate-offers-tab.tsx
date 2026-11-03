@@ -7,9 +7,7 @@ import { OfferLetterViewModal } from "./offer-letter-view-modal";
 import { Button } from "@/components/ui/button";
 import {
   FileText,
-  DollarSign,
   Building2,
-  Calendar,
   CheckCircle2,
   Clock,
   XCircle,
@@ -71,7 +69,7 @@ export function CandidateOffersTab() {
             {pendingOffers.map((offer) => (
               <div
                 key={offer.id}
-                className="p-5 rounded-xl bg-gradient-to-r from-emerald-950/30 via-teal-950/20 to-card border border-emerald-600/40 hover:border-emerald-500 transition-all shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-5 rounded-xl bg-linear-to-r from-emerald-950/30 via-teal-950/20 to-card border border-emerald-600/40 hover:border-emerald-500 transition-all shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 text-left">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -96,9 +94,9 @@ export function CandidateOffersTab() {
 
                   <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground flex-wrap">
                     <span className="text-foreground font-bold">
-                      ${offer.baseSalary.toLocaleString()}{" "}
+                      £{offer.baseSalary.toLocaleString()}{" "}
                       <span className="font-normal text-muted-foreground">
-                        {offer.currency} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
+                        {offer.currency && offer.currency !== "USD" ? offer.currency : "GBP"} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
                       </span>
                     </span>
                     {offer.equityDetails && (
@@ -108,7 +106,7 @@ export function CandidateOffersTab() {
                     )}
                     {offer.signOnBonus && (
                       <span className="text-indigo-400 font-medium">
-                        • ${offer.signOnBonus.toLocaleString()} Sign-On
+                        • £{offer.signOnBonus.toLocaleString()} Sign-On
                       </span>
                     )}
                   </div>
@@ -118,7 +116,7 @@ export function CandidateOffersTab() {
                   <Button
                     size="sm"
                     onClick={() => handleOpenOffer(offer)}
-                    className="h-9 px-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs rounded-md shadow-md gap-1.5"
+                    className="h-9 px-5 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs rounded-md shadow-md gap-1.5"
                   >
                     <ShieldCheck className="size-3.5" />
                     <span>Review & E-Sign Offer</span>
@@ -168,7 +166,7 @@ export function CandidateOffersTab() {
                   </h4>
 
                   <div className="text-xs font-mono text-muted-foreground">
-                    ${offer.baseSalary.toLocaleString()} {offer.currency} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
+                    £{offer.baseSalary.toLocaleString()} {offer.currency && offer.currency !== "USD" ? offer.currency : "GBP"} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
                   </div>
                 </div>
 

@@ -167,7 +167,7 @@ export function ApplicationDetailDrawer({
                   <span className="text-[11px] opacity-80">
                     {application.status === "WITHDRAWN"
                       ? "You voluntarily removed this submission from active hiring consideration."
-                      : "The hiring team decided not to advance your application for this requisition."}
+                      : "The hiring team decided not to advance your application for this position."}
                   </span>
                 </div>
               </div>

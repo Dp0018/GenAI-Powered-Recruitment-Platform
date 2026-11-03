@@ -242,7 +242,7 @@ export function ScheduleInterviewModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Technical System Design Screening"
-              className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary"
+              className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-foreground focus:outline-hidden focus:border-primary"
             />
           </div>
 
@@ -258,7 +258,7 @@ export function ScheduleInterviewModal({
                 required
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
-                className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary font-mono"
+                className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-foreground focus:outline-hidden focus:border-primary font-mono"
               />
             </div>
           ) : (
@@ -293,7 +293,7 @@ export function ScheduleInterviewModal({
                       required
                       value={slot}
                       onChange={(e) => handleUpdateSlot(idx, e.target.value)}
-                      className="flex-1 h-8 px-2.5 rounded-md bg-background border border-border text-xs text-foreground font-mono focus:outline-none focus:border-primary"
+                      className="flex-1 h-8 px-2.5 rounded-md bg-background border border-border text-xs text-foreground font-mono focus:outline-hidden focus:border-primary"
                     />
                     {proposedSlots.length > 1 && (
                       <button
@@ -345,7 +345,7 @@ export function ScheduleInterviewModal({
               value={meetingLink}
               onChange={(e) => setMeetingLink(e.target.value)}
               placeholder="https://meet.google.com/xyz-abcd-efg"
-              className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary font-mono"
+              className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-foreground focus:outline-hidden focus:border-primary font-mono"
             />
           </div>
 
@@ -360,7 +360,7 @@ export function ScheduleInterviewModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Please be ready with a coding environment and your GitHub portfolio."
-              className="w-full p-2.5 rounded-md bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary resize-none leading-relaxed"
+              className="w-full p-2.5 rounded-md bg-background border border-border text-xs text-foreground focus:outline-hidden focus:border-primary resize-none leading-relaxed"
             />
           </div>
 

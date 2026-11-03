@@ -122,7 +122,7 @@ export function RecruiterScreeningScorecard({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Add candidate strengths, culture fit, interview feedback..."
             rows={3}
-            className="w-full text-xs rounded-md bg-secondary/40 border border-border p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none"
+            className="w-full text-xs rounded-md bg-secondary/40 border border-border p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:border-primary resize-none"
             required
           />
         </div>

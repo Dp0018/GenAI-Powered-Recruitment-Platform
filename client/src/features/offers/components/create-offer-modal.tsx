@@ -21,11 +21,7 @@ import {
   FileText,
   Send,
   Loader2,
-  DollarSign,
-  Calendar,
-  Sparkles,
-  ShieldCheck,
-  CheckCircle2,
+  PoundSterling,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -51,7 +47,7 @@ export function CreateOfferModal({
 
   const [jobTitle, setJobTitle] = useState(initialJobTitle || "");
   const [baseSalary, setBaseSalary] = useState<string>("160000");
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("GBP");
   const [payPeriod, setPayPeriod] = useState("YEARLY");
   const [equityDetails, setEquityDetails] = useState("");
   const [signOnBonus, setSignOnBonus] = useState("");
@@ -59,7 +55,7 @@ export function CreateOfferModal({
   const [startDate, setStartDate] = useState("");
   const [expirationDays, setExpirationDays] = useState("7");
   const [benefitsSummary, setBenefitsSummary] = useState(
-    "Full medical, dental, and vision insurance; 401(k) matching up to 5%; flexible paid time off; $2,500 annual home office & learning stipend."
+    "Full medical, dental, and vision insurance; pension matching up to 5%; flexible paid time off; £2,500 annual home office & learning stipend."
   );
   const [letterBody, setLetterBody] = useState("");
 
@@ -67,7 +63,7 @@ export function CreateOfferModal({
     if (existingOffer) {
       setJobTitle(existingOffer.jobTitle);
       setBaseSalary(String(existingOffer.baseSalary));
-      setCurrency(existingOffer.currency || "USD");
+      setCurrency(existingOffer.currency && existingOffer.currency !== "USD" ? existingOffer.currency : "GBP");
       setPayPeriod(existingOffer.payPeriod || "YEARLY");
       setEquityDetails(existingOffer.equityDetails || "");
       setSignOnBonus(existingOffer.signOnBonus ? String(existingOffer.signOnBonus) : "");
@@ -221,7 +217,7 @@ ${companyName} Talent Acquisition Team`
             <div className="p-4 rounded-xl bg-secondary/30 border border-border space-y-4 text-left">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <DollarSign className="size-3.5 text-primary" />
+                  <PoundSterling className="size-3.5 text-primary" />
                   <span>Compensation & Band Breakdown</span>
                 </span>
                 <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
@@ -266,11 +262,11 @@ ${companyName} Talent Acquisition Team`
                       id="offer-currency"
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-none focus:border-primary"
+                      className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-hidden focus:border-primary"
                     >
-                      <option value="USD">USD ($)</option>
-                      <option value="EUR">EUR (€)</option>
                       <option value="GBP">GBP (£)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="USD">USD ($)</option>
                       <option value="CAD">CAD ($)</option>
                       <option value="AUD">AUD ($)</option>
                       <option value="INR">INR (₹)</option>
@@ -285,7 +281,7 @@ ${companyName} Talent Acquisition Team`
                       id="offer-period"
                       value={payPeriod}
                       onChange={(e) => setPayPeriod(e.target.value)}
-                      className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-none focus:border-primary"
+                      className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-hidden focus:border-primary"
                     >
                       <option value="YEARLY">Yearly</option>
                       <option value="MONTHLY">Monthly</option>
@@ -359,7 +355,7 @@ ${companyName} Talent Acquisition Team`
                     id="offer-expiration"
                     value={expirationDays}
                     onChange={(e) => setExpirationDays(e.target.value)}
-                    className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-none focus:border-primary"
+                    className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-hidden focus:border-primary"
                   >
                     <option value="3">3 Calendar Days</option>
                     <option value="5">5 Business Days</option>
@@ -434,7 +430,7 @@ ${companyName} Talent Acquisition Team`
                 size="sm"
                 onClick={handleSendToCandidate}
                 disabled={isSaving}
-                className="h-9 px-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-xs rounded-md shadow-md gap-2"
+                className="h-9 px-5 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-xs rounded-md shadow-md gap-2"
               >
                 {sendMutation.isPending ? (
                   <Loader2 className="size-3.5 animate-spin" />

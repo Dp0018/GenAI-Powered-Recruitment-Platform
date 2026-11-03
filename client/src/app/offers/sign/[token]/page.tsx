@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { offersApi } from "@/features/offers/api/offers-api";
 import { JobOffer } from "@/features/offers/types/offer";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ import {
   Building2,
   Loader2,
   AlertTriangle,
-  ArrowRight,
   Lock,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -26,7 +25,6 @@ import Link from "next/link";
 
 export default function SignOfferPage() {
   const params = useParams();
-  const router = useRouter();
   const token = params?.token as string;
 
   const [offer, setOffer] = useState<JobOffer | null>(null);
@@ -191,9 +189,9 @@ export default function SignOfferPage() {
             <div className="p-3.5 rounded-xl bg-secondary/30 border border-border space-y-0.5">
               <div className="text-[10px] font-mono text-muted-foreground uppercase">Base Compensation</div>
               <div className="text-base font-bold font-mono text-foreground">
-                ${offer.baseSalary.toLocaleString()}{" "}
+                £{offer.baseSalary.toLocaleString()}{" "}
                 <span className="text-[10px] font-normal text-muted-foreground">
-                  {offer.currency} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
+                  {offer.currency && offer.currency !== "USD" ? offer.currency : "GBP"} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
                 </span>
               </div>
             </div>
@@ -208,7 +206,7 @@ export default function SignOfferPage() {
             <div className="p-3.5 rounded-xl bg-secondary/30 border border-border space-y-0.5">
               <div className="text-[10px] font-mono text-muted-foreground uppercase">Sign-On Bonus</div>
               <div className="text-base font-bold font-mono text-indigo-400">
-                {offer.signOnBonus ? `$${offer.signOnBonus.toLocaleString()}` : "—"}
+                {offer.signOnBonus ? `£${offer.signOnBonus.toLocaleString()}` : "—"}
               </div>
             </div>
 
@@ -341,7 +339,7 @@ export default function SignOfferPage() {
                     size="lg"
                     onClick={handleSign}
                     disabled={submitting || !signerName.trim() || !consent}
-                    className="h-11 px-8 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-lg shadow-lg gap-2"
+                    className="h-11 px-8 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-lg shadow-lg gap-2"
                   >
                     {submitting ? (
                       <Loader2 className="size-4 animate-spin" />

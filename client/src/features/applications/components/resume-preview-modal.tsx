@@ -21,7 +21,6 @@ import {
   Calendar,
   Sparkles,
   Loader2,
-  Send,
   MessageSquare,
   Star,
   ListChecks,
@@ -31,13 +30,13 @@ import {
   Code,
   Link2,
   ShieldAlert,
-  ShieldCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { RecruiterScreeningScorecard } from "./recruiter-screening-scorecard";
 import { useCandidateProfileByIdQuery } from "@/features/profile/hooks/use-profile";
 import { useExplainApplicationMatchQuery } from "@/features/ai/hooks/use-ai";
 import { ExplainableMatchCard } from "@/features/ai/components/explainable-match-card";
+import { SkillGapRejectionModal } from "./skill-gap-rejection-modal";
 
 const REJECTION_TEMPLATES = [
   {
@@ -72,21 +71,22 @@ export function ResumePreviewModal({
   const updateStatusMutation = useUpdateApplicationStatusMutation();
   const [customNote, setCustomNote] = useState("");
   const [showNoteInput, setShowNoteInput] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<ApplicationStatus | null>(null);
+  const [selectedStatus, setSelectedStatus] =
+    useState<ApplicationStatus | null>(null);
+  const [skillGapRejectOpen, setSkillGapRejectOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
     "overview" | "evaluation" | "answers" | "profile" | "xai"
   >("overview");
-  const { data: candidateProfile, isLoading: isProfileLoading } = useCandidateProfileByIdQuery(
-    application?.candidate?.id
-  );
+  const { data: candidateProfile, isLoading: isProfileLoading } =
+    useCandidateProfileByIdQuery(application?.candidate?.id);
   const {
     data: xaiData,
     isLoading: isXaiLoading,
     refetch: refetchXai,
   } = useExplainApplicationMatchQuery(
     application?.id,
-    Boolean(application?.id && activeTab === "xai")
+    Boolean(application?.id && activeTab === "xai"),
   );
 
   if (!application) return null;
@@ -109,7 +109,7 @@ export function ResumePreviewModal({
           setShowNoteInput(false);
           setSelectedStatus(null);
         },
-      }
+      },
     );
   };
 
@@ -174,7 +174,7 @@ export function ResumePreviewModal({
           </div>
 
           {/* Screening Panel & Cover Note (1 Column) */}
-          <div className="lg:col-span-1 p-4 flex flex-col justify-between overflow-y-auto bg-card/60 space-y-4">
+          <div className="lg:col-span-1 p-4 flex flex-col justify-between overflow-y-auto no-scrollbar bg-card/60 space-y-4">
             <div className="space-y-4">
               {/* Tab Navigation */}
               <div className="flex rounded-lg bg-secondary/80 p-0.5 border border-border text-[11px] font-mono">
@@ -245,7 +245,8 @@ export function ResumePreviewModal({
               </div>
 
               {/* Prompt Injection / Anomaly Alert if flagged */}
-              {((application.resumeAnomalyScore && application.resumeAnomalyScore >= 70) ||
+              {((application.resumeAnomalyScore &&
+                application.resumeAnomalyScore >= 70) ||
                 application.resumeAnomalyFlags) && (
                 <div className="p-3 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-rose-400">
@@ -253,7 +254,8 @@ export function ResumePreviewModal({
                     <span>AI Trust Alert: Resume Anomaly Flagged</span>
                   </div>
                   <p className="text-[11px] leading-relaxed text-rose-200/90 font-sans">
-                    Gemini AI detected potential prompt manipulation or hidden prompt injection in this candidate&apos;s resume text.
+                    Gemini AI detected potential prompt manipulation or hidden
+                    prompt injection in this candidate&apos;s resume text.
                   </p>
                 </div>
               )}
@@ -267,14 +269,17 @@ export function ResumePreviewModal({
                       <span>Candidate Pitch</span>
                     </h4>
                     <div className="p-3 rounded-lg bg-secondary/50 border border-border text-xs text-foreground/90 leading-relaxed whitespace-pre-line max-h-48 overflow-y-auto">
-                      {application.coverLetter || "No cover note provided by candidate."}
+                      {application.coverLetter ||
+                        "No cover note provided by candidate."}
                     </div>
                   </div>
 
                   <div className="space-y-2 text-xs divide-y divide-border/60">
                     <div className="flex justify-between py-1.5 first:pt-0">
                       <span className="text-muted-foreground">Phone</span>
-                      <span className="font-mono text-foreground">{application.phone || "N/A"}</span>
+                      <span className="font-mono text-foreground">
+                        {application.phone || "N/A"}
+                      </span>
                     </div>
                     <div className="flex justify-between py-1.5">
                       <span className="text-muted-foreground">Applied</span>
@@ -282,15 +287,19 @@ export function ResumePreviewModal({
                         {new Date(application.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    {application.averageRating !== null && application.averageRating !== undefined && (
-                      <div className="flex justify-between py-1.5">
-                        <span className="text-muted-foreground">Average Score</span>
-                        <span className="font-mono text-amber-400 font-bold flex items-center gap-1">
-                          <Star className="size-3 fill-amber-400" />
-                          {application.averageRating.toFixed(1)} / 5.0 ({application.reviewCount || 0})
-                        </span>
-                      </div>
-                    )}
+                    {application.averageRating !== null &&
+                      application.averageRating !== undefined && (
+                        <div className="flex justify-between py-1.5">
+                          <span className="text-muted-foreground">
+                            Average Score
+                          </span>
+                          <span className="font-mono text-amber-400 font-bold flex items-center gap-1">
+                            <Star className="size-3 fill-amber-400" />
+                            {application.averageRating.toFixed(1)} / 5.0 (
+                            {application.reviewCount || 0})
+                          </span>
+                        </div>
+                      )}
                   </div>
                 </div>
               )}
@@ -307,12 +316,13 @@ export function ResumePreviewModal({
                     <ListChecks className="size-3.5 text-primary" />
                     <span>Candidate Screening Responses</span>
                   </h4>
-                  {!application.screeningAnswers || application.screeningAnswers.length === 0 ? (
+                  {!application.screeningAnswers ||
+                  application.screeningAnswers.length === 0 ? (
                     <div className="p-4 rounded-lg border border-dashed border-border bg-secondary/20 text-center text-xs text-muted-foreground">
-                      No pre-screening questions configured for this requisition.
+                      No pre-screening questions configured for this job.
                     </div>
                   ) : (
-                    <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                    <div className="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1">
                       {application.screeningAnswers.map((ans, idx) => (
                         <div
                           key={ans.id || idx}
@@ -337,7 +347,9 @@ export function ResumePreviewModal({
                   {isProfileLoading ? (
                     <div className="p-8 text-center space-y-2">
                       <Loader2 className="size-5 animate-spin text-primary mx-auto" />
-                      <p className="text-xs text-muted-foreground">Loading candidate profile...</p>
+                      <p className="text-xs text-muted-foreground">
+                        Loading candidate profile...
+                      </p>
                     </div>
                   ) : !candidateProfile ? (
                     <div className="p-4 rounded-lg border border-dashed border-border bg-secondary/20 text-center text-xs text-muted-foreground">
@@ -348,7 +360,8 @@ export function ResumePreviewModal({
                       {/* Bio & Headline */}
                       <div className="p-3 rounded-lg bg-secondary/40 border border-border space-y-1">
                         <div className="font-semibold text-foreground text-sm">
-                          {candidateProfile.headline || application.candidate.name}
+                          {candidateProfile.headline ||
+                            application.candidate.name}
                         </div>
                         {candidateProfile.bio && (
                           <p className="text-muted-foreground text-xs leading-relaxed">
@@ -394,39 +407,54 @@ export function ResumePreviewModal({
                       </div>
 
                       {/* Skills Cloud */}
-                      {candidateProfile.skills && candidateProfile.skills.length > 0 && (
-                        <div>
-                          <h5 className="font-mono text-[10px] uppercase font-bold text-muted-foreground mb-1.5">
-                            Candidate Skills Cloud
-                          </h5>
-                          <div className="flex flex-wrap gap-1">
-                            {candidateProfile.skills.map((skill, sIdx) => (
-                              <span
-                                key={sIdx}
-                                className="px-2 py-0.5 rounded-full bg-secondary text-foreground text-[10px] font-mono border border-border"
-                              >
-                                {skill}
-                              </span>
-                            ))}
+                      {candidateProfile.skills &&
+                        candidateProfile.skills.length > 0 && (
+                          <div>
+                            <h5 className="font-mono text-[10px] uppercase font-bold text-muted-foreground mb-1.5">
+                              Candidate Skills Cloud
+                            </h5>
+                            <div className="flex flex-wrap gap-1">
+                              {candidateProfile.skills.map((skill, sIdx) => (
+                                <span
+                                  key={sIdx}
+                                  className="px-2 py-0.5 rounded-full bg-secondary text-foreground text-[10px] font-mono border border-border"
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {/* Work Experience */}
                       <div>
                         <h5 className="font-mono text-[10px] uppercase font-bold text-muted-foreground mb-1.5 flex items-center gap-1">
                           <Briefcase className="size-3 text-primary" />
-                          <span>Work Experience ({candidateProfile.workExperiences?.length || 0})</span>
+                          <span>
+                            Work Experience (
+                            {candidateProfile.workExperiences?.length || 0})
+                          </span>
                         </h5>
-                        {(!candidateProfile.workExperiences || candidateProfile.workExperiences.length === 0) ? (
-                          <p className="text-muted-foreground text-[11px]">No formal experience entries.</p>
+                        {!candidateProfile.workExperiences ||
+                        candidateProfile.workExperiences.length === 0 ? (
+                          <p className="text-muted-foreground text-[11px]">
+                            No formal experience entries.
+                          </p>
                         ) : (
                           <div className="space-y-2 border-l-2 border-primary/30 pl-2.5 ml-1">
                             {candidateProfile.workExperiences.map((exp) => (
-                              <div key={exp.id || exp.title} className="space-y-0.5">
-                                <div className="font-semibold text-foreground text-xs">{exp.title}</div>
+                              <div
+                                key={exp.id || exp.title}
+                                className="space-y-0.5"
+                              >
+                                <div className="font-semibold text-foreground text-xs">
+                                  {exp.title}
+                                </div>
                                 <div className="text-[11px] text-muted-foreground font-mono">
-                                  {exp.company} • {exp.startDate || "N/A"} – {exp.currentlyWorking ? "Present" : exp.endDate || "N/A"}
+                                  {exp.company} • {exp.startDate || "N/A"} –{" "}
+                                  {exp.currentlyWorking
+                                    ? "Present"
+                                    : exp.endDate || "N/A"}
                                 </div>
                                 {exp.description && (
                                   <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-3">
@@ -443,17 +471,32 @@ export function ResumePreviewModal({
                       <div>
                         <h5 className="font-mono text-[10px] uppercase font-bold text-muted-foreground mb-1.5 flex items-center gap-1">
                           <GraduationCap className="size-3 text-primary" />
-                          <span>Education Credentials ({candidateProfile.educationHistory?.length || 0})</span>
+                          <span>
+                            Education Credentials (
+                            {candidateProfile.educationHistory?.length || 0})
+                          </span>
                         </h5>
-                        {(!candidateProfile.educationHistory || candidateProfile.educationHistory.length === 0) ? (
-                          <p className="text-muted-foreground text-[11px]">No education entries listed.</p>
+                        {!candidateProfile.educationHistory ||
+                        candidateProfile.educationHistory.length === 0 ? (
+                          <p className="text-muted-foreground text-[11px]">
+                            No education entries listed.
+                          </p>
                         ) : (
                           <div className="space-y-2 border-l-2 border-emerald-500/30 pl-2.5 ml-1">
                             {candidateProfile.educationHistory.map((edu) => (
-                              <div key={edu.id || edu.institution} className="space-y-0.5">
-                                <div className="font-semibold text-foreground text-xs">{edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ""}</div>
+                              <div
+                                key={edu.id || edu.institution}
+                                className="space-y-0.5"
+                              >
+                                <div className="font-semibold text-foreground text-xs">
+                                  {edu.degree}{" "}
+                                  {edu.fieldOfStudy
+                                    ? `in ${edu.fieldOfStudy}`
+                                    : ""}
+                                </div>
                                 <div className="text-[11px] text-muted-foreground font-mono">
-                                  {edu.institution} {edu.endDate ? `(${edu.endDate})` : ""}
+                                  {edu.institution}{" "}
+                                  {edu.endDate ? `(${edu.endDate})` : ""}
                                 </div>
                               </div>
                             ))}
@@ -487,10 +530,15 @@ export function ResumePreviewModal({
                   {isXaiLoading ? (
                     <div className="p-8 flex flex-col items-center justify-center space-y-2 text-muted-foreground">
                       <Loader2 className="size-5 animate-spin text-primary" />
-                      <span className="text-xs font-mono">Synthesizing candidate match...</span>
+                      <span className="text-xs font-mono">
+                        Synthesizing candidate match...
+                      </span>
                     </div>
                   ) : xaiData ? (
-                    <ExplainableMatchCard data={xaiData} candidateName={application.candidate.name} />
+                    <ExplainableMatchCard
+                      data={xaiData}
+                      candidateName={application.candidate.name}
+                    />
                   ) : (
                     <div className="p-6 text-center text-xs text-muted-foreground font-mono">
                       No XAI report generated yet.
@@ -524,7 +572,8 @@ export function ResumePreviewModal({
                     className="h-8 text-xs bg-secondary/40 border-border"
                   />
                   <p className="text-[10px] text-muted-foreground font-mono">
-                    This note will be formatted into the candidate&apos;s Resend notification.
+                    This note will be formatted into the candidate&apos;s Resend
+                    notification.
                   </p>
                 </div>
               )}
@@ -535,15 +584,19 @@ export function ResumePreviewModal({
                   aria-label="Rejection reason template"
                   defaultValue=""
                   onChange={(e) => {
-                    const found = REJECTION_TEMPLATES.find((t) => t.label === e.target.value);
+                    const found = REJECTION_TEMPLATES.find(
+                      (t) => t.label === e.target.value,
+                    );
                     if (found) {
                       setCustomNote(found.note);
                       setShowNoteInput(true);
                     }
                   }}
-                  className="w-full h-7 rounded border border-border bg-secondary/40 text-[11px] font-mono text-muted-foreground hover:text-foreground px-2 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer"
+                  className="w-full h-7 rounded border border-border bg-secondary/40 text-[11px] font-mono text-muted-foreground hover:text-foreground px-2 focus:outline-hidden focus:ring-1 focus:ring-primary/40 cursor-pointer"
                 >
-                  <option value="" disabled>Select Polite Rejection Template...</option>
+                  <option value="" disabled>
+                    Select Polite Rejection Template...
+                  </option>
                   {REJECTION_TEMPLATES.map((tpl) => (
                     <option key={tpl.label} value={tpl.label}>
                       {tpl.label}
@@ -560,7 +613,8 @@ export function ResumePreviewModal({
                   onClick={() => handleStageTransition("SHORTLISTED")}
                   className="h-8 text-xs border-purple-800/40 text-purple-400 hover:bg-purple-950/30 gap-1"
                 >
-                  {updateStatusMutation.isPending && selectedStatus === "SHORTLISTED" ? (
+                  {updateStatusMutation.isPending &&
+                  selectedStatus === "SHORTLISTED" ? (
                     <Loader2 className="size-3 animate-spin" />
                   ) : (
                     <Sparkles className="size-3" />
@@ -575,7 +629,8 @@ export function ResumePreviewModal({
                   onClick={() => handleStageTransition("INTERVIEWING")}
                   className="h-8 text-xs border-amber-800/40 text-amber-400 hover:bg-amber-950/30 gap-1"
                 >
-                  {updateStatusMutation.isPending && selectedStatus === "INTERVIEWING" ? (
+                  {updateStatusMutation.isPending &&
+                  selectedStatus === "INTERVIEWING" ? (
                     <Loader2 className="size-3 animate-spin" />
                   ) : (
                     <Calendar className="size-3" />
@@ -590,7 +645,8 @@ export function ResumePreviewModal({
                   onClick={() => handleStageTransition("OFFERED")}
                   className="h-8 text-xs border-emerald-800/40 text-emerald-400 hover:bg-emerald-950/30 gap-1"
                 >
-                  {updateStatusMutation.isPending && selectedStatus === "OFFERED" ? (
+                  {updateStatusMutation.isPending &&
+                  selectedStatus === "OFFERED" ? (
                     <Loader2 className="size-3 animate-spin" />
                   ) : (
                     <CheckCircle2 className="size-3" />
@@ -602,20 +658,25 @@ export function ResumePreviewModal({
                   size="sm"
                   variant="outline"
                   disabled={updateStatusMutation.isPending}
-                  onClick={() => handleStageTransition("REJECTED")}
-                  className="h-8 text-xs border-destructive/40 text-destructive hover:bg-destructive/10 gap-1"
+                  onClick={() => setSkillGapRejectOpen(true)}
+                  className="h-8 text-xs border-destructive/40 text-destructive hover:bg-destructive/10 gap-1 cursor-pointer"
+                  title="Reject with skill gap analysis & feedback"
                 >
-                  {updateStatusMutation.isPending && selectedStatus === "REJECTED" ? (
-                    <Loader2 className="size-3 animate-spin" />
-                  ) : (
-                    <XCircle className="size-3" />
-                  )}
-                  <span>Reject</span>
+                  <XCircle className="size-3" />
+                  <span>Reject with Feedback</span>
                 </Button>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Intelligent Skill Gap Rejection Modal */}
+        <SkillGapRejectionModal
+          application={application}
+          open={skillGapRejectOpen}
+          onOpenChange={setSkillGapRejectOpen}
+          onSuccess={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );

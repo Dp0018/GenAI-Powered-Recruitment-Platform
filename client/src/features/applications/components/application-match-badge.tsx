@@ -27,7 +27,7 @@ export function ApplicationMatchBadge({
     );
   }
 
-  const { score, fitCategory, matchedSkills } = match;
+  const { score, matchedSkills } = match;
 
   let badgeColor = "bg-secondary text-muted-foreground border-border";
   let icon = <Check className="size-2.5 text-muted-foreground" />;

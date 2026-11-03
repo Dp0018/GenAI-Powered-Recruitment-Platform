@@ -25,8 +25,6 @@ import {
   ShieldCheck,
   Building2,
   Loader2,
-  AlertTriangle,
-  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -140,9 +138,9 @@ export function OfferLetterViewModal({
             <div className="p-3 rounded-lg bg-secondary/30 border border-border space-y-0.5">
               <div className="text-[10px] font-mono text-muted-foreground uppercase">Base Compensation</div>
               <div className="text-sm font-bold font-mono text-foreground">
-                ${offer.baseSalary.toLocaleString()}{" "}
+                £{offer.baseSalary.toLocaleString()}{" "}
                 <span className="text-[10px] text-muted-foreground">
-                  {offer.currency} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
+                  {offer.currency && offer.currency !== "USD" ? offer.currency : "GBP"} / {offer.payPeriod === "MONTHLY" ? "mo" : "yr"}
                 </span>
               </div>
             </div>
@@ -157,7 +155,7 @@ export function OfferLetterViewModal({
             <div className="p-3 rounded-lg bg-secondary/30 border border-border space-y-0.5">
               <div className="text-[10px] font-mono text-muted-foreground uppercase">Sign-On Bonus</div>
               <div className="text-sm font-bold font-mono text-emerald-400">
-                {offer.signOnBonus ? `$${offer.signOnBonus.toLocaleString()}` : "—"}
+                {offer.signOnBonus ? `£${offer.signOnBonus.toLocaleString()}` : "—"}
               </div>
             </div>
 
@@ -227,7 +225,7 @@ export function OfferLetterViewModal({
                 <span>Candidate Declined Offer</span>
               </div>
               <p className="text-muted-foreground pt-1">
-                Reason given: <span className="text-foreground italic">"{offer.declinedReason || "No details provided"}"</span>
+                Reason given: <span className="text-foreground italic">&ldquo;{offer.declinedReason || "No details provided"}&rdquo;</span>
               </p>
               {offer.declinedAt && (
                 <p className="text-[11px] font-mono text-muted-foreground">
@@ -291,7 +289,7 @@ export function OfferLetterViewModal({
                       size="sm"
                       onClick={handleSign}
                       disabled={signMutation.isPending || !signerName.trim() || !consent}
-                      className="h-10 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs rounded-md shadow-md gap-2"
+                      className="h-10 px-6 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs rounded-md shadow-md gap-2"
                     >
                       {signMutation.isPending ? (
                         <Loader2 className="size-4 animate-spin" />
