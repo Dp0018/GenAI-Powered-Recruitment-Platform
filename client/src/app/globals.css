@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -55,7 +55,7 @@
   --card-foreground: oklch(0.18 0.02 245);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.02 245);
-  --primary: oklch(0.55 0.20 235);
+  --primary: oklch(0.55 0.2 235);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.94 0.015 240);
   --secondary-foreground: oklch(0.22 0.02 245);
@@ -66,21 +66,21 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.88 0.015 240);
   --input: oklch(0.88 0.015 240);
-  --ring: oklch(0.55 0.20 235);
-  --chart-1: oklch(0.55 0.20 235);
+  --ring: oklch(0.55 0.2 235);
+  --chart-1: oklch(0.55 0.2 235);
   --chart-2: oklch(0.68 0.16 210);
   --chart-3: oklch(0.45 0.14 240);
   --chart-4: oklch(0.75 0.12 180);
-  --chart-5: oklch(0.35 0.10 250);
+  --chart-5: oklch(0.35 0.1 250);
   --radius: 0.5rem;
   --sidebar: oklch(0.97 0.008 240);
   --sidebar-foreground: oklch(0.18 0.02 245);
-  --sidebar-primary: oklch(0.55 0.20 235);
+  --sidebar-primary: oklch(0.55 0.2 235);
   --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: oklch(0.92 0.02 240);
   --sidebar-accent-foreground: oklch(0.18 0.02 245);
   --sidebar-border: oklch(0.88 0.015 240);
-  --sidebar-ring: oklch(0.55 0.20 235);
+  --sidebar-ring: oklch(0.55 0.2 235);
 }
 
 .dark {
@@ -91,10 +91,10 @@
   --popover: oklch(0.155 0.024 245);
   --popover-foreground: oklch(0.96 0.01 240);
   --primary: oklch(0.62 0.19 235);
-  --primary-foreground: oklch(0.10 0.03 245);
+  --primary-foreground: oklch(0.1 0.03 245);
   --secondary: oklch(0.22 0.025 245);
   --secondary-foreground: oklch(0.92 0.01 240);
-  --muted: oklch(0.20 0.022 245);
+  --muted: oklch(0.2 0.022 245);
   --muted-foreground: oklch(0.68 0.025 240);
   --accent: oklch(0.23 0.03 240);
   --accent-foreground: oklch(0.96 0.01 240);
@@ -106,12 +106,12 @@
   --chart-2: oklch(0.72 0.15 205);
   --chart-3: oklch(0.52 0.14 245);
   --chart-4: oklch(0.78 0.11 185);
-  --chart-5: oklch(0.42 0.10 255);
+  --chart-5: oklch(0.42 0.1 255);
   --radius: 0.5rem;
   --sidebar: oklch(0.15 0.022 245);
   --sidebar-foreground: oklch(0.96 0.01 240);
   --sidebar-primary: oklch(0.62 0.19 235);
-  --sidebar-primary-foreground: oklch(0.10 0.03 245);
+  --sidebar-primary-foreground: oklch(0.1 0.03 245);
   --sidebar-accent: oklch(0.22 0.025 245);
   --sidebar-accent-foreground: oklch(0.96 0.01 240);
   --sidebar-border: oklch(0.26 0.025 245 / 85%);
@@ -122,10 +122,128 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  body, html {
+    @apply bg-background text-foreground font-sans;
   }
-  html {
-    @apply font-sans;
-  }
+}
+
+/* ==========================================================================
+   GLOBAL SCROLLBAR REMOVAL (Completely hidden vertical & horizontal scrollbars)
+   ========================================================================== */
+html,
+body,
+*,
+*::before,
+*::after {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar,
+*::-webkit-scrollbar,
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-corner {
+  display: none !important;
+  background: transparent !important;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+/* Hide Base UI / Radix ScrollArea scrollbars completely */
+[data-slot="scroll-area-scrollbar"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* TipTap Editor Styles */
+.tiptap {
+  outline: none !important;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--color-muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.tiptap h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-foreground);
+}
+
+.tiptap h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  color: var(--color-foreground);
+}
+
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin: 0.75rem 0;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin: 0.75rem 0;
+}
+
+.tiptap li {
+  margin: 0.25rem 0;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  font-style: italic;
+  color: var(--color-muted-foreground);
+}
+
+.tiptap code {
+  background-color: var(--color-secondary);
+  color: var(--color-foreground);
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.25rem 0;
 }

@@ -40,11 +40,11 @@ export function useCreateJobMutation(onSuccess?: () => void) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["company-jobs"] });
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      toast.success("Job requisition published successfully");
+      toast.success("Job published successfully");
       if (onSuccess) onSuccess();
     },
-    onError: (err: any) => {
-      toast.error(err?.message || "Failed to publish job requisition");
+    onError: (err: Error) => {
+      toast.error(err?.message || "Failed to publish job");
     },
   });
 }
@@ -59,11 +59,11 @@ export function useUpdateJobMutation(onSuccess?: () => void) {
       queryClient.invalidateQueries({ queryKey: ["company-jobs"] });
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       queryClient.invalidateQueries({ queryKey: ["job-detail"] });
-      toast.success("Job requisition updated successfully");
+      toast.success("Job updated successfully");
       if (onSuccess) onSuccess();
     },
-    onError: (err: any) => {
-      toast.error(err?.message || "Failed to update job requisition");
+    onError: (err: Error) => {
+      toast.error(err?.message || "Failed to update job");
     },
   });
 }
@@ -85,13 +85,13 @@ export function useUpdateJobStatusMutation(onSuccess?: () => void) {
       queryClient.invalidateQueries({ queryKey: ["job-detail"] });
       toast.success(
         vars.status === "PUBLISHED"
-          ? "Requisition reopened & published"
-          : "Requisition closed to new applicants"
+          ? "Job reopened & published"
+          : "Job closed to new applicants"
       );
       if (onSuccess) onSuccess();
     },
-    onError: (err: any) => {
-      toast.error(err?.message || "Failed to change requisition status");
+    onError: (err: Error) => {
+      toast.error(err?.message || "Failed to change job status");
     },
   });
 }
@@ -104,10 +104,10 @@ export function useDeleteJobMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["company-jobs"] });
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      toast.success("Job requisition deleted");
+      toast.success("Job deleted");
     },
-    onError: (err: any) => {
-      toast.error(err?.message || "Failed to delete requisition");
+    onError: (err: Error) => {
+      toast.error(err?.message || "Failed to delete job");
     },
   });
 }
@@ -131,7 +131,7 @@ export function useToggleSaveJobMutation(jobId: string) {
       queryClient.invalidateQueries({ queryKey: ["saved-jobs"] });
       toast.success(isSaved ? "Job added to saved bookmarks" : "Job removed from bookmarks");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(err?.message || "Please sign in as a candidate to save jobs");
     },
   });

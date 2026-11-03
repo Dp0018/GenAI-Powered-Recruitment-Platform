@@ -8,7 +8,7 @@ interface JobPageProps {
 }
 
 export const metadata = {
-  title: "Job Requisition - JobPortal",
+  title: "Job Details - JobPortal",
   description: "View position specifications, compensation bands, and requirements.",
 };
 

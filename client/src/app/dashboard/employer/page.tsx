@@ -3,7 +3,7 @@ import { EmployerDashboardView } from "@/features/dashboard/employer/components/
 
 export const metadata = {
   title: "Employer Dashboard - JobPortal",
-  description: "Employer workspace for job requisitions and candidate pipeline management.",
+  description: "Employer workspace for job postings and candidate pipeline management.",
 };
 
 export default function EmployerDashboardPage() {

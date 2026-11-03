@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   useQuarantinedJobsQuery,
   useApproveQuarantinedJobMutation,
@@ -14,14 +13,11 @@ import {
   ShieldCheck,
   AlertTriangle,
   Sparkles,
-  Building2,
   MapPin,
-  ExternalLink,
   Loader2,
   CheckCircle2,
   XCircle,
   Eye,
-  Info,
 } from "lucide-react";
 import {
   Dialog,
@@ -89,7 +85,7 @@ export function AdminFraudQuarantineTab() {
       <div className="rounded-xl border border-border bg-card/60 overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="text-xs font-semibold text-foreground flex items-center gap-2">
-            <span>Pending Flagged Requisitions</span>
+            <span>Flagged Job Postings</span>
             <span className="text-[11px] font-mono text-muted-foreground">({jobs.length})</span>
           </div>
           <Button
@@ -231,14 +227,14 @@ export function AdminFraudQuarantineTab() {
       {/* Inspect Modal */}
       {inspectJob && (
         <Dialog open={Boolean(inspectJob)} onOpenChange={() => setInspectJob(null)}>
-          <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto no-scrollbar">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-base">
                 <ShieldAlert className="size-5 text-rose-400" />
                 <span>Job Posting Inspection & Audit</span>
               </DialogTitle>
               <DialogDescription className="text-xs font-mono">
-                Requisition ID: {inspectJob.id} &bull; Company: {inspectJob.company?.name}
+                Job ID: {inspectJob.id} &bull; Company: {inspectJob.company?.name}
               </DialogDescription>
             </DialogHeader>
 

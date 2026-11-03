@@ -1,4 +1,4 @@
-import { CompanyResponse, PagedResponse } from "@/types/auth";
+import { CompanyResponse } from "@/types/auth";
 
 export type JobQuestionType = "TEXT" | "BOOLEAN" | "CHOICE";
 

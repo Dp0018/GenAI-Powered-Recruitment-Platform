@@ -17,8 +17,6 @@ import {
   CalendarDays,
   FileDown,
   Building2,
-  AlertCircle,
-  XCircle,
   CheckCircle2,
   CalendarCheck2,
   Sparkles,
@@ -89,7 +87,7 @@ export function CandidateInterviewsTab() {
         </div>
         <div className="flex items-center gap-2">
           {pendingBooking.length > 0 && (
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-semibold animate-pulse">
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-semibold">
               {pendingBooking.length} Action Required
             </span>
           )}

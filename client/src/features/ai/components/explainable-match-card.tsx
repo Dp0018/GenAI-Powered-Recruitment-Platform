@@ -36,7 +36,7 @@ export function ExplainableMatchCard({ data, candidateName }: ExplainableMatchCa
   return (
     <div className="space-y-4 text-foreground text-left">
       {/* Top Banner Card */}
-      <div className="p-4 rounded-xl border border-border bg-gradient-to-r from-secondary/40 via-secondary/20 to-secondary/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 rounded-xl border border-border bg-linear-to-r from-secondary/40 via-secondary/20 to-secondary/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div
             className={`size-14 rounded-xl border flex flex-col items-center justify-center font-bold shrink-0 ${getScoreColor(

@@ -50,7 +50,6 @@ export function AdminCompanyVerificationTab() {
   });
 
   const companies = data?.content || [];
-  const totalElements = data?.totalElements || 0;
 
   const handleConfirmReject = () => {
     if (!rejectModalCompany) return;
@@ -334,7 +333,7 @@ export function AdminCompanyVerificationTab() {
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="e.g. Incomplete corporate registration documentation, unverifiable business address..."
-              className="w-full text-xs rounded-md border border-border bg-secondary/50 p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+              className="w-full text-xs rounded-md border border-border bg-secondary/50 p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary resize-none"
             />
           </div>
 

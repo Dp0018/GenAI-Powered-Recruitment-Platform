@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { JobQuestionItem, JobQuestionType } from "../types/job";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, HelpCircle, CheckSquare, AlignLeft, ToggleLeft } from "lucide-react";
+import { Plus, Trash2, HelpCircle } from "lucide-react";
 
 interface JobScreeningQuestionsBuilderProps {
   questions: JobQuestionItem[];

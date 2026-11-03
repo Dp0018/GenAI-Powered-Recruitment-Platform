@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useJobMatchQuery } from "../hooks/use-job-match";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   ArrowRight,
@@ -27,7 +26,7 @@ export function SkillsMatchBreakdownCard({ jobId }: SkillsMatchBreakdownCardProp
 
   if (!match) return null;
 
-  const { score, fitCategory, matchedSkills, missingSkills, summary } = match;
+  const { score, matchedSkills, missingSkills, summary } = match;
 
   let progressColor = "bg-primary";
   let badgeColor = "bg-secondary text-muted-foreground border-border";
@@ -63,7 +62,7 @@ export function SkillsMatchBreakdownCard({ jobId }: SkillsMatchBreakdownCardProp
               Candidate Compatibility Rating
             </h3>
             <p className="text-[11px] text-muted-foreground">
-              Algorithmic match between your profile skills and requisition tags.
+              Algorithmic match between your profile skills and job tags.
             </p>
           </div>
         </div>

@@ -16,15 +16,13 @@ import {
   ShieldAlert,
   Building2,
   Users,
-  Activity,
   Server,
   Database,
   Lock,
   Mail,
   Image as ImageIcon,
-  CheckCircle2,
   Loader2,
-  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 
 export function AdminHeader() {
@@ -41,14 +39,15 @@ export function AdminHeader() {
           Administrative Operations Panel
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Welcome back, {user?.name || "Platform Admin"}. Review employer KYC credentials, enforce user compliance, and monitor system KPIs.
+          Welcome back, {user?.name || "Platform Admin"}. Review employer KYC
+          credentials, enforce user compliance, and monitor system KPIs.
         </p>
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-950/40 border border-emerald-800/40 text-xs font-mono text-emerald-400">
-          <Activity className="size-3" />
-          <span>PostgreSQL Cluster: Healthy</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-400 shadow-xs">
+          <CheckCircle2 className="size-3.5" />
+          <span>Platform Status: Operational</span>
         </div>
       </div>
     </div>
@@ -60,77 +59,87 @@ function AdminSystemHealthTab() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Core Infrastructure */}
-        <div className="p-6 rounded-xl border border-border bg-card/60 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-2xl border border-border/80 bg-card/80 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-border/60">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Server className="size-4 text-primary" />
+              <Server className="size-4 text-sky-400" />
               <span>Core Application Engine</span>
             </h3>
-            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
+            <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
               OPERATIONAL
             </span>
           </div>
 
-          <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between py-1 border-b border-border/40 font-mono">
-              <span className="text-muted-foreground">Framework Version</span>
-              <span className="text-foreground">Spring Boot 3.4.x / Java 25</span>
+          <div className="space-y-3 text-xs">
+            <div className="flex items-center justify-between py-1 border-b border-border/40">
+              <span className="text-muted-foreground">API Application Gateway</span>
+              <span className="text-foreground font-medium">
+                Online (Uptime: 99.98%)
+              </span>
             </div>
-            <div className="flex items-center justify-between py-1 border-b border-border/40 font-mono">
-              <span className="text-muted-foreground">Frontend Runtime</span>
-              <span className="text-foreground">Next.js 16 (Turbopack SSR)</span>
+            <div className="flex items-center justify-between py-1 border-b border-border/40">
+              <span className="text-muted-foreground">Frontend Delivery Network</span>
+              <span className="text-foreground font-medium">
+                Global Edge CDN Active
+              </span>
             </div>
-            <div className="flex items-center justify-between py-1 border-b border-border/40 font-mono">
-              <span className="text-muted-foreground">Security Layer</span>
-              <span className="text-foreground">Stateless JWT + BCrypt (Role RBAC)</span>
+            <div className="flex items-center justify-between py-1 border-b border-border/40">
+              <span className="text-muted-foreground">Security & Access Control</span>
+              <span className="text-foreground font-medium">
+                Role-Based Access Enforced
+              </span>
             </div>
-            <div className="flex items-center justify-between py-1 font-mono">
-              <span className="text-muted-foreground">Access Token Expiry</span>
-              <span className="text-foreground">15 Minutes (7-Day Refresh)</span>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">Session Expiration</span>
+              <span className="text-foreground font-medium">
+                Active Session Protection
+              </span>
             </div>
           </div>
         </div>
 
         {/* Database & Integrations */}
-        <div className="p-6 rounded-xl border border-border bg-card/60 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-2xl border border-border/80 bg-card/80 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-border/60">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Database className="size-4 text-primary" />
-              <span>Database & External Services</span>
+              <Database className="size-4 text-sky-400" />
+              <span>Platform Cloud Services</span>
             </h3>
-            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
+            <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
               SYNCHRONIZED
             </span>
           </div>
 
-          <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between py-1 border-b border-border/40 font-mono">
+          <div className="space-y-3 text-xs">
+            <div className="flex items-center justify-between py-1 border-b border-border/40">
               <span className="text-muted-foreground flex items-center gap-1.5">
-                <Database className="size-3 text-muted-foreground" />
-                <span>PostgreSQL Primary</span>
+                <Database className="size-3.5 text-muted-foreground" />
+                <span>Primary Database Storage</span>
               </span>
-              <span className="text-foreground font-medium">HikariCP Pool (Pool Size: 10)</span>
+              <span className="text-emerald-400 font-medium">
+                Healthy & Synchronized
+              </span>
             </div>
-            <div className="flex items-center justify-between py-1 border-b border-border/40 font-mono">
+            <div className="flex items-center justify-between py-1 border-b border-border/40">
               <span className="text-muted-foreground flex items-center gap-1.5">
-                <Mail className="size-3 text-muted-foreground" />
-                <span>Resend Transactional</span>
+                <Mail className="size-3.5 text-muted-foreground" />
+                <span>Transactional Email Dispatch</span>
               </span>
-              <span className="text-emerald-400">REST API Connected</span>
+              <span className="text-emerald-400 font-medium">Service Connected</span>
             </div>
-            <div className="flex items-center justify-between py-1 border-b border-border/40 font-mono">
+            <div className="flex items-center justify-between py-1 border-b border-border/40">
               <span className="text-muted-foreground flex items-center gap-1.5">
-                <ImageIcon className="size-3 text-muted-foreground" />
-                <span>ImageKit CDN Storage</span>
+                <ImageIcon className="size-3.5 text-muted-foreground" />
+                <span>Document & Media Storage</span>
               </span>
-              <span className="text-emerald-400">Secure Upload Ready</span>
+              <span className="text-emerald-400 font-medium">Cloud Storage Ready</span>
             </div>
-            <div className="flex items-center justify-between py-1 font-mono">
+            <div className="flex items-center justify-between py-1">
               <span className="text-muted-foreground flex items-center gap-1.5">
-                <Lock className="size-3 text-muted-foreground" />
-                <span>Audit & Logging</span>
+                <Lock className="size-3.5 text-muted-foreground" />
+                <span>Audit & Activity Logging</span>
               </span>
-              <span className="text-foreground">SLF4J Structured Logs</span>
+              <span className="text-foreground font-medium">Real-Time Event Stream</span>
             </div>
           </div>
         </div>
@@ -151,7 +160,9 @@ export function AdminDashboardView() {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-16 space-y-3">
         <Loader2 className="size-6 animate-spin text-primary" />
-        <span className="text-xs text-muted-foreground font-mono">Verifying administrative access...</span>
+        <span className="text-xs text-muted-foreground font-mono">
+          Verifying administrative access...
+        </span>
       </div>
     );
   }
@@ -162,13 +173,21 @@ export function AdminDashboardView() {
         <div className="size-12 rounded-full bg-rose-950/40 border border-rose-800/40 text-rose-400 flex items-center justify-center mx-auto">
           <ShieldAlert className="size-6" />
         </div>
-        <h2 className="text-lg font-bold text-foreground">Administrative Access Restricted</h2>
+        <h2 className="text-lg font-bold text-foreground">
+          Administrative Access Restricted
+        </h2>
         <p className="text-xs text-muted-foreground">
-          Platform Governance requires authenticated <span className="font-mono text-primary">PLATFORM_ADMIN</span> credentials. You are currently logged in with insufficient permissions.
+          Platform Governance requires authenticated{" "}
+          <span className="font-mono text-primary">PLATFORM_ADMIN</span>{" "}
+          credentials. You are currently logged in with insufficient
+          permissions.
         </p>
         <div className="pt-2">
           <Link href="/login">
-            <Button size="sm" className="bg-primary text-primary-foreground font-mono text-xs">
+            <Button
+              size="sm"
+              className="bg-primary text-primary-foreground font-mono text-xs"
+            >
               Switch to Admin Account
             </Button>
           </Link>
@@ -178,52 +197,59 @@ export function AdminDashboardView() {
   }
 
   return (
-    <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6">
+    <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-6">
       <AdminHeader />
       <AdminMetricsGrid />
 
       <Tabs defaultValue="kyc" className="space-y-6">
-        <TabsList className="bg-secondary/60 border border-border p-1 h-10 rounded-lg">
-          <TabsTrigger
-            value="kyc"
-            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
-          >
-            <Building2 className="size-3.5" />
-            <span>KYC Verification Queue</span>
-            {pendingKYC > 0 && (
-              <span className="size-2 rounded-full bg-amber-400 ml-0.5" />
-            )}
-          </TabsTrigger>
+        <div className="overflow-x-auto no-scrollbar pb-1">
+          <TabsList className="inline-flex items-center gap-1.5 p-1.5 bg-card/90 backdrop-blur-md border border-border/80 rounded-2xl h-13 min-h-[52px] shadow-xs">
+            <TabsTrigger
+              value="kyc"
+              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+            >
+              <Building2 className="size-4" />
+              <span>KYC Verification Queue</span>
+              {pendingKYC > 0 ? (
+                <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  {pendingKYC}
+                </span>
+              ) : null}
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="quarantine"
-            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
-          >
-            <ShieldAlert className="size-3.5 text-rose-400" />
-            <span>AI Trust & Quarantine</span>
-            {quarantinedCount > 0 ? (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-rose-500 text-white ml-0.5">
-                {quarantinedCount}
+            <TabsTrigger
+              value="quarantine"
+              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+            >
+              <ShieldAlert className="size-4 text-rose-400" />
+              <span>AI Trust & Quarantine</span>
+              {quarantinedCount > 0 ? (
+                <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-500 text-white shadow-xs">
+                  {quarantinedCount}
+                </span>
+              ) : null}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="users"
+              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+            >
+              <Users className="size-4" />
+              <span>User Moderation</span>
+              <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-secondary/80 text-muted-foreground border border-border/60">
+                {totalUsers}
               </span>
-            ) : null}
-          </TabsTrigger>
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="users"
-            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
-          >
-            <Users className="size-3.5" />
-            <span>User Moderation ({totalUsers})</span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="system"
-            className="text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:text-foreground"
-          >
-            <Server className="size-3.5" />
-            <span>System Telemetry</span>
-          </TabsTrigger>
-        </TabsList>
+            <TabsTrigger
+              value="system"
+              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+            >
+              <Server className="size-4" />
+              <span>System Telemetry</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="kyc" className="outline-none">
           <AdminCompanyVerificationTab />

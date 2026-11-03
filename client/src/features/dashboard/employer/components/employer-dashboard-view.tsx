@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
@@ -56,7 +56,8 @@ export function EmployerHeader({ onNavigateToTeam }: EmployerHeaderProps) {
           {user?.name || "Employer"} Workspace
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Manage your company requisitions, incoming candidate submissions, and recruiter invitations.
+          Manage your company job postings, incoming candidate submissions, and
+          recruiter invitations.
         </p>
       </div>
 
@@ -78,7 +79,7 @@ export function EmployerHeader({ onNavigateToTeam }: EmployerHeaderProps) {
               className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium gap-1.5 shadow-xs shadow-primary/20"
             >
               <Plus className="size-3.5" />
-              <span>Create Job Requisition</span>
+              <span>Post a Job</span>
             </Button>
           }
         />
@@ -122,20 +123,30 @@ interface EmployerMetricsGridProps {
   totalApplicants: number;
 }
 
-export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGridProps) {
-  const publishedCount = jobs.filter((j) => j.status === "PUBLISHED" && !j.expired).length;
+export function EmployerMetricsGrid({
+  jobs,
+  totalApplicants,
+}: EmployerMetricsGridProps) {
+  const publishedCount = jobs.filter(
+    (j) => j.status === "PUBLISHED" && !j.expired,
+  ).length;
   const totalViews = jobs.reduce((acc, j) => acc + (j.viewsCount || 0), 0);
-  const conversionRate = totalViews > 0 ? ((totalApplicants / totalViews) * 100).toFixed(1) : "0.0";
+  const conversionRate =
+    totalViews > 0 ? ((totalApplicants / totalViews) * 100).toFixed(1) : "0.0";
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
         <div className="flex items-center justify-between text-muted-foreground text-xs">
-          <span>Active Requisitions</span>
+          <span>Active Job Openings</span>
           <Briefcase className="size-4 text-primary" />
         </div>
-        <div className="text-2xl font-bold text-foreground tracking-tight">{publishedCount}</div>
-        <p className="text-[11px] text-muted-foreground">Live & accepting applications</p>
+        <div className="text-2xl font-bold text-foreground tracking-tight">
+          {publishedCount}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Live & accepting applications
+        </p>
       </div>
 
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
@@ -143,8 +154,12 @@ export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGr
           <span>Total Job Views</span>
           <Eye className="size-4 text-purple-400" />
         </div>
-        <div className="text-2xl font-bold text-foreground tracking-tight">{totalViews}</div>
-        <p className="text-[11px] text-muted-foreground">Candidate views across postings</p>
+        <div className="text-2xl font-bold text-foreground tracking-tight">
+          {totalViews}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Candidate views across postings
+        </p>
       </div>
 
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
@@ -152,8 +167,12 @@ export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGr
           <span>Candidate Applicants</span>
           <Users className="size-4 text-primary" />
         </div>
-        <div className="text-2xl font-bold text-foreground tracking-tight">{totalApplicants}</div>
-        <p className="text-[11px] text-muted-foreground">Total applications received</p>
+        <div className="text-2xl font-bold text-foreground tracking-tight">
+          {totalApplicants}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Total applications received
+        </p>
       </div>
 
       <div className="p-5 rounded-lg bg-card/70 border border-border space-y-2">
@@ -161,38 +180,42 @@ export function EmployerMetricsGrid({ jobs, totalApplicants }: EmployerMetricsGr
           <span>Conversion Funnel</span>
           <TrendingUp className="size-4 text-emerald-400" />
         </div>
-        <div className="text-2xl font-bold text-emerald-400 tracking-tight">{conversionRate}%</div>
-        <p className="text-[11px] text-muted-foreground">Applications per 100 views</p>
+        <div className="text-2xl font-bold text-emerald-400 tracking-tight">
+          {conversionRate}%
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Applications per 100 views
+        </p>
       </div>
     </div>
   );
 }
 
-interface EmployerRequisitionsTableProps {
+interface EmployerJobsTableProps {
   jobs: JobItem[];
   isLoading: boolean;
   totalElements: number;
 }
 
-export function EmployerRequisitionsTable({
+export function EmployerJobsTable({
   jobs,
   isLoading,
   totalElements,
-}: EmployerRequisitionsTableProps) {
+}: EmployerJobsTableProps) {
   const deleteMutation = useDeleteJobMutation();
   const statusMutation = useUpdateJobStatusMutation();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Edit Requisition Modal State
+  // Edit Job Modal State
   const [editingJob, setEditingJob] = useState<JobItem | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
-  // Duplicate Requisition Modal State
+  // Duplicate Job Modal State
   const [duplicatingJob, setDuplicatingJob] = useState<JobItem | null>(null);
   const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
 
   const handleDelete = (id: string, title: string) => {
-    if (confirm(`Are you sure you want to delete requisition "${title}"?`)) {
+    if (confirm(`Are you sure you want to delete job "${title}"?`)) {
       setDeletingId(id);
       deleteMutation.mutate(id, {
         onSettled: () => setDeletingId(null),
@@ -215,44 +238,55 @@ export function EmployerRequisitionsTable({
     setDuplicateModalOpen(true);
   };
 
-  const getExpirationBadge = (job: JobItem) => {
-    if (job.expired) {
-      return (
-        <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-destructive/10 text-destructive border border-destructive/20">
-          <AlertTriangle className="size-3" />
-          <span>Expired</span>
-        </span>
-      );
+function JobExpirationBadge({ job }: { job: JobItem }) {
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!job.expiresAt) return;
+    const msLeft = new Date(job.expiresAt).getTime() - Date.now();
+    const days = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+    if (days <= 7 && days > 0) {
+      setDaysLeft(days);
     }
-    if (job.expiresAt) {
-      const msLeft = new Date(job.expiresAt).getTime() - Date.now();
-      const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
-      if (daysLeft <= 7 && daysLeft > 0) {
-        return (
-          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-950/40 text-amber-400 border border-amber-800/40">
-            <Clock className="size-3" />
-            <span>Expires in {daysLeft}d</span>
-          </span>
-        );
-      }
-    }
-    return null;
-  };
+  }, [job.expiresAt]);
+
+  if (job.expired) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+        <AlertTriangle className="size-3" />
+        <span>Expired</span>
+      </span>
+    );
+  }
+
+  if (daysLeft !== null) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-950/40 text-amber-400 border border-amber-800/40">
+        <Clock className="size-3" />
+        <span>Expires in {daysLeft}d</span>
+      </span>
+    );
+  }
+
+  return null;
+}
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-foreground tracking-tight">
-          Job Requisitions
+          Job Postings
         </h2>
-        <span className="text-xs text-muted-foreground font-mono">{totalElements} Total</span>
+        <span className="text-xs text-muted-foreground font-mono">
+          {totalElements} Total
+        </span>
       </div>
 
       {isLoading ? (
         <div className="p-12 text-center rounded-lg border border-border bg-card/40 space-y-3">
           <Loader2 className="size-6 animate-spin text-primary mx-auto" />
           <div className="text-xs text-muted-foreground font-mono">
-            Loading company requisitions...
+            Loading job postings...
           </div>
         </div>
       ) : jobs.length === 0 ? (
@@ -261,9 +295,12 @@ export function EmployerRequisitionsTable({
             <FileSpreadsheet className="size-5" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-medium text-foreground">No requisitions created yet</h3>
+            <h3 className="text-sm font-medium text-foreground">
+              No jobs posted yet
+            </h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Draft your first position to specify compensation bands, workplace policy, and role expectations.
+              Post your first opening to specify compensation, workplace policy,
+              and role expectations.
             </p>
           </div>
           <div className="pt-2">
@@ -275,7 +312,7 @@ export function EmployerRequisitionsTable({
                   className="h-8 border-border text-foreground hover:bg-secondary rounded-md text-xs gap-1.5"
                 >
                   <Plus className="size-3.5" />
-                  <span>Create Requisition</span>
+                  <span>Post a Job</span>
                 </Button>
               }
             />
@@ -292,17 +329,26 @@ export function EmployerRequisitionsTable({
                   <th className="py-3 px-4 font-semibold">Location</th>
                   <th className="py-3 px-4 font-semibold">Compensation</th>
                   <th className="py-3 px-4 font-semibold">Status</th>
-                  <th className="py-3 px-4 font-semibold">Funnel (Views / Apps)</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  <th className="py-3 px-4 font-semibold">
+                    Funnel (Views / Apps)
+                  </th>
+                  <th className="py-3 px-4 font-semibold text-right">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-secondary/30 transition-colors">
+                  <tr
+                    key={job.id}
+                    className="hover:bg-secondary/30 transition-colors"
+                  >
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-foreground text-sm">{job.title}</span>
-                        {getExpirationBadge(job)}
+                        <span className="font-semibold text-foreground text-sm">
+                          {job.title}
+                        </span>
+                        <JobExpirationBadge job={job} />
                       </div>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {job.tags?.slice(0, 3).map((tag, i) => (
@@ -321,13 +367,15 @@ export function EmployerRequisitionsTable({
                         {job.jobType.replace("_", " ")}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-muted-foreground">{job.location}</td>
+                    <td className="py-3.5 px-4 text-muted-foreground">
+                      {job.location}
+                    </td>
                     <td className="py-3.5 px-4 font-mono font-medium text-foreground">
                       {job.minSalary && job.maxSalary
-                        ? `$${(job.minSalary / 1000).toFixed(0)}k - $${(job.maxSalary / 1000).toFixed(0)}k`
+                        ? `£${(job.minSalary / 1000).toFixed(0)}k - £${(job.maxSalary / 1000).toFixed(0)}k`
                         : job.minSalary
-                        ? `From $${(job.minSalary / 1000).toFixed(0)}k`
-                        : "Competitive"}
+                          ? `From £${(job.minSalary / 1000).toFixed(0)}k`
+                          : "Competitive"}
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5">
@@ -336,8 +384,8 @@ export function EmployerRequisitionsTable({
                             job.status === "PUBLISHED" && !job.expired
                               ? "bg-emerald-950/40 text-emerald-400 border border-emerald-800/40"
                               : job.status === "CLOSED" || job.expired
-                              ? "bg-secondary text-muted-foreground border border-border"
-                              : "bg-amber-950/40 text-amber-400 border border-amber-800/40"
+                                ? "bg-secondary text-muted-foreground border border-border"
+                                : "bg-amber-950/40 text-amber-400 border border-amber-800/40"
                           }`}
                         >
                           {job.expired ? "EXPIRED" : job.status}
@@ -350,8 +398,8 @@ export function EmployerRequisitionsTable({
                           disabled={statusMutation.isPending}
                           title={
                             job.status === "PUBLISHED"
-                              ? "Click to close requisition"
-                              : "Click to publish requisition"
+                              ? "Click to close job"
+                              : "Click to publish job"
                           }
                           className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                         >
@@ -373,7 +421,12 @@ export function EmployerRequisitionsTable({
                         <span>{job.viewsCount || 0} views</span>
                         {job.viewsCount && job.viewsCount > 0 ? (
                           <span className="text-emerald-400 font-bold ml-1">
-                            ({((job.applicantCount / job.viewsCount) * 100).toFixed(0)}%)
+                            (
+                            {(
+                              (job.applicantCount / job.viewsCount) *
+                              100
+                            ).toFixed(0)}
+                            %)
                           </span>
                         ) : null}
                       </div>
@@ -386,7 +439,7 @@ export function EmployerRequisitionsTable({
                           size="sm"
                           onClick={() => handleEdit(job)}
                           className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-                          title="Edit requisition specifications"
+                          title="Edit job details"
                         >
                           <Edit2 className="size-3.5" />
                         </Button>
@@ -397,7 +450,7 @@ export function EmployerRequisitionsTable({
                           size="sm"
                           onClick={() => handleDuplicate(job)}
                           className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
-                          title="Duplicate / Clone this requisition"
+                          title="Duplicate this job"
                         >
                           <Copy className="size-3.5" />
                         </Button>
@@ -419,7 +472,7 @@ export function EmployerRequisitionsTable({
                           disabled={deletingId === job.id}
                           onClick={() => handleDelete(job.id, job.title)}
                           className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                          title="Delete requisition"
+                          title="Delete job"
                         >
                           {deletingId === job.id ? (
                             <Loader2 className="size-3.5 animate-spin" />
@@ -455,7 +508,10 @@ export function EmployerRequisitionsTable({
 }
 
 export function EmployerDashboardView() {
-  const [activeTab, setActiveTab] = useState<"requisitions" | "applicants" | "branding" | "team">("requisitions");
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState<
+    "jobs" | "applicants" | "branding" | "team"
+  >("jobs");
   const { data: jobsData, isLoading: jobsLoading } = useCompanyJobsQuery();
   const { data: appsData } = useCompanyApplicationsQuery();
 
@@ -463,71 +519,119 @@ export function EmployerDashboardView() {
   const totalJobs = jobsData?.totalElements || 0;
   const totalApplicants = appsData?.totalElements || 0;
 
+  if (isAuthLoading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-16 space-y-3">
+        <Loader2 className="size-6 animate-spin text-primary" />
+        <span className="text-xs text-muted-foreground font-mono">
+          Verifying employer access...
+        </span>
+      </div>
+    );
+  }
+
+  if (
+    !isAuthenticated ||
+    (user?.role !== "EMPLOYER_ADMIN" && user?.role !== "RECRUITER")
+  ) {
+    return (
+      <div className="flex-1 py-20 px-4 max-w-md mx-auto text-center space-y-4">
+        <div className="size-12 rounded-full bg-rose-950/40 border border-rose-800/40 text-rose-400 flex items-center justify-center mx-auto">
+          <ShieldAlert className="size-6" />
+        </div>
+        <h2 className="text-lg font-bold text-foreground">
+          Employer Access Restricted
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          This workspace requires an authenticated corporate account (
+          <span className="font-mono text-primary">EMPLOYER_ADMIN</span> or{" "}
+          <span className="font-mono text-primary">RECRUITER</span>).
+        </p>
+        <div className="pt-2">
+          <Link href="/login">
+            <Button
+              size="sm"
+              className="bg-primary text-primary-foreground font-mono text-xs"
+            >
+              Log in to Employer Account
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-8">
+    <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
       <EmployerHeader onNavigateToTeam={() => setActiveTab("team")} />
       <EmployerKycBanner />
       <EmployerMetricsGrid jobs={jobs} totalApplicants={totalApplicants} />
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-border overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("requisitions")}
-          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === "requisitions"
-              ? "border-primary text-foreground font-semibold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <FileSpreadsheet className="size-3.5" />
-          <span>Job Requisitions</span>
-          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-secondary">
-            {totalJobs}
-          </span>
-        </button>
+      {/* Modern Segmented Navigation Pill Strip */}
+      <div className="overflow-x-auto no-scrollbar pb-1">
+        <div className="inline-flex items-center gap-1.5 p-1.5 bg-card/90 backdrop-blur-md border border-border/80 rounded-2xl h-13 min-h-[52px] shadow-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab("jobs")}
+            className={`h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer flex items-center ${
+              activeTab === "jobs"
+                ? "bg-secondary text-foreground shadow-xs border border-border/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+            }`}
+          >
+            <FileSpreadsheet className="size-4" />
+            <span>Job Postings</span>
+            <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-secondary/80 text-muted-foreground border border-border/60">
+              {totalJobs}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("applicants")}
-          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === "applicants"
-              ? "border-primary text-foreground font-semibold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Users className="size-3.5" />
-          <span>Applicant Pipeline</span>
-          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-secondary">
-            {totalApplicants}
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("applicants")}
+            className={`h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer flex items-center ${
+              activeTab === "applicants"
+                ? "bg-secondary text-foreground shadow-xs border border-border/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+            }`}
+          >
+            <Users className="size-4" />
+            <span>Applicant Pipeline</span>
+            <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-secondary/80 text-muted-foreground border border-border/60">
+              {totalApplicants}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("branding")}
-          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === "branding"
-              ? "border-primary text-foreground font-semibold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Building2 className="size-3.5" />
-          <span>Company Branding</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("branding")}
+            className={`h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer flex items-center ${
+              activeTab === "branding"
+                ? "bg-secondary text-foreground shadow-xs border border-border/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+            }`}
+          >
+            <Building2 className="size-4" />
+            <span>Company Branding</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("team")}
-          className={`pb-3 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === "team"
-              ? "border-primary text-foreground font-semibold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Users className="size-3.5" />
-          <span>Team & Recruiters</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("team")}
+            className={`h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer flex items-center ${
+              activeTab === "team"
+                ? "bg-secondary text-foreground shadow-xs border border-border/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+            }`}
+          >
+            <Users className="size-4" />
+            <span>Team & Recruiters</span>
+          </button>
+        </div>
       </div>
 
-      {activeTab === "requisitions" ? (
-        <EmployerRequisitionsTable
+      {activeTab === "jobs" ? (
+        <EmployerJobsTable
           jobs={jobs}
           isLoading={jobsLoading}
           totalElements={totalJobs}

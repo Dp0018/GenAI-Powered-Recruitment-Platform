@@ -25,7 +25,6 @@ import {
   Mail,
   Loader2,
   Calendar,
-  Sparkles,
 } from "lucide-react";
 
 export function EmployerTeamTab() {
@@ -104,7 +103,7 @@ export function EmployerTeamTab() {
             <Shield className="size-4 text-amber-400" />
           </div>
           <div className="text-2xl font-bold text-foreground font-mono">{adminCount}</div>
-          <p className="text-[11px] text-muted-foreground">Full billing & requisition authority</p>
+          <p className="text-[11px] text-muted-foreground">Full billing & hiring authority</p>
         </div>
 
         <div className="p-4 rounded-lg bg-card/70 border border-border space-y-1">
@@ -130,7 +129,7 @@ export function EmployerTeamTab() {
           <Users className="size-8 text-muted-foreground mx-auto" />
           <h3 className="text-sm font-medium text-foreground">No team members found</h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Invite your colleagues to review candidate applications and post job requisitions.
+            Invite your colleagues to review candidate applications and post jobs.
           </p>
         </div>
       ) : (
@@ -280,8 +279,8 @@ export function EmployerTeamTab() {
               <select
                 id="invite-role"
                 value={role}
-                onChange={(e) => setRole(e.target.value as any)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                onChange={(e) => setRole(e.target.value as "RECRUITER" | "EMPLOYER_ADMIN")}
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="RECRUITER">Recruiter (Screen & Manage Candidates)</option>
                 <option value="EMPLOYER_ADMIN">Employer Admin (Full Control & Invites)</option>

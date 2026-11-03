@@ -4,14 +4,10 @@ import React from "react";
 import { useAdminAnalyticsQuery } from "@/features/admin/hooks/use-admin";
 import {
   Users,
-  Building2,
   Clock,
   Briefcase,
   FileText,
-  ShieldAlert,
   Loader2,
-  CheckCircle2,
-  AlertTriangle,
 } from "lucide-react";
 
 export function AdminMetricsGrid() {
@@ -35,7 +31,7 @@ export function AdminMetricsGrid() {
   const pendingKYC = analytics?.pendingCompanies ?? 0;
   const verifiedTenants = analytics?.verifiedCompanies ?? 0;
   const totalUsers = analytics?.totalUsers ?? 0;
-  const activeRequisitions = analytics?.activeJobs ?? 0;
+  const activeJobsCount = analytics?.activeJobs ?? 0;
   const totalApplications = analytics?.totalApplications ?? 0;
   const suspendedUsers = analytics?.bannedUsers ?? 0;
 
@@ -67,7 +63,7 @@ export function AdminMetricsGrid() {
           <Briefcase className="size-4 text-primary" />
         </div>
         <div className="text-2xl font-bold text-foreground tracking-tight">
-          {activeRequisitions}
+          {activeJobsCount}
         </div>
         <p className="text-[11px] text-muted-foreground">
           {analytics?.totalJobs ?? 0} total listings created

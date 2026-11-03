@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useJobsQuery } from "../hooks/use-jobs";
 import { JobCard } from "./job-card";
 import { JobItem, SearchJobsParams } from "../types/job";
@@ -14,24 +14,30 @@ import {
   Briefcase,
   Sparkles,
   ArrowUpDown,
-  DollarSign,
+  PoundSterling,
   GraduationCap,
   ChevronLeft,
   ChevronRight,
-  X,
   RotateCcw,
 } from "lucide-react";
 
-const POPULAR_TAGS = ["Kubernetes", "Next.js", "Java 21", "Cloud Infrastructure", "Full Stack", "Distributed Systems"];
+const POPULAR_TAGS = [
+  "Kubernetes",
+  "Next.js",
+  "Java 21",
+  "Cloud Infrastructure",
+  "Full Stack",
+  "Distributed Systems",
+];
 
 const SALARY_OPTIONS = [
   { label: "Any Compensation", value: 0 },
-  { label: "$50,000+ / yr", value: 50000 },
-  { label: "$80,000+ / yr", value: 80000 },
-  { label: "$100,000+ / yr", value: 100000 },
-  { label: "$120,000+ / yr", value: 120000 },
-  { label: "$150,000+ / yr", value: 150000 },
-  { label: "$200,000+ / yr", value: 200000 },
+  { label: "£50,000+ / yr", value: 50000 },
+  { label: "£80,000+ / yr", value: 80000 },
+  { label: "£100,000+ / yr", value: 100000 },
+  { label: "£120,000+ / yr", value: 120000 },
+  { label: "£150,000+ / yr", value: 150000 },
+  { label: "£200,000+ / yr", value: 200000 },
 ];
 
 const EXPERIENCE_LEVELS = [
@@ -151,25 +157,30 @@ export function PublicJobsBoard() {
   const endRecord = Math.min((currentPage + 1) * pageSize, totalElements);
 
   return (
-    <section id="jobs" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/80 bg-background">
-      <div className="container mx-auto max-w-6xl space-y-8">
+    <section
+      id="jobs"
+      className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/80 bg-background"
+    >
+      <div className="mx-auto w-full max-w-7xl space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
           <div className="space-y-2 max-w-2xl">
             <div className="text-xs font-mono uppercase tracking-wider text-primary font-semibold flex items-center gap-2">
               <Briefcase className="size-3.5" />
-              <span>Verified Corporate Requisitions</span>
+              <span>Verified Job Openings</span>
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-foreground">
               Explore Live Engineering Openings
             </h2>
             <p className="text-sm text-muted-foreground">
-              Direct recruitment opportunities from verified employers with cryptographic credential verification.
+              Direct recruitment opportunities from verified employers with
+              cryptographic credential verification.
             </p>
           </div>
 
           <div className="text-xs font-mono text-muted-foreground">
-            Total Openings: <strong className="text-foreground">{totalElements}</strong>
+            Total Openings:{" "}
+            <strong className="text-foreground">{totalElements}</strong>
           </div>
         </div>
 
@@ -198,7 +209,7 @@ export function PublicJobsBoard() {
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full h-11 pl-10 pr-4 bg-background border border-border text-foreground text-xs rounded-md focus:outline-none focus:border-primary"
+                className="w-full h-11 pl-10 pr-4 bg-background border border-border text-foreground text-xs rounded-md focus:outline-hidden focus:border-primary"
               >
                 <option value="all">All Locations</option>
                 <option value="Bangalore">Bangalore, India</option>
@@ -215,7 +226,7 @@ export function PublicJobsBoard() {
               <select
                 value={workplaceType}
                 onChange={(e) => setWorkplaceType(e.target.value)}
-                className="w-full h-11 px-3 bg-background border border-border text-foreground text-xs rounded-md focus:outline-none focus:border-primary"
+                className="w-full h-11 px-3 bg-background border border-border text-foreground text-xs rounded-md focus:outline-hidden focus:border-primary"
               >
                 <option value="ALL">Any Workplace</option>
                 <option value="REMOTE">Remote</option>
@@ -252,7 +263,7 @@ export function PublicJobsBoard() {
                     page: 0,
                   }));
                 }}
-                className="w-full h-9 pl-9 pr-4 bg-secondary/40 border border-border text-foreground text-xs rounded-md font-mono focus:outline-none focus:border-primary"
+                className="w-full h-9 pl-9 pr-4 bg-secondary/40 border border-border text-foreground text-xs rounded-md font-mono focus:outline-hidden focus:border-primary"
               >
                 {EXPERIENCE_LEVELS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -264,7 +275,7 @@ export function PublicJobsBoard() {
 
             {/* Minimum Salary Range */}
             <div className="sm:col-span-4 relative flex items-center">
-              <DollarSign className="absolute left-3 size-3.5 text-muted-foreground pointer-events-none" />
+              <PoundSterling className="absolute left-3 size-3.5 text-muted-foreground pointer-events-none" />
               <select
                 value={minSalary}
                 onChange={(e) => {
@@ -277,7 +288,7 @@ export function PublicJobsBoard() {
                     page: 0,
                   }));
                 }}
-                className="w-full h-9 pl-9 pr-4 bg-secondary/40 border border-border text-foreground text-xs rounded-md font-mono focus:outline-none focus:border-primary"
+                className="w-full h-9 pl-9 pr-4 bg-secondary/40 border border-border text-foreground text-xs rounded-md font-mono focus:outline-hidden focus:border-primary"
               >
                 {SALARY_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -301,7 +312,7 @@ export function PublicJobsBoard() {
                     page: 0,
                   }));
                 }}
-                className="w-full h-9 pl-9 pr-4 bg-secondary/40 border border-border text-foreground text-xs rounded-md font-mono focus:outline-none focus:border-primary"
+                className="w-full h-9 pl-9 pr-4 bg-secondary/40 border border-border text-foreground text-xs rounded-md font-mono focus:outline-hidden focus:border-primary"
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -350,11 +361,15 @@ export function PublicJobsBoard() {
           </div>
         </form>
 
-        {/* Requisitions Catalog Results Bar */}
+        {/* Job Catalog Results Bar */}
         <div className="flex items-center justify-between text-xs text-muted-foreground px-1 font-mono">
           <span>
-            Showing <strong className="text-foreground">{startRecord}–{endRecord}</strong> of{" "}
-            <strong className="text-foreground">{totalElements}</strong> positions
+            Showing{" "}
+            <strong className="text-foreground">
+              {startRecord}–{endRecord}
+            </strong>{" "}
+            of <strong className="text-foreground">{totalElements}</strong>{" "}
+            positions
           </span>
           {totalPages > 1 && (
             <span>
@@ -368,14 +383,27 @@ export function PublicJobsBoard() {
           {isLoading ? (
             <div className="p-16 text-center rounded-xl border border-border bg-card/40 space-y-3">
               <Loader2 className="size-6 animate-spin text-primary mx-auto" />
-              <div className="text-sm font-medium text-foreground">Querying verified job database...</div>
-              <p className="text-xs text-muted-foreground font-mono">Scanning live requisition indexes</p>
+              <div className="text-sm font-medium text-foreground">
+                Querying verified job database...
+              </div>
+              <p className="text-xs text-muted-foreground font-mono">
+                Scanning live job postings
+              </p>
             </div>
           ) : isError ? (
             <div className="p-8 text-center rounded-xl border border-destructive/40 bg-destructive/10 space-y-2">
-              <div className="text-sm font-semibold text-destructive">Failed to fetch job requisitions</div>
-              <p className="text-xs text-muted-foreground">Please check backend connectivity or try again.</p>
-              <Button size="sm" variant="outline" onClick={() => refetch()} className="h-8 text-xs mt-2 font-mono">
+              <div className="text-sm font-semibold text-destructive">
+                Failed to fetch jobs
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Please check backend connectivity or try again.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => refetch()}
+                className="h-8 text-xs mt-2 font-mono"
+              >
                 Retry Query
               </Button>
             </div>
@@ -385,20 +413,28 @@ export function PublicJobsBoard() {
                 <Briefcase className="size-6" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground">No matching positions found</h3>
+                <h3 className="text-base font-semibold text-foreground">
+                  No matching positions found
+                </h3>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  We could not find any openings matching your exact search filters. Try broadening your keywords or resetting filters.
+                  We could not find any openings matching your exact search
+                  filters. Try broadening your keywords or resetting filters.
                 </p>
               </div>
               <div>
-                <Button size="sm" variant="outline" onClick={handleResetFilters} className="text-xs font-mono gap-1.5 border-border">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleResetFilters}
+                  className="text-xs font-mono gap-1.5 border-border"
+                >
                   <RotateCcw className="size-3.5" />
                   <span>Reset All Filters</span>
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {jobs.map((job) => (
                 <JobCard key={job.id} job={job} />
               ))}
@@ -430,7 +466,10 @@ export function PublicJobsBoard() {
                   if (!isFirst && !isLast && !isCurrent && !isNeighbor) {
                     if (idx === currentPage - 2 || idx === currentPage + 2) {
                       return (
-                        <span key={idx} className="px-1 text-xs text-muted-foreground font-mono">
+                        <span
+                          key={idx}
+                          className="px-1 text-xs text-muted-foreground font-mono"
+                        >
                           ...
                         </span>
                       );

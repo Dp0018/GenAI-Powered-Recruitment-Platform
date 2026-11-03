@@ -3,8 +3,8 @@ import { PublicJobsBoard } from "@/features/jobs/components/public-jobs-board";
 import { Footer } from "@/components/shared/footer";
 
 export const metadata = {
-  title: "Explore Openings - JobPortal Requisition Board",
-  description: "Browse verified engineering and leadership requisitions across companies.",
+  title: "Explore Openings - JobPortal Job Board",
+  description: "Browse verified engineering and leadership jobs across companies.",
 };
 
 export default function JobsPage() {

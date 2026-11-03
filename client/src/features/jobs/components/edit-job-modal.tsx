@@ -113,7 +113,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
         status,
         minSalary: minSalary ? parseInt(minSalary, 10) : undefined,
         maxSalary: maxSalary ? parseInt(maxSalary, 10) : undefined,
-        currency: job.currency || "USD",
+        currency: job.currency || "GBP",
         salaryPeriod,
         hasEquity,
         equityRange: hasEquity && equityRange.trim() ? equityRange.trim() : undefined,
@@ -131,14 +131,14 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card border border-border text-foreground p-6 sm:p-8 rounded-xl shadow-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar bg-card border border-border text-foreground p-6 sm:p-8 rounded-xl shadow-2xl">
         <DialogHeader className="space-y-1.5 text-left border-b border-border pb-4">
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary border border-border text-xs font-mono text-muted-foreground">
             <Edit3 className="size-3 text-primary" />
-            <span>Requisition Management</span>
+            <span>Job Management</span>
           </div>
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-            Edit Job Requisition
+            Edit Job Posting
           </DialogTitle>
           <p className="text-xs text-muted-foreground">
             Update role specifications, compensation, perks, or lifecycle status.
@@ -181,7 +181,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
                 id="edit-workplaceType"
                 value={workplaceType}
                 onChange={(e) => setWorkplaceType(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="REMOTE">Remote</option>
                 <option value="HYBRID">Hybrid</option>
@@ -197,7 +197,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
                 id="edit-jobType"
                 value={jobType}
                 onChange={(e) => setJobType(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="FULL_TIME">Full-time</option>
                 <option value="PART_TIME">Part-time</option>
@@ -216,7 +216,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
                 id="edit-exp"
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="ENTRY_LEVEL">Entry Level (0-2 yrs)</option>
                 <option value="MID_LEVEL">Mid Level (3-5 yrs)</option>
@@ -228,13 +228,13 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
 
             <div className="space-y-1">
               <Label htmlFor="edit-status" className="text-xs font-medium text-foreground">
-                Requisition Status
+                Job Status
               </Label>
               <select
                 id="edit-status"
                 value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                onChange={(e) => setStatus(e.target.value as "PUBLISHED" | "CLOSED" | "DRAFT")}
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="PUBLISHED">Published (Accepting)</option>
                 <option value="CLOSED">Closed (Archived)</option>
@@ -250,7 +250,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
                 id="edit-expiration"
                 value={expirationDays}
                 onChange={(e) => setExpirationDays(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="30">+30 Days from now</option>
                 <option value="60">+60 Days from now</option>
@@ -313,7 +313,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
                   id="edit-salaryPeriod"
                   value={salaryPeriod}
                   onChange={(e) => setSalaryPeriod(e.target.value)}
-                  className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-none focus:border-primary"
+                  className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-hidden focus:border-primary"
                 >
                   <option value="YEARLY">Yearly</option>
                   <option value="MONTHLY">Monthly</option>
@@ -357,7 +357,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
                 {hasSignOnBonus && (
                   <Input
                     type="number"
-                    placeholder="Sign-on amount ($)"
+                    placeholder="Sign-on amount (£)"
                     value={signOnBonus}
                     onChange={(e) => setSignOnBonus(e.target.value)}
                     className="h-8 bg-background border-border text-foreground text-xs rounded-md"
@@ -417,7 +417,7 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
               </Label>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Select key benefits included with this role to highlight on public requisition cards.
+              Select key benefits included with this role to highlight on public job cards.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               {COMPANY_BENEFITS.map((b) => {

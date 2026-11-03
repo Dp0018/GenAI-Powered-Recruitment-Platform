@@ -36,7 +36,7 @@ export const jobsApi = {
 
   getJobBySlug: async (slug: string): Promise<JobItem> => {
     const res = await apiClient<JobItem>(`/jobs/${slug}`);
-    if (!res.data) throw new Error("Job requisition not found");
+    if (!res.data) throw new Error("Job not found");
     return res.data;
   },
 

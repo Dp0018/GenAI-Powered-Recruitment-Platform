@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateJobMutation } from "../hooks/use-jobs";
 import { COMPANY_BENEFITS } from "../types/benefits";
-import { Plus, Loader2, Briefcase, MapPin, DollarSign, Tag, Building2, Sparkles } from "lucide-react";
+import { Plus, Loader2, Building2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { JobItem, JobQuestionItem } from "../types/job";
 import { JobScreeningQuestionsBuilder } from "./job-screening-questions-builder";
@@ -83,11 +83,6 @@ export function CreateJobModal({
     }
   }, [initialValues, open]);
 
-  const createMutation = useCreateJobMutation(() => {
-    setOpen(false);
-    resetForm();
-  });
-
   const resetForm = () => {
     setTitle("");
     setDescription("");
@@ -103,6 +98,11 @@ export function CreateJobModal({
     setExpirationDays("30");
     setScreeningQuestions([]);
   };
+
+  const createMutation = useCreateJobMutation(() => {
+    setOpen(false);
+    resetForm();
+  });
 
   const toggleBenefit = (key: string) => {
     setSelectedBenefits((prev) =>
@@ -135,7 +135,7 @@ export function CreateJobModal({
       experienceLevel,
       minSalary: minSalary ? parseInt(minSalary, 10) : undefined,
       maxSalary: maxSalary ? parseInt(maxSalary, 10) : undefined,
-      currency: "USD",
+      currency: "GBP",
       salaryPeriod,
       hasEquity,
       equityRange: hasEquity && equityRange.trim() ? equityRange.trim() : undefined,
@@ -164,19 +164,19 @@ export function CreateJobModal({
           className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs gap-1.5 rounded-md shadow-sm shadow-primary/20"
         >
           <Plus className="size-3.5" />
-          <span>Post New Requisition</span>
+          <span>Post a Job</span>
         </Button>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto bg-card border border-border text-foreground p-6 sm:p-8 rounded-xl shadow-2xl">
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto no-scrollbar bg-card border border-border text-foreground p-6 sm:p-8 rounded-xl shadow-2xl">
         <DialogHeader className="space-y-1.5 text-left border-b border-border pb-4">
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary border border-border text-xs font-mono text-muted-foreground">
             <Building2 className="size-3 text-primary" />
-            <span>Tenant Requisition Builder</span>
+            <span>Job Posting Builder</span>
           </div>
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-            Create Job Requisition
+            Create Job Posting
           </DialogTitle>
           <p className="text-xs text-muted-foreground">
             Publish an authentic corporate opening directly to verified candidates across the portal.
@@ -221,7 +221,7 @@ export function CreateJobModal({
                 id="workplaceType"
                 value={workplaceType}
                 onChange={(e) => setWorkplaceType(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="REMOTE">Remote</option>
                 <option value="HYBRID">Hybrid</option>
@@ -237,7 +237,7 @@ export function CreateJobModal({
                 id="jobType"
                 value={jobType}
                 onChange={(e) => setJobType(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="FULL_TIME">Full-time</option>
                 <option value="PART_TIME">Part-time</option>
@@ -300,7 +300,7 @@ export function CreateJobModal({
                   id="salaryPeriod"
                   value={salaryPeriod}
                   onChange={(e) => setSalaryPeriod(e.target.value)}
-                  className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-none focus:border-primary"
+                  className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-hidden focus:border-primary"
                 >
                   <option value="YEARLY">Yearly</option>
                   <option value="MONTHLY">Monthly</option>
@@ -344,7 +344,7 @@ export function CreateJobModal({
                 {hasSignOnBonus && (
                   <Input
                     type="number"
-                    placeholder="Sign-on amount ($)"
+                    placeholder="Sign-on amount (£)"
                     value={signOnBonus}
                     onChange={(e) => setSignOnBonus(e.target.value)}
                     className="h-8 bg-background border-border text-foreground text-xs rounded-md"
@@ -392,7 +392,7 @@ export function CreateJobModal({
                 id="experienceLevel"
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="ENTRY_LEVEL">Entry Level (0-2 yrs)</option>
                 <option value="MID_LEVEL">Mid Level (3-5 yrs)</option>
@@ -410,7 +410,7 @@ export function CreateJobModal({
                 id="expirationDays"
                 value={expirationDays}
                 onChange={(e) => setExpirationDays(e.target.value)}
-                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+                className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
                 <option value="30">30 Days (Standard)</option>
                 <option value="60">60 Days (Extended)</option>
@@ -442,7 +442,7 @@ export function CreateJobModal({
               </Label>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Tag top corporate perks included with this requisition.
+              Tag top corporate perks included with this job.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               {COMPANY_BENEFITS.map((b) => {
@@ -525,7 +525,7 @@ export function CreateJobModal({
                   Publishing...
                 </>
               ) : (
-                "Publish Requisition"
+                "Publish Job"
               )}
             </Button>
           </div>

@@ -13,14 +13,11 @@ import { Input } from "@/components/ui/input";
 import {
   Users,
   ShieldAlert,
-  ShieldCheck,
   Search,
   Loader2,
   Ban,
   CheckCircle2,
-  AlertTriangle,
   RotateCcw,
-  Calendar,
   Mail,
   Building2,
 } from "lucide-react";
@@ -56,7 +53,6 @@ export function AdminUserModerationTab() {
   const unbanMutation = useUnbanUserMutation();
 
   const users = data?.content || [];
-  const totalElements = data?.totalElements || 0;
 
   const handleConfirmBan = () => {
     if (!banModalUser || !banReason.trim()) return;
@@ -284,65 +280,105 @@ export function AdminUserModerationTab() {
           }
         }}
       >
-        <DialogContent className="max-w-md bg-card border-border text-foreground">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold flex items-center gap-2 text-rose-400">
-              <ShieldAlert className="size-4" />
-              <span>Suspend Account Access</span>
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Suspending <strong>{banModalUser?.email}</strong> will revoke all active JWT sessions and prevent login access.
-            </DialogDescription>
+        <DialogContent className="max-w-md sm:max-w-lg bg-card/95 border border-border/80 text-foreground rounded-3xl p-6 shadow-2xl backdrop-blur-xl">
+          <DialogHeader className="text-left">
+            <div className="flex items-start gap-4 pb-1">
+              <div className="size-11 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 shadow-inner">
+                <ShieldAlert className="size-5" />
+              </div>
+              <div className="space-y-1">
+                <DialogTitle className="text-lg font-bold text-foreground tracking-tight">
+                  Suspend Account Access
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+                  Suspending <span className="font-mono text-foreground font-semibold px-1.5 py-0.5 rounded bg-secondary/80 border border-border/60">{banModalUser?.email}</span> will revoke all active JWT sessions and immediately prevent login access.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="space-y-3 py-2">
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1">
-                Suspension Reason <span className="text-rose-400">*</span>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                <span>
+                  Suspension Reason <span className="text-rose-400">*</span>
+                </span>
+                <span className="text-[10px] text-muted-foreground font-normal">
+                  Required for platform audit log
+                </span>
               </label>
               <Input
                 value={banReason}
                 onChange={(e) => setBanReason(e.target.value)}
                 placeholder="e.g. Terms of Service violation, automated scraping, spam..."
-                className="h-8 text-xs bg-secondary/50 border-border"
+                className="h-10 text-xs bg-secondary/40 border border-border/80 rounded-xl px-3 transition-all focus-visible:ring-2 focus-visible:ring-rose-500/25 focus-visible:border-rose-500/50 outline-none"
               />
             </div>
 
-            <div>
-              <label className="text-xs font-medium text-foreground block mb-1">
-                Duration in Days (Leave blank for indefinite ban)
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                <span>Duration</span>
+                <span className="text-[10px] text-muted-foreground font-normal">
+                  Leave blank for permanent ban
+                </span>
               </label>
+
+              {/* Quick Preset Duration Chips */}
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { label: "7 Days", value: 7 as number | "" },
+                  { label: "30 Days", value: 30 as number | "" },
+                  { label: "90 Days", value: 90 as number | "" },
+                  { label: "Indefinite", value: "" as number | "" },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => setBanDays(preset.value)}
+                    className={`px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer border ${
+                      banDays === preset.value
+                        ? "bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold"
+                        : "bg-secondary/40 hover:bg-secondary text-muted-foreground border-border/60"
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+
               <Input
                 type="number"
                 min={1}
                 max={365}
                 value={banDays}
                 onChange={(e) => setBanDays(e.target.value ? Number(e.target.value) : "")}
-                placeholder="e.g. 7 or 30 days"
-                className="h-8 text-xs bg-secondary/50 border-border"
+                placeholder="Custom number of days (e.g. 14, 60)"
+                className="h-10 text-xs bg-secondary/40 border border-border/80 rounded-xl px-3 transition-all focus-visible:ring-2 focus-visible:ring-rose-500/25 focus-visible:border-rose-500/50 outline-none"
               />
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-2.5 pt-2">
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={() => setBanModalUser(null)}
-              className="text-xs border-border"
+              className="h-10 px-4 rounded-xl text-xs font-medium border-border/80 bg-secondary/30 hover:bg-secondary cursor-pointer"
             >
               Cancel
             </Button>
             <Button
+              type="button"
               size="sm"
               disabled={banMutation.isPending || !banReason.trim()}
               onClick={handleConfirmBan}
-              className="text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5"
+              className="h-10 px-5 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white gap-2 shadow-xs cursor-pointer disabled:opacity-50"
             >
               {banMutation.isPending ? (
-                <Loader2 className="size-3 animate-spin" />
+                <Loader2 className="size-3.5 animate-spin" />
               ) : (
-                <Ban className="size-3" />
+                <Ban className="size-3.5" />
               )}
               <span>Confirm Suspension</span>
             </Button>

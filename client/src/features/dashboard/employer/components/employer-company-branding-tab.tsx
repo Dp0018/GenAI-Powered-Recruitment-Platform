@@ -15,10 +15,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Building2,
-  Globe,
-  MapPin,
-  Users,
-  Briefcase,
   UploadCloud,
   Loader2,
   ExternalLink,
@@ -130,7 +126,7 @@ export function EmployerCompanyBrandingTab() {
             <span>Corporate Branding & Employer Page</span>
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Configure how your organization appears on public job requisitions and candidate discovery.
+            Configure how your organization appears on public job listings and candidate discovery.
           </p>
         </div>
 

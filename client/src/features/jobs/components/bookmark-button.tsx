@@ -22,8 +22,7 @@ export function BookmarkButton({
   className = "",
 }: BookmarkButtonProps) {
   const { user } = useAuth();
-  const isCandidate = user?.role === "CANDIDATE";
-  const { data: isSaved, isLoading } = useIsJobSavedQuery(jobId, Boolean(user));
+  const { data: isSaved } = useIsJobSavedQuery(jobId, Boolean(user));
   const toggleMutation = useToggleSaveJobMutation(jobId);
 
   const handleClick = (e: React.MouseEvent) => {

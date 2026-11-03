@@ -23,7 +23,6 @@ import {
   Edit3,
   Loader2,
   Code,
-  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { aiApi } from "@/features/ai/api/ai-api";
@@ -45,7 +44,6 @@ export function JobDescriptionEditor({
 }: JobDescriptionEditorProps) {
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -77,7 +75,7 @@ export function JobDescriptionEditor({
     editorProps: {
       attributes: {
         class:
-          "focus:outline-none min-h-[180px] p-4 text-xs sm:text-sm text-foreground leading-relaxed font-sans prose prose-invert max-w-none",
+          "focus:outline-hidden min-h-[180px] p-4 text-xs sm:text-sm text-foreground leading-relaxed font-sans prose prose-invert max-w-none",
       },
     },
     onUpdate: ({ editor }) => {
@@ -99,7 +97,6 @@ export function JobDescriptionEditor({
   const handleAiPolish = async () => {
     if (!editor) return;
     const currentContent = editor.getText().trim();
-    const promptSource = currentContent || jobTitle || "Software Engineer";
 
     setIsAiGenerating(true);
     try {

@@ -20,7 +20,6 @@ import {
   MapPin,
   Send,
   Loader2,
-  CheckCircle2,
   PauseCircle,
   PlayCircle,
   Sparkles,
@@ -117,7 +116,7 @@ export function CandidateJobAlertsTab() {
           <div className="flex items-center justify-between border-b border-border pb-2.5">
             <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
               <Sparkles className="size-3.5 text-primary" />
-              <span>Create Custom Requisition Alert</span>
+              <span>Create Custom Job Alert</span>
             </span>
             <Button
               type="button"
@@ -219,7 +218,7 @@ export function CandidateJobAlertsTab() {
           <div className="space-y-1">
             <h3 className="text-sm font-medium text-foreground">No active job alerts configured</h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Set up alerts for your target roles to receive automatic email notifications as soon as matching requisitions open up.
+              Set up alerts for your target roles to receive automatic email notifications as soon as matching jobs open up.
             </p>
           </div>
           <Button

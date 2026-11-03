@@ -19,13 +19,11 @@ interface JobFraudShieldBadgeProps {
 
 export function JobFraudShieldBadge({
   fraudScore,
-  riskLevel,
   fraudReasons,
   isQuarantined,
   className = "",
 }: JobFraudShieldBadgeProps) {
   const actualScore = fraudScore ?? 5;
-  const actualRisk = riskLevel ?? "LOW";
   const actualQuarantined = isQuarantined ?? false;
   const [isOpen, setIsOpen] = useState(false);
 
@@ -96,7 +94,7 @@ export function JobFraudShieldBadge({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Real-time cyber safety evaluation protecting job seekers against scams, phishing, and fake requisitions.
+              Real-time cyber safety evaluation protecting job seekers against scams, phishing, and fake job postings.
             </p>
           </DialogHeader>
 
@@ -151,7 +149,7 @@ export function JobFraudShieldBadge({
               ) : (
                 <div className="p-2.5 rounded border border-border bg-card/60 text-xs text-muted-foreground flex items-center gap-2">
                   <CheckCircle2 className="size-3.5 text-emerald-400 shrink-0" />
-                  <span>Standard verified employment requisition with standard compensation and no suspicious indicators.</span>
+                  <span>Standard verified job opening with standard compensation and no suspicious indicators.</span>
                 </div>
               )}
             </div>

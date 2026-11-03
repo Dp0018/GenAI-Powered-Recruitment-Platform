@@ -1,5 +1,4 @@
 import { Role } from "@/types/auth";
-import { Company } from "@/features/companies/types/company";
 
 export interface AdminAnalytics {
   totalUsers: number;
