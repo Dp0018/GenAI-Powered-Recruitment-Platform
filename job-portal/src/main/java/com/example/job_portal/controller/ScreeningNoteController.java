@@ -21,7 +21,7 @@ public class ScreeningNoteController {
     private final ScreeningNoteService screeningNoteService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'EMPLOYER', 'RECRUITER', 'PLATFORM_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<ScreeningNoteResponse>> addScreeningNote(
             @PathVariable String applicationId,
             @Valid @RequestBody CreateScreeningNoteRequest request,
@@ -32,7 +32,7 @@ public class ScreeningNoteController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'EMPLOYER', 'RECRUITER', 'PLATFORM_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<ApplicationScorecardSummaryResponse>> getScorecard(
             @PathVariable String applicationId,
             @AuthenticationPrincipal UserPrincipal currentUser

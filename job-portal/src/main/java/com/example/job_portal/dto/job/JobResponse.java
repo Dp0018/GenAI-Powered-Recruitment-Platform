@@ -82,7 +82,7 @@ public class JobResponse {
                 .experienceLevel(job.getExperienceLevel() != null ? job.getExperienceLevel().name() : Job.ExperienceLevel.MID_LEVEL.name())
                 .minSalary(job.getMinSalary())
                 .maxSalary(job.getMaxSalary())
-                .currency(job.getCurrency() != null ? job.getCurrency() : "USD")
+                .currency(job.getCurrency() == null || "USD".equalsIgnoreCase(job.getCurrency()) ? "GBP" : job.getCurrency())
                 .salaryPeriod(job.getSalaryPeriod() != null ? job.getSalaryPeriod() : "YEARLY")
                 .hasEquity(job.getHasEquity() != null ? job.getHasEquity() : false)
                 .equityRange(job.getEquityRange())

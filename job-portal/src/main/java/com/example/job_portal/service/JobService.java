@@ -216,7 +216,7 @@ public class JobService {
                 .experienceLevel(experienceLevel)
                 .minSalary(request.getMinSalary())
                 .maxSalary(request.getMaxSalary())
-                .currency(request.getCurrency() != null ? request.getCurrency() : "USD")
+                .currency(request.getCurrency() != null && !"USD".equalsIgnoreCase(request.getCurrency()) ? request.getCurrency() : "GBP")
                 .salaryPeriod(request.getSalaryPeriod() != null ? request.getSalaryPeriod() : "YEARLY")
                 .hasEquity(request.getHasEquity() != null ? request.getHasEquity() : false)
                 .equityRange(request.getEquityRange())

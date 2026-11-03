@@ -275,7 +275,7 @@ public class GeminiServiceImpl implements GeminiService {
                 job.getLocation() != null ? job.getLocation() : "Remote",
                 job.getMinSalary() != null ? job.getMinSalary() : "N/A",
                 job.getMaxSalary() != null ? job.getMaxSalary() : "N/A",
-                job.getCurrency() != null ? job.getCurrency() : "USD",
+                job.getCurrency() != null && !"USD".equalsIgnoreCase(job.getCurrency()) ? job.getCurrency() : "GBP",
                 job.getSalaryPeriod() != null ? job.getSalaryPeriod() : "YEARLY",
                 job.getDescription(),
                 job.getRequirements() != null ? job.getRequirements() : "",

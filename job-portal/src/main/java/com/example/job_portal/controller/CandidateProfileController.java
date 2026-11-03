@@ -46,7 +46,7 @@ public class CandidateProfileController {
     }
 
     @GetMapping("/candidate/{userId}")
-    @PreAuthorize("hasAnyRole('EMPLOYER', 'ADMIN', 'CANDIDATE')")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'EMPLOYER', 'RECRUITER', 'PLATFORM_ADMIN', 'ADMIN', 'CANDIDATE')")
     public ResponseEntity<ApiResponse<CandidateProfileResponse>> getCandidateProfileByUserId(
             @PathVariable String userId
     ) {

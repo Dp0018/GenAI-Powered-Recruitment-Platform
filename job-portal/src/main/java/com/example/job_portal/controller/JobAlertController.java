@@ -67,7 +67,7 @@ public class JobAlertController {
     }
 
     @PostMapping("/trigger")
-    @PreAuthorize("hasAnyRole('CANDIDATE', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CANDIDATE', 'PLATFORM_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> triggerDigests() {
         int count = jobAlertService.triggerDigestExecution();
         return ResponseEntity.ok(ApiResponse.success(

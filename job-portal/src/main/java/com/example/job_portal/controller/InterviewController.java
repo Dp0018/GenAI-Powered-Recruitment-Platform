@@ -24,7 +24,7 @@ public class InterviewController {
     private final InterviewService interviewService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'EMPLOYER', 'RECRUITER', 'PLATFORM_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<InterviewResponse>> scheduleInterview(
             @Valid @RequestBody CreateInterviewRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -34,7 +34,7 @@ public class InterviewController {
     }
 
     @PostMapping("/propose-slots")
-    @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'EMPLOYER', 'RECRUITER', 'PLATFORM_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<InterviewResponse>> proposeSlots(
             @Valid @RequestBody com.example.job_portal.dto.interview.ProposeInterviewSlotsRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -55,7 +55,7 @@ public class InterviewController {
     }
 
     @GetMapping("/employer")
-    @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'EMPLOYER', 'RECRUITER', 'PLATFORM_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<List<InterviewResponse>>> getEmployerInterviews(
             @AuthenticationPrincipal UserPrincipal currentUser
     ) {

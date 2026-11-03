@@ -64,7 +64,7 @@ public class JobOfferServiceImpl implements JobOfferService {
                         request.getJobTitle(),
                         application.getJob().getCompany().getName(),
                         request.getBaseSalary(),
-                        request.getCurrency() != null ? request.getCurrency() : "USD",
+                        request.getCurrency() != null && !"USD".equalsIgnoreCase(request.getCurrency()) ? request.getCurrency() : "GBP",
                         request.getPayPeriod() != null ? request.getPayPeriod() : "ANNUAL",
                         request.getEquityDetails(),
                         request.getSignOnBonus(),
@@ -85,7 +85,7 @@ public class JobOfferServiceImpl implements JobOfferService {
                 .createdBy(recruiterUser)
                 .jobTitle(request.getJobTitle().trim())
                 .baseSalary(request.getBaseSalary())
-                .currency(request.getCurrency() != null ? request.getCurrency() : "USD")
+                .currency(request.getCurrency() != null && !"USD".equalsIgnoreCase(request.getCurrency()) ? request.getCurrency() : "GBP")
                 .payPeriod(request.getPayPeriod() != null ? request.getPayPeriod() : "ANNUAL")
                 .equityDetails(request.getEquityDetails())
                 .signOnBonus(request.getSignOnBonus())

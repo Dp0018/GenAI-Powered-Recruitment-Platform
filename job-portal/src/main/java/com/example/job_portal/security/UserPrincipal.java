@@ -9,8 +9,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Builder
@@ -27,7 +29,13 @@ public class UserPrincipal implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(User user, String password) {
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        if (user.getRole() == Role.EMPLOYER_ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_EMPLOYER"));
+        } else if (user.getRole() == Role.PLATFORM_ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
 
         return UserPrincipal.builder()
                 .id(user.getId())
@@ -37,7 +45,7 @@ public class UserPrincipal implements UserDetails {
                 .role(user.getRole())
                 .companyId(user.getCompany() != null ? user.getCompany().getId() : null)
                 .banned(user.isBanned())
-                .authorities(Collections.singletonList(authority))
+                .authorities(authorities)
                 .build();
     }
 

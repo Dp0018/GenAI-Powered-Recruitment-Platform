@@ -28,7 +28,7 @@ public class SkillsMatchController {
     }
 
     @GetMapping("/applications/{applicationId}/match")
-    @PreAuthorize("hasAnyRole('EMPLOYER', 'RECRUITER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYER_ADMIN', 'EMPLOYER', 'RECRUITER', 'PLATFORM_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<SkillsMatchResponse>> getApplicationMatch(
             @PathVariable String applicationId,
             @AuthenticationPrincipal UserPrincipal currentUser

@@ -69,7 +69,7 @@ public class Job {
 
     @Column(length = 10)
     @Builder.Default
-    private String currency = "USD";
+    private String currency = "GBP";
 
     @Column(name = "salary_period", length = 20)
     @Builder.Default

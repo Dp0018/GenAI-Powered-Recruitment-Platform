@@ -48,7 +48,7 @@ public class JobOffer {
 
     @Column(length = 10, nullable = false)
     @Builder.Default
-    private String currency = "USD";
+    private String currency = "GBP";
 
     @Column(name = "pay_period", length = 20)
     @Builder.Default
