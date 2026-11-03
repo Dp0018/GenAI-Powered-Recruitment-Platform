@@ -37,12 +37,11 @@ export function HeroSection() {
 
   return (
     <section className="pt-16 pb-20 sm:pt-24 sm:pb-28 px-4 sm:px-6 lg:px-8 border-b border-border/60 bg-background">
-      <div className="container mx-auto max-w-5xl space-y-10">
+      <div className="mx-auto w-full max-w-7xl space-y-10">
         {/* Top Status Pill */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/80 border border-border text-xs text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary" />
-            <span className="text-foreground font-medium">Over 1,200 verified roles posted this week</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-secondary/80 border border-border text-xs text-foreground font-medium">
+            <span>Over 1,200 verified roles posted this week</span>
           </div>
         </div>
 

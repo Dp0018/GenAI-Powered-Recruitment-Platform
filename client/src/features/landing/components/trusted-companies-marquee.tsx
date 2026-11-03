@@ -16,7 +16,7 @@ const COMPANIES = [
 export function TrustedCompaniesMarquee() {
   return (
     <section className="py-10 border-b border-border/60 bg-secondary/10">
-      <div className="container mx-auto max-w-6xl px-4 text-center space-y-5">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-5">
         <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
           Hiring teams from top companies hire on JobPortal
         </p>

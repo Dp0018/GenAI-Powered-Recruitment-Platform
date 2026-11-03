@@ -2,12 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
-import { Briefcase, Heart, Sparkles, CheckCircle2 } from "lucide-react";
+import { Briefcase, CheckCircle2 } from "lucide-react";
 
 export function Footer() {
   return (
     <footer className="border-t border-border/80 bg-card/60 text-muted-foreground text-sm">
-      <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14 space-y-12">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Brand Info */}
           <div className="md:col-span-2 space-y-4">
@@ -21,11 +21,6 @@ export function Footer() {
             <p className="text-xs sm:text-sm text-muted-foreground max-w-sm leading-relaxed">
               The modern hiring platform built for transparency and speed. Connecting exceptional software engineers, product leaders, and designers directly with verified companies.
             </p>
-
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
-              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>All Systems Operational</span>
-            </div>
           </div>
 
           {/* Links Column 1: Candidates */}

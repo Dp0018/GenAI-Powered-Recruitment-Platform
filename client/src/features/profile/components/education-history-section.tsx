@@ -14,11 +14,9 @@ import {
   GraduationCap,
   Plus,
   Trash2,
-  Calendar,
   School,
   Loader2,
   X,
-  Award,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,13 +38,6 @@ export function EducationHistorySection({
   const [gradeOrGpa, setGradeOrGpa] = useState("");
   const [description, setDescription] = useState("");
 
-  const addMutation = useAddEducationHistoryMutation(() => {
-    resetForm();
-    setIsAdding(false);
-  });
-
-  const deleteMutation = useDeleteEducationHistoryMutation();
-
   const resetForm = () => {
     setInstitution("");
     setDegree("");
@@ -56,6 +47,13 @@ export function EducationHistorySection({
     setGradeOrGpa("");
     setDescription("");
   };
+
+  const addMutation = useAddEducationHistoryMutation(() => {
+    resetForm();
+    setIsAdding(false);
+  });
+
+  const deleteMutation = useDeleteEducationHistoryMutation();
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();

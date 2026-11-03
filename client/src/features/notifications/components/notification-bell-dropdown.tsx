@@ -94,7 +94,7 @@ export function NotificationBellDropdown() {
           setIsOpen(!isOpen);
           if (!isOpen) refresh();
         }}
-        className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/40"
+        className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors focus:outline-hidden focus:ring-1 focus:ring-primary/40"
         aria-label="Notifications"
       >
         <Bell className="size-4.5" />

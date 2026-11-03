@@ -2,7 +2,7 @@
 
 import React from "react";
 import {
-  DollarSign,
+  PoundSterling,
   Zap,
   ShieldCheck,
   CalendarCheck,
@@ -12,7 +12,7 @@ import {
 
 const VALUE_PROPS = [
   {
-    icon: DollarSign,
+    icon: PoundSterling,
     title: "Upfront Salary Transparency",
     description:
       "Every position lists base salary ranges, equity options, and bonuses so you know the full compensation before applying.",
@@ -52,7 +52,7 @@ const VALUE_PROPS = [
 export function WhyChooseUs() {
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/60 bg-background">
-      <div className="container mx-auto max-w-6xl space-y-12">
+      <div className="mx-auto w-full max-w-7xl space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-medium text-primary uppercase tracking-wider">

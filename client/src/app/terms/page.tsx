@@ -72,7 +72,7 @@ export default function TermsPage() {
             3. Employer Verification and Job Listing Standards
           </h2>
           <p>
-            To prevent fraud and misleading representations, all newly registered employer organizations enter a mandatory Pending Verification status. Employers may create listing drafts, but public broadcasting of job requisitions requires authorization from Platform Administrators.
+            To prevent fraud and misleading representations, all newly registered employer organizations enter a mandatory Pending Verification status. Employers may create listing drafts, but public broadcasting of job postings requires authorization from Platform Administrators.
           </p>
           <p>
             Job postings must represent bona fide employment opportunities. Postings requiring upfront financial payments from applicants, multi-level marketing schemes, or misleading compensation structures are strictly prohibited and result in immediate termination of the employer account.

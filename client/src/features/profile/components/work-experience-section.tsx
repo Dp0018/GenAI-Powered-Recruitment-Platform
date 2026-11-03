@@ -14,7 +14,6 @@ import {
   Briefcase,
   Plus,
   Trash2,
-  Calendar,
   MapPin,
   Building2,
   Loader2,
@@ -40,13 +39,6 @@ export function WorkExperienceSection({
   const [currentlyWorking, setCurrentlyWorking] = useState(false);
   const [description, setDescription] = useState("");
 
-  const addMutation = useAddWorkExperienceMutation(() => {
-    resetForm();
-    setIsAdding(false);
-  });
-
-  const deleteMutation = useDeleteWorkExperienceMutation();
-
   const resetForm = () => {
     setCompany("");
     setTitle("");
@@ -56,6 +48,13 @@ export function WorkExperienceSection({
     setCurrentlyWorking(false);
     setDescription("");
   };
+
+  const addMutation = useAddWorkExperienceMutation(() => {
+    resetForm();
+    setIsAdding(false);
+  });
+
+  const deleteMutation = useDeleteWorkExperienceMutation();
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();

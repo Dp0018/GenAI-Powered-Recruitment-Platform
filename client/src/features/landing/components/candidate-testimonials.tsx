@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { Star, Quote } from "lucide-react";
+import { Star } from "lucide-react";
 
 const TESTIMONIALS = [
   {
     name: "Sarah Jenkins",
     role: "Senior Full Stack Engineer",
     hiredAt: "Hired at Stripe",
-    compensation: "$185k / yr + Equity",
+    compensation: "£145k / yr + Equity",
     quote:
       "I applied directly on a Tuesday, had my first call on Thursday, and accepted an offer two weeks later. The upfront salary transparency meant zero awkward negotiation surprises.",
     rating: 5,
@@ -18,7 +18,7 @@ const TESTIMONIALS = [
     name: "Alex Rivera",
     role: "Staff Platform Engineer",
     hiredAt: "Hired at Vercel",
-    compensation: "$215k / yr + Stock",
+    compensation: "£165k / yr + Stock",
     quote:
       "Unlike legacy boards with agency spam and ghost listings, every company on JobPortal was verified and the hiring manager directly reviewed my application.",
     rating: 5,
@@ -28,7 +28,7 @@ const TESTIMONIALS = [
     name: "Priya Sharma",
     role: "Lead Product Designer",
     hiredAt: "Hired at Figma",
-    compensation: "$175k / yr + Equity",
+    compensation: "£135k / yr + Equity",
     quote:
       "The application process was refreshingly simple. I submitted using my saved profile and scheduled my interviews right from the recruiter's calendar.",
     rating: 5,
@@ -39,7 +39,7 @@ const TESTIMONIALS = [
 export function CandidateTestimonials() {
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/60 bg-background">
-      <div className="container mx-auto max-w-6xl space-y-12">
+      <div className="mx-auto w-full max-w-7xl space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-medium text-primary uppercase tracking-wider">

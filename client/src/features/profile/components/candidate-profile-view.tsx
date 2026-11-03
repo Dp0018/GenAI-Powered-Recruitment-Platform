@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useProfileQuery, useUpdateProfileMutation } from "../hooks/use-profile";
 import { profileApi } from "../api/profile-api";
-import { applicationsApi } from "@/features/applications/api/applications-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,16 +17,12 @@ import {
   Globe,
   Link2,
   Code,
-  UploadCloud,
   CheckCircle2,
-  Trash2,
-  ExternalLink,
   Plus,
   X,
   Camera,
   Loader2,
   Save,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { WorkExperienceSection } from "./work-experience-section";
@@ -35,11 +30,10 @@ import { EducationHistorySection } from "./education-history-section";
 import { ResumeLibrarySection } from "./resume-library-section";
 
 export function CandidateProfileView() {
-  const { data: profile, isLoading, refetch } = useProfileQuery();
+  const { data: profile, isLoading } = useProfileQuery();
   const updateMutation = useUpdateProfileMutation();
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const resumeInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
   const [name, setName] = useState("");
@@ -60,67 +54,6 @@ export function CandidateProfileView() {
   const [skillInput, setSkillInput] = useState("");
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [isUploadingResume, setIsUploadingResume] = useState(false);
-  const [isParsingResume, setIsParsingResume] = useState(false);
-
-  const handleAutoExtract = async (targetUrl?: string) => {
-    const urlToParse = targetUrl || resumeUrl;
-    if (!urlToParse) {
-      toast.error("Please upload a resume first before auto-extracting profile");
-      return;
-    }
-
-    try {
-      setIsParsingResume(true);
-      toast.info("Extracting work history, skills & bio from resume...");
-      const parsed = await profileApi.parseResume({ resumeUrl: urlToParse });
-
-      if (parsed.headline && !headline) {
-        setHeadline(parsed.headline);
-      }
-      if (parsed.bio && !bio) {
-        setBio(parsed.bio);
-      }
-      if (parsed.phone && !phone) {
-        setPhone(parsed.phone);
-      }
-      if (parsed.skills && parsed.skills.length > 0) {
-        setSkills((prev) => Array.from(new Set([...prev, ...(parsed.skills || [])])));
-      }
-
-      // If work experiences parsed and candidate doesn't have any, save them
-      if (parsed.workExperiences && parsed.workExperiences.length > 0 && (!profile?.workExperiences || profile.workExperiences.length === 0)) {
-        for (const exp of parsed.workExperiences) {
-          try {
-            await profileApi.addWorkExperience(exp);
-          } catch {
-            // ignore item failure
-          }
-        }
-      }
-
-      // If education history parsed and candidate doesn't have any, save them
-      if (parsed.educationHistory && parsed.educationHistory.length > 0 && (!profile?.educationHistory || profile.educationHistory.length === 0)) {
-        for (const edu of parsed.educationHistory) {
-          try {
-            await profileApi.addEducationHistory(edu);
-          } catch {
-            // ignore item failure
-          }
-        }
-      }
-
-      refetch();
-      toast.success(
-        `Resume parsed! Auto-extracted ${parsed.skills?.length || 0} skills, bio & credential details.`
-      );
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to extract from resume";
-      toast.error(msg);
-    } finally {
-      setIsParsingResume(false);
-    }
-  };
 
   useEffect(() => {
     if (profile) {
@@ -167,37 +100,6 @@ export function CandidateProfileView() {
     } finally {
       setIsUploadingAvatar(false);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
-    }
-  };
-
-  const handleResumeUpload = async (file: File) => {
-    const validExtensions = [".pdf", ".docx", ".doc"];
-    const fileExt = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
-
-    if (!validExtensions.includes(fileExt)) {
-      toast.error("Please upload a PDF or Word document (.pdf, .docx, .doc)");
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Resume file exceeds 10MB limit");
-      return;
-    }
-
-    try {
-      setIsUploadingResume(true);
-      const res = await applicationsApi.uploadResume(file);
-      setResumeUrl(res.url);
-      setResumeFileName(file.name);
-      toast.success("Resume uploaded! Extracting profile details...");
-      // Auto-populate profile from uploaded resume
-      handleAutoExtract(res.url);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to upload resume";
-      toast.error(msg);
-    } finally {
-      setIsUploadingResume(false);
-      if (resumeInputRef.current) resumeInputRef.current.value = "";
     }
   };
 
@@ -593,7 +495,7 @@ export function CandidateProfileView() {
       <div className="flex justify-end pt-2">
         <Button
           type="submit"
-          disabled={updateMutation.isPending || isUploadingAvatar || isUploadingResume}
+          disabled={updateMutation.isPending || isUploadingAvatar}
           size="sm"
           className="h-10 px-6 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-md shadow-sm gap-2"
         >

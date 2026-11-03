@@ -143,7 +143,7 @@ export function EmployerCompanyStep({
             id="company-industry"
             value={industry}
             onChange={(e) => setIndustry(e.target.value)}
-            className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+            className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
           >
             {INDUSTRIES.map((ind) => (
               <option key={ind} value={ind} className="bg-card text-foreground">
@@ -161,7 +161,7 @@ export function EmployerCompanyStep({
             id="company-size"
             value={companySize}
             onChange={(e) => setCompanySize(e.target.value)}
-            className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-none focus:border-primary"
+            className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
           >
             {COMPANY_SIZES.map((size) => (
               <option key={size} value={size} className="bg-card text-foreground">

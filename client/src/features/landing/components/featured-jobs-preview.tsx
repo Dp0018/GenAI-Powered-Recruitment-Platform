@@ -18,7 +18,7 @@ export function FeaturedJobsPreview() {
 
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/60 bg-secondary/10">
-      <div className="container mx-auto max-w-6xl space-y-10">
+      <div className="mx-auto w-full max-w-7xl space-y-10">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1.5">

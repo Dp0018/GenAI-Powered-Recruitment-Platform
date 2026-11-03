@@ -6,12 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   User,
   Building2,
-  Check,
   ArrowRight,
-  FileText,
-  Calendar,
-  Send,
-  CheckCircle,
 } from "lucide-react";
 
 export function DualPathwaySection() {
@@ -19,7 +14,7 @@ export function DualPathwaySection() {
 
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/60 bg-secondary/15">
-      <div className="container mx-auto max-w-5xl space-y-12">
+      <div className="mx-auto w-full max-w-7xl space-y-12">
         {/* Toggle Switcher */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-card border border-border">

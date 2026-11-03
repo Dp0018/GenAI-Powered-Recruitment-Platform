@@ -119,7 +119,63 @@ export function LoginCard() {
         </Button>
       </form>
 
-      <div className="pt-4 border-t border-border flex flex-col gap-2 text-sm text-muted-foreground">
+      {/* Quick Test Accounts */}
+      <div className="pt-3 border-t border-border/60 space-y-2">
+        <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground font-semibold">
+          Test Role Logins (Click to Fill)
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setEmail("candidate@jobportal.com");
+              setPassword("Password123!");
+            }}
+            className="p-2.5 text-left rounded-lg bg-secondary/50 hover:bg-secondary border border-border/70 text-xs transition-colors cursor-pointer group"
+          >
+            <div className="font-semibold text-foreground group-hover:text-sky-400">Candidate</div>
+            <div className="text-[10px] text-muted-foreground truncate">candidate@jobportal.com</div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEmail("employer@jobportal.com");
+              setPassword("Password123!");
+            }}
+            className="p-2.5 text-left rounded-lg bg-secondary/50 hover:bg-secondary border border-border/70 text-xs transition-colors cursor-pointer group"
+          >
+            <div className="font-semibold text-foreground group-hover:text-sky-400">Employer Admin</div>
+            <div className="text-[10px] text-muted-foreground truncate">employer@jobportal.com</div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEmail("recruiter@jobportal.com");
+              setPassword("Password123!");
+            }}
+            className="p-2.5 text-left rounded-lg bg-secondary/50 hover:bg-secondary border border-border/70 text-xs transition-colors cursor-pointer group"
+          >
+            <div className="font-semibold text-foreground group-hover:text-sky-400">Recruiter</div>
+            <div className="text-[10px] text-muted-foreground truncate">recruiter@jobportal.com</div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEmail("admin@jobportal.com");
+              setPassword("AdminPassword123!");
+            }}
+            className="p-2.5 text-left rounded-lg bg-secondary/50 hover:bg-secondary border border-border/70 text-xs transition-colors cursor-pointer group"
+          >
+            <div className="font-semibold text-foreground group-hover:text-sky-400">Platform Admin</div>
+            <div className="text-[10px] text-muted-foreground truncate">admin@jobportal.com</div>
+          </button>
+        </div>
+      </div>
+
+      <div className="pt-2 border-t border-border flex flex-col gap-2 text-sm text-muted-foreground">
         <div className="flex items-center justify-between">
           <span>Don&apos;t have an account?</span>
           <Link

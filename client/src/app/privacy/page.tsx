@@ -69,7 +69,7 @@ export default function PrivacyPage() {
             <li>Facilitating direct job applications between candidates and verified hiring organizations.</li>
             <li>Enforcing enterprise authentication and secure session revocation.</li>
             <li>Dispatching time-sensitive one-time verification passcodes (OTP) for account verification and password resets.</li>
-            <li>Performing platform verification reviews to eliminate fraudulent corporate profiles and spam requisitions.</li>
+            <li>Performing platform verification reviews to eliminate fraudulent corporate profiles and spam job postings.</li>
           </ul>
         </section>
 

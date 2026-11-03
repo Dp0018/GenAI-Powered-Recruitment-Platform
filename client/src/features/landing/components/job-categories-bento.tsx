@@ -32,7 +32,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "Software Engineer",
     icon: Code2,
     jobCount: "3,480+ roles",
-    salaryRange: "$120k - $240k",
+    salaryRange: "£90k - £180k",
     skills: ["React", "TypeScript", "Go", "Java"],
   },
   {
@@ -41,7 +41,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "AI Engineer",
     icon: Cpu,
     jobCount: "1,240+ roles",
-    salaryRange: "$150k - $290k",
+    salaryRange: "£110k - £220k",
     skills: ["LLMs", "Python", "PyTorch", "RAG"],
   },
   {
@@ -50,7 +50,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "Product Manager",
     icon: Layers,
     jobCount: "860+ roles",
-    salaryRange: "$130k - $215k",
+    salaryRange: "£95k - £165k",
     skills: ["Roadmapping", "Growth", "Agile", "Analytics"],
   },
   {
@@ -59,7 +59,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "DevOps",
     icon: Cloud,
     jobCount: "940+ roles",
-    salaryRange: "$135k - $225k",
+    salaryRange: "£100k - £175k",
     skills: ["Kubernetes", "AWS", "Terraform", "CI/CD"],
   },
   {
@@ -68,7 +68,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "Data Engineer",
     icon: Database,
     jobCount: "780+ roles",
-    salaryRange: "$115k - $205k",
+    salaryRange: "£85k - £155k",
     skills: ["SQL", "Snowflake", "dbt", "PostgreSQL"],
   },
   {
@@ -77,7 +77,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "Product Designer",
     icon: Palette,
     jobCount: "620+ roles",
-    salaryRange: "$110k - $185k",
+    salaryRange: "£80k - £140k",
     skills: ["Figma", "Design Systems", "Prototyping", "UX"],
   },
   {
@@ -86,7 +86,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "Security Engineer",
     icon: ShieldCheck,
     jobCount: "430+ roles",
-    salaryRange: "$140k - $230k",
+    salaryRange: "£105k - £175k",
     skills: ["AppSec", "Compliance", "SOC2", "Cloud Sec"],
   },
   {
@@ -95,7 +95,7 @@ const CATEGORIES: CategoryCard[] = [
     query: "Account Executive",
     icon: TrendingUp,
     jobCount: "510+ roles",
-    salaryRange: "$90k - $190k",
+    salaryRange: "£75k - £140k",
     skills: ["B2B SaaS", "Enterprise", "Outbound", "CRM"],
   },
 ];
@@ -105,7 +105,7 @@ export function JobCategoriesBento() {
 
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-border/60 bg-background">
-      <div className="container mx-auto max-w-6xl space-y-10">
+      <div className="mx-auto w-full max-w-7xl space-y-10">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1.5">

@@ -38,7 +38,7 @@ export default function AuthLayout({
                 Unified Hiring Infrastructure with Scoped Access Control.
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Connect directly with verified corporate entities. Every session and requisition operates within strictly isolated tenant partitions.
+                Connect directly with verified corporate entities. Every session and job posting operates within strictly isolated tenant partitions.
               </p>
             </div>
 
@@ -85,24 +85,6 @@ export default function AuthLayout({
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Platform Compliance Status Chip (No internal framework mentions) */}
-        <div className="p-3.5 rounded-lg bg-secondary/50 border border-border text-xs space-y-1.5">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="flex items-center gap-1.5 text-foreground font-semibold">
-              <ShieldCheck className="size-3.5 text-primary" />
-              <span>Security Assurance</span>
-            </span>
-            <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
-              <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Active
-            </span>
-          </div>
-          <div className="flex justify-between text-[11px] text-muted-foreground">
-            <span>Tenant Isolation: Enforced</span>
-            <span>Data Encryption: AES-256</span>
           </div>
         </div>
       </aside>
