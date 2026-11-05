@@ -357,10 +357,13 @@ ${companyName} Talent Acquisition Team`
                     onChange={(e) => setExpirationDays(e.target.value)}
                     className="w-full h-9 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:outline-hidden focus:border-primary"
                   >
+                    <option value="2">2 Days (Urgent)</option>
                     <option value="3">3 Calendar Days</option>
                     <option value="5">5 Business Days</option>
                     <option value="7">7 Days (Standard)</option>
                     <option value="14">14 Days (Extended)</option>
+                    <option value="17">17 Days (Custom)</option>
+                    <option value="30">30 Days (1 Month)</option>
                   </select>
                 </div>
               </div>

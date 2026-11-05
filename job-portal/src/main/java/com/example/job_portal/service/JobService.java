@@ -132,7 +132,8 @@ public class JobService {
     @Transactional
     public JobResponse getJobBySlug(String slug) {
         Job job = jobRepository.findBySlug(slug)
-                .orElseThrow(() -> new ResourceNotFoundException("Job", "slug", slug));
+                .or(() -> jobRepository.findById(slug))
+                .orElseThrow(() -> new ResourceNotFoundException("Job", "slug/id", slug));
         try {
             jobRepository.incrementViewsCount(job.getId());
             job.setViewsCount(job.getViewsCount() + 1);

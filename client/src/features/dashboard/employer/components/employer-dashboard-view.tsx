@@ -10,8 +10,6 @@ import {
 } from "@/features/jobs/hooks/use-jobs";
 import { useCompanyApplicationsQuery } from "@/features/applications/hooks/use-applications";
 import { EmployerApplicantsTable } from "@/features/applications/components/employer-applicants-table";
-import { CreateJobModal } from "@/features/jobs/components/create-job-modal";
-import { EditJobModal } from "@/features/jobs/components/edit-job-modal";
 import { EmployerTeamTab } from "./employer-team-tab";
 import { EmployerCompanyBrandingTab } from "./employer-company-branding-tab";
 import { Button } from "@/components/ui/button";
@@ -72,17 +70,15 @@ export function EmployerHeader({ onNavigateToTeam }: EmployerHeaderProps) {
           <span>Invite Recruiter</span>
         </Button>
 
-        <CreateJobModal
-          triggerButton={
-            <Button
-              size="sm"
-              className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium gap-1.5 shadow-xs shadow-primary/20"
-            >
-              <Plus className="size-3.5" />
-              <span>Post a Job</span>
-            </Button>
-          }
-        />
+        <Link href="/dashboard/employer/jobs/new">
+          <Button
+            size="sm"
+            className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium gap-1.5 shadow-xs shadow-primary/20 cursor-pointer"
+          >
+            <Plus className="size-3.5" />
+            <span>Post a Job</span>
+          </Button>
+        </Link>
       </div>
     </div>
   );
@@ -206,14 +202,6 @@ export function EmployerJobsTable({
   const statusMutation = useUpdateJobStatusMutation();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Edit Job Modal State
-  const [editingJob, setEditingJob] = useState<JobItem | null>(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-
-  // Duplicate Job Modal State
-  const [duplicatingJob, setDuplicatingJob] = useState<JobItem | null>(null);
-  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
-
   const handleDelete = (id: string, title: string) => {
     if (confirm(`Are you sure you want to delete job "${title}"?`)) {
       setDeletingId(id);
@@ -228,16 +216,6 @@ export function EmployerJobsTable({
     statusMutation.mutate({ id: job.id, status: nextStatus });
   };
 
-  const handleEdit = (job: JobItem) => {
-    setEditingJob(job);
-    setEditModalOpen(true);
-  };
-
-  const handleDuplicate = (job: JobItem) => {
-    setDuplicatingJob(job);
-    setDuplicateModalOpen(true);
-  };
-
 function JobExpirationBadge({ job }: { job: JobItem }) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
 
@@ -245,30 +223,48 @@ function JobExpirationBadge({ job }: { job: JobItem }) {
     if (!job.expiresAt) return;
     const msLeft = new Date(job.expiresAt).getTime() - Date.now();
     const days = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
-    if (days <= 7 && days > 0) {
-      setDaysLeft(days);
-    }
+    setDaysLeft(days);
   }, [job.expiresAt]);
 
-  if (job.expired) {
+  if (job.expired || (daysLeft !== null && daysLeft <= 0)) {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+      <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">
         <AlertTriangle className="size-3" />
-        <span>Expired</span>
+        <span>Closed / Expired</span>
       </span>
     );
   }
 
   if (daysLeft !== null) {
+    if (daysLeft <= 3) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">
+          <Clock className="size-3 text-rose-400" />
+          <span>Closes in {daysLeft}d</span>
+        </span>
+      );
+    }
+    if (daysLeft <= 20) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+          <Clock className="size-3 text-amber-400" />
+          <span>Closes in {daysLeft}d</span>
+        </span>
+      );
+    }
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-950/40 text-amber-400 border border-amber-800/40">
-        <Clock className="size-3" />
-        <span>Expires in {daysLeft}d</span>
+      <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
+        <Clock className="size-3 text-sky-400" />
+        <span>Closes in {daysLeft}d</span>
       </span>
     );
   }
 
-  return null;
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">
+      <span>Ongoing</span>
+    </span>
+  );
 }
 
   return (
@@ -304,18 +300,16 @@ function JobExpirationBadge({ job }: { job: JobItem }) {
             </p>
           </div>
           <div className="pt-2">
-            <CreateJobModal
-              triggerButton={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 border-border text-foreground hover:bg-secondary rounded-md text-xs gap-1.5"
-                >
-                  <Plus className="size-3.5" />
-                  <span>Post a Job</span>
-                </Button>
-              }
-            />
+            <Link href="/dashboard/employer/jobs/new">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground hover:bg-secondary rounded-md text-xs gap-1.5 cursor-pointer"
+              >
+                <Plus className="size-3.5" />
+                <span>Post a Job</span>
+              </Button>
+            </Link>
           </div>
         </div>
       ) : (
@@ -433,27 +427,29 @@ function JobExpirationBadge({ job }: { job: JobItem }) {
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {/* Edit Action */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(job)}
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-                          title="Edit job details"
-                        >
-                          <Edit2 className="size-3.5" />
-                        </Button>
+                        {/* Edit Action - Navigates to dedicated page */}
+                        <Link href={`/dashboard/employer/jobs/${job.id}/edit`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground cursor-pointer"
+                            title="Edit job details"
+                          >
+                            <Edit2 className="size-3.5" />
+                          </Button>
+                        </Link>
 
-                        {/* Duplicate Action */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDuplicate(job)}
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
-                          title="Duplicate this job"
-                        >
-                          <Copy className="size-3.5" />
-                        </Button>
+                        {/* Duplicate Action - Navigates to dedicated page with ?duplicateFrom */}
+                        <Link href={`/dashboard/employer/jobs/new?duplicateFrom=${job.id}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-primary cursor-pointer"
+                            title="Duplicate this job"
+                          >
+                            <Copy className="size-3.5" />
+                          </Button>
+                        </Link>
 
                         {/* Live Link */}
                         <Link
@@ -490,19 +486,6 @@ function JobExpirationBadge({ job }: { job: JobItem }) {
         </div>
       )}
 
-      {/* Edit Job Modal */}
-      <EditJobModal
-        job={editingJob}
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-      />
-
-      {/* Duplicate / Clone Job Modal */}
-      <CreateJobModal
-        open={duplicateModalOpen}
-        onOpenChange={setDuplicateModalOpen}
-        initialValues={duplicatingJob}
-      />
     </div>
   );
 }

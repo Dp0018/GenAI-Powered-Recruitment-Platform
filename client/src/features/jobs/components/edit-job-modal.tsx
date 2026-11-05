@@ -252,7 +252,11 @@ export function EditJobModal({ job, open, onOpenChange }: EditJobModalProps) {
                 onChange={(e) => setExpirationDays(e.target.value)}
                 className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
-                <option value="30">+30 Days from now</option>
+                <option value="2">+2 Days from now (Urgent)</option>
+                <option value="7">+7 Days from now (1 Week)</option>
+                <option value="14">+14 Days from now (2 Weeks)</option>
+                <option value="17">+17 Days from now (Custom)</option>
+                <option value="30">+30 Days from now (Month)</option>
                 <option value="60">+60 Days from now</option>
                 <option value="90">+90 Days from now</option>
                 <option value="none">No Expiration (Indefinite)</option>

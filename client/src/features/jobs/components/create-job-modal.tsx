@@ -412,7 +412,11 @@ export function CreateJobModal({
                 onChange={(e) => setExpirationDays(e.target.value)}
                 className="w-full h-10 bg-background border border-border text-foreground text-xs rounded-md px-3 focus:outline-hidden focus:border-primary"
               >
-                <option value="30">30 Days (Standard)</option>
+                <option value="2">2 Days (Flash / Urgent)</option>
+                <option value="7">7 Days (1 Week)</option>
+                <option value="14">14 Days (2 Weeks)</option>
+                <option value="17">17 Days (Custom)</option>
+                <option value="30">30 Days (Standard Month)</option>
                 <option value="60">60 Days (Extended)</option>
                 <option value="90">90 Days (Quarterly)</option>
                 <option value="none">No Expiration (Indefinite)</option>
