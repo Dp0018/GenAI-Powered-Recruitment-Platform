@@ -40,19 +40,19 @@ export function HeroSection() {
       <div className="mx-auto w-full max-w-7xl space-y-10">
         {/* Top Status Pill */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-secondary/80 border border-border text-xs text-foreground font-medium">
-            <span>Over 1,200 verified roles posted this week</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-secondary border border-border text-xs text-muted-foreground font-mono">
+            <span>1,200+ verified roles posted this week</span>
           </div>
         </div>
 
         {/* Main Headline */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.12]">
-            Find your next role with clear pay and direct hiring.
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-foreground leading-[1.08]">
+            Find your next role with clear pay and direct hiring
           </h1>
 
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Browse thousands of openings at verified companies. Every role includes transparent salary ranges, direct recruiter connections, and simple one-click applications.
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Browse openings at verified companies. Every role includes transparent salary ranges, direct recruiter connections, and one-click applications.
           </p>
         </div>
 
@@ -129,17 +129,17 @@ export function HeroSection() {
         </div>
 
         {/* Clean Stat Strip */}
-        <div className="max-w-3xl mx-auto pt-6 border-t border-border/50 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+        <div className="max-w-3xl mx-auto pt-6 border-t border-border/60 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
           <div>
-            <div className="text-2xl font-bold text-foreground">15,000+</div>
+            <div className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">15,000+</div>
             <div className="text-xs text-muted-foreground mt-0.5">Active verified jobs</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-foreground">100%</div>
+            <div className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">100%</div>
             <div className="text-xs text-muted-foreground mt-0.5">Disclosed salary ranges</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-foreground">&lt; 48 Hours</div>
+            <div className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">&lt; 48 hours</div>
             <div className="text-xs text-muted-foreground mt-0.5">Average recruiter response</div>
           </div>
         </div>

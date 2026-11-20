@@ -16,9 +16,6 @@ import { useCandidateInterviewsQuery } from "@/features/interviews/hooks/use-int
 import {
   User,
   FileText,
-  Clock,
-  ShieldCheck,
-  ShieldAlert,
   Search,
   ExternalLink,
   CheckCircle2,
@@ -29,7 +26,12 @@ import {
   Bell,
   FileEdit,
   Award,
+  Crown,
+  CreditCard,
+  ShieldCheck,
+  ShieldAlert,
 } from "lucide-react";
+import { useBilling } from "@/features/billing/hooks/use-billing";
 import { CandidateJobAlertsTab } from "./candidate-job-alerts-tab";
 import { CandidateOffersTab } from "@/features/offers/components/candidate-offers-tab";
 import { useCandidateOffersQuery } from "@/features/offers/hooks/use-offers";
@@ -37,53 +39,110 @@ import { ApplicationDetailDrawer } from "@/features/applications/components/appl
 
 export function CandidateHeader() {
   const { user } = useAuth();
+  const { subscription, openCustomerPortal, isOpenPortalLoading } = useBilling();
+  const isPro = subscription?.planType === "PRO" || Boolean(subscription?.isPaid);
   const initial = user?.name ? user.name.charAt(0).toUpperCase() : "C";
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-linear-to-b from-card via-card/90 to-card/60 p-6 sm:p-8 backdrop-blur-md shadow-xs space-y-6">
-      {/* Subtle ambient accent glow */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-sky-500/5 blur-3xl pointer-events-none" />
-
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="size-14 sm:size-16 rounded-2xl bg-linear-to-br from-sky-500/20 via-card to-indigo-500/20 border border-sky-500/30 text-sky-400 font-extrabold text-2xl flex items-center justify-center shrink-0 shadow-inner">
-            {initial}
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="relative shrink-0">
+            <div className="size-12 rounded-lg bg-secondary border border-border text-foreground flex items-center justify-center font-semibold text-base">
+              {initial}
+            </div>
+            {isPro && (
+              <div
+                className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-xs border border-card"
+                title="Candidate Pro Member"
+              >
+                <Crown className="size-3 fill-slate-950 text-slate-950" />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                Candidate Workspace
+              <span className="text-xs text-muted-foreground font-medium">
+                Candidate workspace
               </span>
               <span className="text-border">•</span>
-              {user?.emailVerified ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-medium text-emerald-400">
-                  <CheckCircle2 className="size-3 text-emerald-400" />
-                  <span>Verified Profile</span>
+              {isPro ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                  <Crown className="size-3" />
+                  <span>Pro member</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-[11px] font-medium text-amber-400">
-                  <ShieldAlert className="size-3 text-amber-400" />
-                  <span>Verification Pending</span>
+                <Link href="/pricing">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary hover:bg-secondary/80 text-[11px] font-medium text-muted-foreground transition-colors cursor-pointer border border-border">
+                    <Crown className="size-3" />
+                    <span>Get Pro</span>
+                  </span>
+                </Link>
+              )}
+              <span className="text-border">•</span>
+              {user?.emailVerified ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="size-3" />
+                  <span>Verified</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                  <ShieldAlert className="size-3" />
+                  <span>Unverified</span>
                 </span>
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Welcome back, {user?.name || "Candidate"}
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+              <span>{user?.name || "Candidate"}</span>
+              {isPro && (
+                <span title="Candidate Pro Member">
+                  <Crown className="size-4 text-amber-500 fill-amber-500 inline shrink-0" />
+                </span>
+              )}
             </h1>
 
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Track your active job applications, interview schedules, offers, and verified credentials.
+            <p className="text-xs text-muted-foreground">
+              {isPro
+                ? "Candidate Pro active: Spotlight badge applied and resume score forecast enabled."
+                : "Active job applications, interviews, offers, and credentials."}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          {isPro && subscription?.customerId ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-3 text-xs gap-1.5 rounded-lg cursor-pointer hover:bg-secondary"
+              onClick={() => openCustomerPortal()}
+              disabled={isOpenPortalLoading}
+            >
+              <CreditCard className="size-3.5 text-muted-foreground" />
+              <span>Billing</span>
+            </Button>
+          ) : !isPro ? (
+            <Link href="/pricing">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-3 text-xs font-medium gap-1.5 rounded-lg border-border hover:bg-secondary cursor-pointer"
+              >
+                <Crown className="size-3.5 text-amber-500" />
+                <span>Upgrade to Pro</span>
+              </Button>
+            </Link>
+          ) : null}
+
           <Link href="/jobs">
-            <Button className="h-11 px-5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-sky-500/20 gap-2 transition-all cursor-pointer">
+            <Button
+              size="sm"
+              className="h-9 px-3.5 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-lg gap-1.5 transition-colors cursor-pointer"
+            >
               <Search className="size-3.5" />
-              <span>Browse Openings</span>
+              <span>Browse jobs</span>
             </Button>
           </Link>
         </div>
@@ -111,59 +170,51 @@ export function CandidateMetricsGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* 1. Submitted Applications */}
-      <div className="p-5 rounded-2xl bg-card/60 border border-border/80 space-y-2.5 hover:border-sky-500/30 transition-colors shadow-xs">
-        <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-          <span>Submitted Applications</span>
-          <div className="size-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-            <FileText className="size-4" />
-          </div>
+      <div className="p-4 rounded-xl bg-card border border-border space-y-1">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Applications</span>
+          <FileText className="size-3.5 text-muted-foreground" />
         </div>
-        <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+        <div className="text-2xl font-semibold text-foreground tracking-tight tabular-nums">
           {totalSubmitted}
         </div>
-        <p className="text-[11px] text-muted-foreground">Active positions applied for</p>
+        <p className="text-[11px] text-muted-foreground">Active positions applied</p>
       </div>
 
       {/* 2. In Review */}
-      <div className="p-5 rounded-2xl bg-card/60 border border-border/80 space-y-2.5 hover:border-amber-500/30 transition-colors shadow-xs">
-        <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-          <span>In Active Review</span>
-          <div className="size-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-            <Clock className="size-4" />
-          </div>
+      <div className="p-4 rounded-xl bg-card border border-border space-y-1">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>In review</span>
+          <span className="size-2 rounded-full bg-amber-500" />
         </div>
-        <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+        <div className="text-2xl font-semibold text-foreground tracking-tight tabular-nums">
           {inReview}
         </div>
-        <p className="text-[11px] text-muted-foreground">Applications being evaluated</p>
+        <p className="text-[11px] text-muted-foreground">Under active review</p>
       </div>
 
       {/* 3. Interviews Scheduled */}
-      <div className="p-5 rounded-2xl bg-card/60 border border-border/80 space-y-2.5 hover:border-indigo-500/30 transition-colors shadow-xs">
-        <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-          <span>Interview Rounds</span>
-          <div className="size-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-            <Calendar className="size-4" />
-          </div>
+      <div className="p-4 rounded-xl bg-card border border-border space-y-1">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Interviews</span>
+          <Calendar className="size-3.5 text-muted-foreground" />
         </div>
-        <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+        <div className="text-2xl font-semibold text-foreground tracking-tight tabular-nums">
           {totalInterviews}
         </div>
-        <p className="text-[11px] text-muted-foreground">Scheduled & upcoming sessions</p>
+        <p className="text-[11px] text-muted-foreground">Upcoming rounds</p>
       </div>
 
       {/* 4. Offers & Contracts */}
-      <div className="p-5 rounded-2xl bg-card/60 border border-border/80 space-y-2.5 hover:border-emerald-500/30 transition-colors shadow-xs">
-        <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-          <span>Job Offers Received</span>
-          <div className="size-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-            <Award className="size-4" />
-          </div>
+      <div className="p-4 rounded-xl bg-card border border-border space-y-1">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Offers</span>
+          <Award className="size-3.5 text-muted-foreground" />
         </div>
-        <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+        <div className="text-2xl font-semibold text-foreground tracking-tight tabular-nums">
           {totalOffers}
         </div>
-        <p className="text-[11px] text-muted-foreground">Formal offers & contracts</p>
+        <p className="text-[11px] text-muted-foreground">Formal offers received</p>
       </div>
     </div>
   );
@@ -172,16 +223,16 @@ export function CandidateMetricsGrid({
 function getStatusBadge(status: ApplicationStatus) {
   switch (status) {
     case "APPLIED":
-      return "bg-secondary text-foreground border-border/80";
+      return "bg-secondary text-foreground border-border";
     case "REVIEWING":
     case "SHORTLISTED":
-      return "bg-amber-500/10 text-amber-400 border-amber-500/25";
+      return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
     case "INTERVIEWING":
-      return "bg-indigo-500/10 text-indigo-400 border-indigo-500/25";
+      return "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20";
     case "OFFERED":
-      return "bg-emerald-500/10 text-emerald-400 border-emerald-500/25 font-bold";
+      return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-medium";
     case "REJECTED":
-      return "bg-rose-500/10 text-rose-400 border-rose-500/25";
+      return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
     case "WITHDRAWN":
       return "bg-secondary text-muted-foreground border-border";
     default:
@@ -209,83 +260,86 @@ export function CandidateApplicationsList({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">
-            Application Tracking
+          <h2 className="text-base font-semibold text-foreground tracking-tight">
+            Application tracking
           </h2>
           <p className="text-xs text-muted-foreground">
-            Real-time status updates from corporate hiring teams
+            Status updates from corporate hiring teams
           </p>
         </div>
-        <span className="text-xs text-muted-foreground font-mono">
-          {totalElements} Submissions
+        <span className="text-xs text-muted-foreground font-mono tabular-nums">
+          {totalElements} submissions
         </span>
       </div>
 
       {isLoading ? (
-        <div className="p-16 text-center rounded-2xl border border-border/80 bg-card/40 space-y-3">
-          <Loader2 className="size-7 animate-spin text-sky-400 mx-auto" />
+        <div className="p-12 text-center rounded-xl border border-border bg-card space-y-2">
+          <Loader2 className="size-5 animate-spin text-muted-foreground mx-auto" />
           <div className="text-xs text-muted-foreground font-mono">
-            Loading your applications...
+            Loading applications...
           </div>
         </div>
       ) : applications.length === 0 ? (
-        <div className="rounded-2xl border border-border/80 bg-card/50 p-12 sm:p-16 text-center space-y-4 shadow-xs">
-          <div className="size-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto text-sky-400 shadow-inner">
-            <FileText className="size-7" />
+        <div className="rounded-xl border border-border bg-card p-10 text-center space-y-3">
+          <div className="size-10 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center mx-auto">
+            <FileText className="size-5" />
           </div>
-          <div className="space-y-1.5">
-            <h3 className="text-base font-bold text-foreground">No applications submitted yet</h3>
+          <div className="space-y-1">
+            <h3 className="text-sm font-semibold text-foreground">No applications submitted yet</h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-              Explore open positions posted directly by verified employer partners. Your submissions are sent straight to engineering leads.
+              Explore positions posted directly by verified employer partners.
             </p>
           </div>
-          <div className="pt-2">
+          <div className="pt-1">
             <Link href="/jobs">
-              <Button className="h-10 px-6 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs gap-2 transition-all shadow-md shadow-sky-500/20 cursor-pointer">
-                <Search className="size-3.5" />
-                <span>Search Live Jobs</span>
+              <Button
+                size="sm"
+                className="h-8 px-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-xs gap-1.5 cursor-pointer font-medium"
+              >
+                <Search className="size-3" />
+                <span>Browse jobs</span>
               </Button>
             </Link>
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-secondary/60 border-b border-border text-muted-foreground uppercase text-[11px] font-semibold">
+              <thead className="bg-secondary/40 border-b border-border text-muted-foreground text-[11px] font-medium">
                 <tr>
-                  <th className="py-3.5 px-4">Position & Organization</th>
-                  <th className="py-3.5 px-4">Location & Type</th>
-                  <th className="py-3.5 px-4">Date Applied</th>
-                  <th className="py-3.5 px-4">Resume</th>
-                  <th className="py-3.5 px-4">Current Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                  <th className="py-2.5 px-4">Position</th>
+                  <th className="py-2.5 px-4">Location</th>
+                  <th className="py-2.5 px-4">Applied</th>
+                  <th className="py-2.5 px-4">Resume</th>
+                  <th className="py-2.5 px-4">Status</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {applications.map((app) => (
-                  <tr key={app.id} className="hover:bg-secondary/30 transition-colors">
-                    <td className="py-4 px-4">
+                  <tr key={app.id} className="hover:bg-secondary/20 transition-colors">
+                    <td className="py-3 px-4">
                       <div
-                        className="font-bold text-foreground text-sm hover:text-sky-400 transition-colors cursor-pointer"
+                        className="font-medium text-foreground text-xs hover:text-primary transition-colors cursor-pointer"
                         onClick={() => handleOpenDrawer(app)}
                       >
                         {app.job?.title}
                       </div>
-                      <div className="text-xs text-sky-400 font-medium mt-0.5">
+                      <div className="text-[11px] text-muted-foreground mt-0.5">
                         {app.job?.companyName || "Verified Organization"}
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-muted-foreground">
-                      <div className="font-medium text-foreground">{app.job?.location}</div>
+                    <td className="py-3 px-4 text-muted-foreground">
+                      <div className="text-foreground">{app.job?.location}</div>
                       <div className="text-[11px] text-muted-foreground">
                         {app.job?.workplaceType}
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-muted-foreground font-mono">
+                    <td className="py-3 px-4 text-muted-foreground font-mono">
                       {app.createdAt
                         ? new Date(app.createdAt).toLocaleDateString("en-US", {
                             month: "short",
@@ -294,50 +348,50 @@ export function CandidateApplicationsList({
                           })
                         : "Recently"}
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-3 px-4">
                       {app.resumeUrl ? (
                         <a
                           href={app.resumeUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-medium"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                         >
-                          <FileText className="size-3.5" />
-                          <span>View PDF</span>
+                          <FileText className="size-3" />
+                          <span>PDF</span>
                         </a>
                       ) : (
-                        <span className="text-muted-foreground text-xs">Profile Master</span>
+                        <span className="text-muted-foreground text-xs">Profile</span>
                       )}
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-3 px-4">
                       <button
                         onClick={() => handleOpenDrawer(app)}
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer hover:opacity-85 transition-opacity ${getStatusBadge(
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] border cursor-pointer hover:opacity-80 transition-opacity ${getStatusBadge(
                           app.status
                         )}`}
                       >
-                        {app.status}
+                        {app.status.toLowerCase()}
                       </button>
                     </td>
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleOpenDrawer(app)}
-                          className="h-8 px-3 text-xs font-semibold text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 gap-1.5 rounded-lg"
+                          className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
                         >
                           <span>Timeline</span>
-                          <ArrowRight className="size-3.5" />
+                          <ArrowRight className="size-3" />
                         </Button>
 
                         {app.job?.slug && (
                           <Link
                             href={`/jobs/${app.job.slug}`}
-                            className="inline-flex items-center justify-center size-8 text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors"
+                            className="inline-flex items-center justify-center size-7 text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary transition-colors"
                             title="View job opening"
                           >
-                            <ExternalLink className="size-3.5" />
+                            <ExternalLink className="size-3" />
                           </Link>
                         )}
                       </div>
@@ -364,41 +418,41 @@ export function CandidateProfileSummary() {
   const { user } = useAuth();
 
   return (
-    <div className="p-6 sm:p-7 rounded-2xl border border-border/80 bg-card/60 space-y-4 shadow-xs">
-      <h3 className="text-sm font-bold text-foreground tracking-tight flex items-center gap-2">
-        <User className="size-4 text-sky-400" />
-        <span>Candidate Profile Credentials</span>
+    <div className="p-5 rounded-xl border border-border bg-card space-y-3">
+      <h3 className="text-xs font-semibold text-foreground flex items-center gap-2">
+        <User className="size-3.5 text-muted-foreground" />
+        <span>Profile credentials</span>
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-        <div className="space-y-1">
-          <span className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">
-            Registered Name
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+        <div className="space-y-0.5">
+          <span className="text-muted-foreground text-[11px]">
+            Registered name
           </span>
-          <div className="text-foreground font-semibold text-sm">{user?.name || "Candidate"}</div>
+          <div className="text-foreground font-medium">{user?.name || "Candidate"}</div>
         </div>
-        <div className="space-y-1">
-          <span className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">
-            Primary Email
+        <div className="space-y-0.5">
+          <span className="text-muted-foreground text-[11px]">
+            Primary email
           </span>
           <div className="text-foreground font-mono">{user?.email || "candidate@example.com"}</div>
         </div>
-        <div className="space-y-1">
-          <span className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">
-            Platform Role
+        <div className="space-y-0.5">
+          <span className="text-muted-foreground text-[11px]">
+            Role
           </span>
           <div>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-secondary text-foreground border border-border">
               {user?.role || "CANDIDATE"}
             </span>
           </div>
         </div>
-        <div className="space-y-1">
-          <span className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">
-            Account Security
+        <div className="space-y-0.5">
+          <span className="text-muted-foreground text-[11px]">
+            Security
           </span>
           <div className="text-foreground flex items-center gap-1.5 font-medium">
-            <ShieldCheck className="size-3.5 text-emerald-400" />
-            <span>Multi-factor authentication active</span>
+            <ShieldCheck className="size-3.5 text-emerald-500" />
+            <span>MFA enabled</span>
           </div>
         </div>
       </div>
@@ -422,9 +476,9 @@ export function CandidateDashboardView() {
 
   if (isAuthLoading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-20 space-y-3">
-        <Loader2 className="size-8 animate-spin text-sky-400" />
-        <span className="text-xs text-muted-foreground font-mono">Verifying candidate session...</span>
+      <div className="flex-1 flex flex-col items-center justify-center p-20 space-y-2">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-mono">Verifying session...</span>
       </div>
     );
   }
@@ -432,17 +486,17 @@ export function CandidateDashboardView() {
   if (!isAuthenticated || user?.role !== "CANDIDATE") {
     return (
       <div className="flex-1 py-20 px-4 max-w-md mx-auto text-center space-y-4">
-        <div className="size-14 rounded-2xl bg-secondary border border-border text-sky-400 flex items-center justify-center mx-auto shadow-inner">
-          <User className="size-7" />
+        <div className="size-12 rounded-lg bg-secondary border border-border text-muted-foreground flex items-center justify-center mx-auto">
+          <User className="size-6" />
         </div>
-        <h2 className="text-xl font-bold text-foreground">Candidate Sign In Required</h2>
+        <h2 className="text-lg font-semibold text-foreground">Sign in required</h2>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Please log in with your candidate credentials to access your submitted applications, interview requests, and offers.
+          Sign in to access applications, interview schedules, and offers.
         </p>
         <div className="pt-2">
           <Link href="/login">
-            <Button className="h-10 px-6 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs rounded-xl">
-              Sign In to Candidate Account
+            <Button className="h-9 px-5 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-lg">
+              Sign in
             </Button>
           </Link>
         </div>
@@ -451,36 +505,36 @@ export function CandidateDashboardView() {
   }
 
   return (
-    <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
+    <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6">
       <CandidateHeader />
 
-      <Tabs defaultValue="applications" className="space-y-6">
-        {/* Modern tactile Segmented Navigation Pill Strip */}
-        <div className="overflow-x-auto no-scrollbar pb-1">
-          <TabsList className="inline-flex items-center gap-1.5 p-1.5 bg-card/90 backdrop-blur-md border border-border/80 rounded-2xl h-13 min-h-[52px] shadow-xs">
+      <Tabs defaultValue="applications" className="space-y-4">
+        {/* Clean Segmented Navigation Tab Strip */}
+        <div className="overflow-x-auto no-scrollbar pb-0.5">
+          <TabsList className="inline-flex items-center gap-1 p-1 bg-secondary border border-border rounded-lg h-9">
             <TabsTrigger
               value="applications"
-              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
-              <FileText className="size-4" />
+              <FileText className="size-3.5" />
               <span>Applications</span>
-              <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-secondary/80 text-muted-foreground border border-border/60">
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-secondary/80 text-muted-foreground border border-border">
                 {totalElements}
               </span>
             </TabsTrigger>
 
             <TabsTrigger
               value="offers"
-              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
-              <Award className="size-4 text-emerald-400" />
+              <Award className="size-3.5" />
               <span>Offers</span>
               {pendingOffers > 0 ? (
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   {pendingOffers} action
                 </span>
               ) : offersData.length > 0 ? (
-                <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-secondary/80 text-muted-foreground border border-border/60">
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-secondary/80 text-muted-foreground border border-border">
                   {offersData.length}
                 </span>
               ) : null}
@@ -488,12 +542,12 @@ export function CandidateDashboardView() {
 
             <TabsTrigger
               value="interviews"
-              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
-              <Calendar className="size-4" />
+              <Calendar className="size-3.5" />
               <span>Interviews</span>
               {totalInterviews > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold">
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
                   {totalInterviews}
                 </span>
               )}
@@ -501,12 +555,12 @@ export function CandidateDashboardView() {
 
             <TabsTrigger
               value="saved"
-              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
-              <Bookmark className="size-4" />
-              <span>Saved Jobs</span>
+              <Bookmark className="size-3.5" />
+              <span>Saved</span>
               {totalSaved > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-secondary/80 text-muted-foreground border border-border/60">
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-secondary/80 text-muted-foreground border border-border">
                   {totalSaved}
                 </span>
               )}
@@ -514,31 +568,31 @@ export function CandidateDashboardView() {
 
             <TabsTrigger
               value="drafts"
-              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
-              <FileEdit className="size-4" />
+              <FileEdit className="size-3.5" />
               <span>Drafts</span>
             </TabsTrigger>
 
             <TabsTrigger
               value="alerts"
-              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
-              <Bell className="size-4" />
-              <span>Job Alerts</span>
+              <Bell className="size-3.5" />
+              <span>Job alerts</span>
             </TabsTrigger>
 
             <TabsTrigger
               value="profile"
-              className="h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/60 data-[state=active]:bg-secondary data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/80 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
-              <User className="size-4" />
-              <span>Profile & Master Resume</span>
+              <User className="size-3.5" />
+              <span>Profile</span>
             </TabsTrigger>
           </TabsList>
         </div>
 
-        <TabsContent value="applications" className="space-y-6 outline-none">
+        <TabsContent value="applications" className="space-y-4 outline-none">
           <CandidateMetricsGrid
             applications={applications}
             totalOffers={offersData.length}

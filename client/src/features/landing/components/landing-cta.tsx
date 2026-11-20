@@ -11,15 +11,15 @@ export function LandingCta() {
       <div className="container mx-auto max-w-4xl">
         <div className="p-8 sm:p-14 rounded-2xl bg-card border border-border/80 shadow-sm text-center space-y-8">
           <div className="space-y-3 max-w-2xl mx-auto">
-            <span className="inline-block text-xs font-medium text-primary uppercase tracking-wider">
-              Get Started Today
+            <span className="inline-block text-xs font-mono text-muted-foreground">
+              Getting started
             </span>
 
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               Ready to find your next opportunity?
             </h2>
 
-            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
               Create your profile in minutes. Connect directly with hiring teams at verified companies with complete salary transparency.
             </p>
           </div>

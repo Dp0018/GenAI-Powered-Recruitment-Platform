@@ -40,6 +40,7 @@ public class JobService {
     private final JobRepository jobRepository;
     private final CompanyRepository companyRepository;
     private final com.example.job_portal.repository.JobQuestionRepository jobQuestionRepository;
+    private final com.example.job_portal.repository.CompanySubscriptionRepository companySubscriptionRepository;
     private final com.example.job_portal.service.ai.GeminiService geminiService;
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
@@ -168,6 +169,19 @@ public class JobService {
 
         Company company = companyRepository.findById(principal.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company", "id", principal.getCompanyId()));
+
+        // Enforce Subscription Plan Job Limits
+        int jobLimit = 1; // Default Free Tier limit
+        java.util.Optional<com.example.job_portal.entity.CompanySubscription> subOpt =
+                companySubscriptionRepository.findByCompanyId(company.getId());
+        if (subOpt.isPresent() && subOpt.get().getStatus() == com.example.job_portal.entity.SubscriptionStatus.ACTIVE) {
+            jobLimit = subOpt.get().getJobPostingLimit();
+        }
+        long activePublishedJobs = jobRepository.countByCompanyIdAndStatus(company.getId(), Job.JobStatus.PUBLISHED);
+        if (activePublishedJobs >= jobLimit) {
+            throw new BadRequestException("Active job posting quota reached (" + activePublishedJobs + "/" + jobLimit +
+                    "). Please upgrade your subscription plan to post additional requisitions.");
+        }
 
         String baseSlug = toSlug(request.getTitle() + " " + company.getName());
         String slug = baseSlug;

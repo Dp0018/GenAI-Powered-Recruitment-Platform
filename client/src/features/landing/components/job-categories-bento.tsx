@@ -108,22 +108,22 @@ export function JobCategoriesBento() {
       <div className="mx-auto w-full max-w-7xl space-y-10">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <span className="text-xs font-medium text-primary uppercase tracking-wider">
-              Explore Disciplines
+          <div className="space-y-1">
+            <span className="text-xs font-mono text-muted-foreground">
+              Disciplines
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               Browse roles by category
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Discover openings across fields with verified salary ranges.
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Explore openings across engineering, product, and leadership with verified salary ranges.
             </p>
           </div>
 
           <Link href="/jobs">
-            <button className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors group cursor-pointer">
+            <button className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline transition-colors group cursor-pointer">
               <span>View all jobs</span>
-              <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </Link>
         </div>
@@ -136,7 +136,7 @@ export function JobCategoriesBento() {
               <div
                 key={cat.id}
                 onClick={() => router.push(`/jobs?query=${encodeURIComponent(cat.query)}`)}
-                className="p-5 rounded-xl bg-card border border-border/80 hover:border-primary/40 transition-colors cursor-pointer group flex flex-col justify-between space-y-4"
+                className="p-5 rounded-xl bg-card border border-border hover:border-foreground/30 transition-colors cursor-pointer group flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
                   <div className="size-10 rounded-lg bg-secondary flex items-center justify-center text-foreground">

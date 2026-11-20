@@ -12,7 +12,10 @@ import {
   ChevronDown,
   User,
   Building2,
+  CreditCard,
+  Crown,
 } from "lucide-react";
+import { useBilling } from "@/features/billing/hooks/use-billing";
 import { NotificationBellDropdown } from "@/features/notifications/components/notification-bell-dropdown";
 import {
   DropdownMenu,
@@ -26,6 +29,11 @@ import {
 export function Navbar() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const { subscription } = useBilling();
+
+  const isCandidatePro =
+    user?.role === "CANDIDATE" &&
+    (subscription?.planType === "PRO" || Boolean(subscription?.isPaid));
 
   const getDashboardLink = () => {
     if (!user) return "/dashboard/candidate";
@@ -61,10 +69,10 @@ export function Navbar() {
             href="/"
             className="flex items-center gap-2.5 font-semibold text-foreground tracking-tight group"
           >
-            <div className="size-8 rounded-lg bg-sky-500 flex items-center justify-center text-slate-950 shadow-sm font-bold">
+            <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-medium">
               <Briefcase className="size-4" />
             </div>
-            <span className="text-base font-bold tracking-tight text-foreground">
+            <span className="text-base font-semibold tracking-tight text-foreground">
               JobPortal
             </span>
           </Link>
@@ -76,6 +84,12 @@ export function Navbar() {
               className="hover:text-foreground transition-colors"
             >
               Find Jobs
+            </Link>
+            <Link
+              href="/pricing"
+              className="hover:text-foreground transition-colors"
+            >
+              Pricing
             </Link>
             <Link
               href="/register/employer"
@@ -95,18 +109,38 @@ export function Navbar() {
               {/* Profile Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className="flex items-center gap-2.5 p-1.5 pr-2.5 rounded-xl hover:bg-secondary/70 transition-colors border border-transparent hover:border-border/60 outline-none cursor-pointer group select-none"
+                  className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-secondary/70 transition-colors border border-transparent hover:border-border outline-none cursor-pointer group select-none"
                   aria-label="User profile menu"
                 >
-                  <div className="size-8 rounded-full bg-linear-to-br from-sky-500/20 via-sky-500/10 to-indigo-500/20 border border-sky-500/30 flex items-center justify-center text-xs font-bold text-sky-400 shrink-0 shadow-xs">
-                    {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                  <div className="relative">
+                    <div
+                      className={`size-8 rounded-lg flex items-center justify-center text-xs font-semibold shrink-0 ${
+                        isCandidatePro
+                          ? "bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400"
+                          : "bg-secondary border border-border text-foreground"
+                      }`}
+                    >
+                      {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                    </div>
+                    {isCandidatePro && (
+                      <span className="absolute -top-1 -right-1 size-3.5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-xs">
+                        <Crown className="size-2 fill-slate-950 text-slate-950" />
+                      </span>
+                    )}
                   </div>
                   <div className="hidden sm:flex flex-col text-left">
-                    <span className="text-xs font-semibold text-foreground leading-tight max-w-[120px] truncate">
+                    <span className="text-xs font-medium text-foreground leading-tight max-w-[120px] truncate flex items-center gap-1">
                       {user.name}
+                      {isCandidatePro && (
+                        <Crown className="size-3 text-amber-500 fill-amber-500 shrink-0" />
+                      )}
                     </span>
-                    <span className="text-[10px] text-muted-foreground leading-tight">
-                      {getRoleLabel()}
+                    <span className="text-[11px] text-muted-foreground leading-tight flex items-center gap-1">
+                      {isCandidatePro ? (
+                        <span className="text-amber-600 dark:text-amber-400 font-medium">Pro member</span>
+                      ) : (
+                        getRoleLabel()
+                      )}
                     </span>
                   </div>
                   <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-transform" />
@@ -118,16 +152,26 @@ export function Navbar() {
                 >
                   <div className="px-3 py-2.5">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-bold text-foreground leading-none">
+                      <p className="text-sm font-bold text-foreground leading-none flex items-center gap-1.5">
                         {user.name}
+                        {isCandidatePro && (
+                          <Crown className="size-3.5 text-amber-400 fill-amber-400 shrink-0" />
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground leading-none truncate">
                         {user.email}
                       </p>
                       <div className="pt-1.5">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                          {getRoleLabel()}
-                        </span>
+                        {isCandidatePro ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-linear-to-r from-amber-500/15 to-yellow-500/10 text-amber-400 border border-amber-500/30 shadow-xs">
+                            <Crown className="size-3 fill-amber-400 text-amber-400" />
+                            Candidate Pro Member
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                            {getRoleLabel()}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -162,6 +206,14 @@ export function Navbar() {
                         <span>Company Profile</span>
                       </DropdownMenuItem>
                     )}
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/pricing")}
+                      className="cursor-pointer gap-2.5 py-2 px-2.5 text-xs font-medium rounded-lg"
+                    >
+                      <CreditCard className="size-4 text-muted-foreground" />
+                      <span>Plans & Billing</span>
+                    </DropdownMenuItem>
                   </DropdownMenuGroup>
 
                   <DropdownMenuSeparator />

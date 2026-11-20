@@ -42,14 +42,14 @@ export function CandidateTestimonials() {
       <div className="mx-auto w-full max-w-7xl space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-medium text-primary uppercase tracking-wider">
-            Reviews
+          <span className="text-xs font-mono text-muted-foreground">
+            Placement feedback
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Trusted by candidates hired at top companies
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+            Hired candidate reviews
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Real feedback from professionals who found their roles on JobPortal.
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Verified feedback from engineers and designers hired through JobPortal.
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export function CandidateTestimonials() {
           {TESTIMONIALS.map((t) => (
             <div
               key={t.name}
-              className="p-6 rounded-xl bg-card border border-border/80 flex flex-col justify-between space-y-6"
+              className="p-6 rounded-xl bg-card border border-border flex flex-col justify-between space-y-6"
             >
               <div className="space-y-3">
                 <div className="flex items-center gap-1 text-amber-500">

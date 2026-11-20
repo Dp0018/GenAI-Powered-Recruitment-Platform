@@ -34,7 +34,10 @@ import {
   AlertTriangle,
   Eye,
   TrendingUp,
+  CreditCard,
+  Sparkles,
 } from "lucide-react";
+import { useBilling } from "@/features/billing/hooks/use-billing";
 
 interface EmployerHeaderProps {
   onNavigateToTeam: () => void;
@@ -110,6 +113,76 @@ export function EmployerKycBanner() {
       <span className="px-2 py-0.5 rounded bg-secondary font-mono text-[10px] text-muted-foreground border border-border whitespace-nowrap self-start sm:self-auto">
         TENANT: {user?.company?.name || user?.company?.id || "REGISTERED"}
       </span>
+    </div>
+  );
+}
+
+export function EmployerSubscriptionBanner() {
+  const { subscription, openCustomerPortal, isOpenPortalLoading } = useBilling();
+
+  if (!subscription) return null;
+
+  const isFree = subscription.planType === "FREE";
+  const limit = subscription.jobPostingLimit >= 9999 ? "Unlimited" : subscription.jobPostingLimit;
+  const current = subscription.currentActiveJobs || 0;
+
+  return (
+    <div className="p-4 rounded-xl bg-card border border-border/80 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+      <div className="flex items-start md:items-center gap-3.5">
+        <div className="size-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0 shadow-xs">
+          <CreditCard className="size-5" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Subscription:
+            </span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+              {subscription.planType}
+            </span>
+            <span className="text-[11px] text-muted-foreground">
+              ({subscription.status})
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Active Job Requisitions Quota: <strong className="text-foreground">{current} of {limit} used</strong>
+            {isFree && " • Upgrade to Growth to unlock 5 active jobs and AI scoring"}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2.5 shrink-0 self-end md:self-auto">
+        {subscription.customerId && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs gap-1.5 cursor-pointer"
+            onClick={() => openCustomerPortal()}
+            disabled={isOpenPortalLoading}
+          >
+            <CreditCard className="size-3.5" />
+            Billing Portal
+          </Button>
+        )}
+
+        {isFree ? (
+          <Link href="/pricing">
+            <Button
+              size="sm"
+              className="h-8 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Sparkles className="size-3.5" />
+              Upgrade Plan
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/pricing">
+            <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground cursor-pointer">
+              Change Plan
+            </Button>
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
@@ -548,6 +621,7 @@ export function EmployerDashboardView() {
     <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
       <EmployerHeader onNavigateToTeam={() => setActiveTab("team")} />
       <EmployerKycBanner />
+      <EmployerSubscriptionBanner />
       <EmployerMetricsGrid jobs={jobs} totalApplicants={totalApplicants} />
 
       {/* Modern Segmented Navigation Pill Strip */}

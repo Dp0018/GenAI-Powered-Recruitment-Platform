@@ -55,14 +55,14 @@ export function WhyChooseUs() {
       <div className="mx-auto w-full max-w-7xl space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-medium text-primary uppercase tracking-wider">
-            Better Hiring
+          <span className="text-xs font-mono text-muted-foreground">
+            Principles
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            A simpler, more transparent job search
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+            A transparent recruitment standard
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Built to take the frustration and secrecy out of finding your next position.
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Built to remove recruiter secrecy, salary ambiguity, and agency spam.
           </p>
         </div>
 
@@ -73,7 +73,7 @@ export function WhyChooseUs() {
             return (
               <div
                 key={prop.title}
-                className="p-6 rounded-xl bg-card border border-border/80 space-y-3"
+                className="p-6 rounded-xl bg-card border border-border space-y-3"
               >
                 <div className="size-10 rounded-lg bg-secondary flex items-center justify-center text-foreground">
                   <Icon className="size-5" />
