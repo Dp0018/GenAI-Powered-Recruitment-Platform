@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,6 +64,9 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final NotificationRepository notificationRepository;
     private final SavedJobRepository savedJobRepository;
     private final JobAlertRepository jobAlertRepository;
+    private final CompanySubscriptionRepository companySubscriptionRepository;
+    private final CandidateSubscriptionRepository candidateSubscriptionRepository;
+    private final com.example.job_portal.service.ai.ResumeRagService resumeRagService;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
 
@@ -90,7 +94,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .description("Stripe is a financial infrastructure platform for the internet. Millions of companies—from the world's largest enterprises to the most ambitious startups—use Stripe to accept payments, grow their revenue, and accelerate new business opportunities.")
                         .verificationStatus(Company.VerificationStatus.VERIFIED)
                         .verifiedAt(Instant.now().minus(90, ChronoUnit.DAYS))
-                        .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY", "REMOTE_STIPEND", "LEARNING_BUDGET", "WELLNESS_REIMBURSEMENT"))
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY", "REMOTE_STIPEND", "LEARNING_BUDGET", "WELLNESS_REIMBURSEMENT")))
                         .build())
         );
 
@@ -106,7 +110,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .description("Linear is the modern standard for software product development, issue tracking, and cycle management. Built with extreme attention to craft, keyboard shortcuts, and real-time synchronization for high-performing engineering teams.")
                         .verificationStatus(Company.VerificationStatus.VERIFIED)
                         .verifiedAt(Instant.now().minus(60, ChronoUnit.DAYS))
-                        .benefits(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "EQUITY", "REMOTE_STIPEND", "LEARNING_BUDGET", "HOME_OFFICE_SETUP"))
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "EQUITY", "REMOTE_STIPEND", "LEARNING_BUDGET", "HOME_OFFICE_SETUP")))
                         .build())
         );
 
@@ -122,7 +126,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .description("Vercel provides edge infrastructure and developer tooling for the modern web. Creators of Next.js, Turbo, and v0, enabling development teams to ship performant, resilient digital products with zero configuration.")
                         .verificationStatus(Company.VerificationStatus.VERIFIED)
                         .verifiedAt(Instant.now().minus(75, ChronoUnit.DAYS))
-                        .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY", "ANNUAL_RETREATS", "REMOTE_STIPEND"))
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY", "ANNUAL_RETREATS", "REMOTE_STIPEND")))
                         .build())
         );
 
@@ -138,7 +142,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .description("Monzo is making money work for everyone as a fully licensed UK digital bank. Serving over 9 million retail and business customers on a cloud-native microservices architecture built in Go.")
                         .verificationStatus(Company.VerificationStatus.VERIFIED)
                         .verifiedAt(Instant.now().minus(120, ChronoUnit.DAYS))
-                        .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "PARENTAL_LEAVE", "COMMUTER_BENEFITS", "FLEXIBLE_WORKING", "LEARNING_BUDGET"))
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "PARENTAL_LEAVE", "COMMUTER_BENEFITS", "FLEXIBLE_WORKING", "LEARNING_BUDGET")))
                         .build())
         );
 
@@ -154,7 +158,57 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .description("Datadog is the essential monitoring and security platform for cloud applications. We bring together end-to-end traces, metrics, and logs to make applications, infrastructure, and third-party services fully observable.")
                         .verificationStatus(Company.VerificationStatus.VERIFIED)
                         .verifiedAt(Instant.now().minus(100, ChronoUnit.DAYS))
-                        .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "EQUITY", "UNLIMITED_PTO", "EMPLOYEE_DISCOUNTS"))
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "EQUITY", "UNLIMITED_PTO", "EMPLOYEE_DISCOUNTS")))
+                        .build())
+        );
+
+        // Company 6: Supabase (Verified, FREE Tier Plan)
+        Company supabase = companyRepository.findBySlug("supabase").orElseGet(() ->
+                companyRepository.save(Company.builder()
+                        .name("Supabase")
+                        .slug("supabase")
+                        .logoUrl("https://logo.clearbit.com/supabase.com")
+                        .website("https://supabase.com")
+                        .industry("Database Infrastructure & BaaS")
+                        .companySize("100-250 employees")
+                        .location("Singapore & Remote Worldwide")
+                        .description("Supabase is an open source Firebase alternative. Providing Postgres database, Authentication, instant APIs, Edge Functions, Realtime subscriptions, and Vector embeddings.")
+                        .verificationStatus(Company.VerificationStatus.VERIFIED)
+                        .verifiedAt(Instant.now().minus(45, ChronoUnit.DAYS))
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "REMOTE_STIPEND", "LEARNING_BUDGET", "HOME_OFFICE_SETUP")))
+                        .build())
+        );
+
+        // Company 7: Resend (Verified, FREE Tier Plan)
+        Company resend = companyRepository.findBySlug("resend").orElseGet(() ->
+                companyRepository.save(Company.builder()
+                        .name("Resend")
+                        .slug("resend")
+                        .logoUrl("https://logo.clearbit.com/resend.com")
+                        .website("https://resend.com")
+                        .industry("Developer Tools & Email API")
+                        .companySize("20-50 employees")
+                        .location("San Francisco, CA & Remote Worldwide")
+                        .description("Resend is the email platform for developers. Designed with high craft, fast delivering APIs, and first-class React Email component libraries to build and send modern transactional emails.")
+                        .verificationStatus(Company.VerificationStatus.VERIFIED)
+                        .verifiedAt(Instant.now().minus(30, ChronoUnit.DAYS))
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "REMOTE_STIPEND", "LEARNING_BUDGET")))
+                        .build())
+        );
+
+        // Company 8: PostHog (UNDER VERIFICATION / PENDING, FREE Tier Plan)
+        Company posthog = companyRepository.findBySlug("posthog").orElseGet(() ->
+                companyRepository.save(Company.builder()
+                        .name("PostHog")
+                        .slug("posthog")
+                        .logoUrl("https://logo.clearbit.com/posthog.com")
+                        .website("https://posthog.com")
+                        .industry("Product Analytics & Developer Tools")
+                        .companySize("50-100 employees")
+                        .location("San Francisco, CA & London, UK")
+                        .description("PostHog is the all-in-one platform for building successful products. Product analytics, session recording, feature flags, A/B testing, and data warehouses built specifically for engineers.")
+                        .verificationStatus(Company.VerificationStatus.PENDING)
+                        .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "REMOTE_STIPEND", "LEARNING_BUDGET")))
                         .build())
         );
 
@@ -172,6 +226,16 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .verificationStatus(Company.VerificationStatus.PENDING)
                         .build())
         );
+
+        // 1.1 Seed Company Subscriptions (Enterprise, Growth, and Free tiers)
+        seedCompanySubscription(stripe, SubscriptionPlan.ENTERPRISE, 9999);
+        seedCompanySubscription(linear, SubscriptionPlan.GROWTH, 10);
+        seedCompanySubscription(vercel, SubscriptionPlan.ENTERPRISE, 9999);
+        seedCompanySubscription(monzo, SubscriptionPlan.ENTERPRISE, 9999);
+        seedCompanySubscription(datadog, SubscriptionPlan.GROWTH, 10);
+        seedCompanySubscription(supabase, SubscriptionPlan.FREE, 2);
+        seedCompanySubscription(resend, SubscriptionPlan.FREE, 2);
+        seedCompanySubscription(posthog, SubscriptionPlan.FREE, 1);
 
         // --------------------------------------------------------------------
         // 2. USERS & CREDENTIALS
@@ -238,6 +302,36 @@ public class DatabaseSeeder implements CommandLineRunner {
                 defaultHashedPassword
         );
 
+        User paul = getOrCreateUser(
+                "Paul Copplestone",
+                "paul.copplestone@supabase.com",
+                Role.EMPLOYER_ADMIN,
+                supabase,
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+                "+1 415 555 0188",
+                defaultHashedPassword
+        );
+
+        User zeno = getOrCreateUser(
+                "Zeno Rocha",
+                "zeno.rocha@resend.com",
+                Role.EMPLOYER_ADMIN,
+                resend,
+                "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=80",
+                "+1 415 555 0133",
+                defaultHashedPassword
+        );
+
+        User james = getOrCreateUser(
+                "James Hawkins",
+                "james.hawkins@posthog.com",
+                Role.EMPLOYER_ADMIN,
+                posthog,
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop&q=80",
+                "+44 20 7946 0777",
+                defaultHashedPassword
+        );
+
         User scamRecruiter = getOrCreateUser(
                 "Apex Talent Acquisition",
                 "recruiter@apex-quantum-crypto.xyz",
@@ -280,9 +374,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                         new EducationDto("Imperial College London", "Master of Science (MSc)", "Distributed Computing & Software Systems", "2017-09", "2018-06", "Distinction (Top 5%)"),
                         new EducationDto("University of Manchester", "Bachelor of Science (BSc)", "Computer Science", "2014-09", "2017-06", "First Class Honours")
                 ),
-                "Alex_Chen_Staff_Systems_Engineer.pdf",
-                "https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf",
-                148200L
+                "alex-chen-resume.pdf",
+                "/resumes/alex-chen-resume.pdf",
+                148200L,
+                CandidatePlan.PRO
         );
 
         User priya = getOrCreateUser(
@@ -315,9 +410,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                 List.of(
                         new EducationDto("University of Bristol", "Bachelor of Science (BSc)", "Computer Science", "2015-09", "2019-06", "First Class Honours")
                 ),
-                "Priya_Patel_FullStack_Engineer.pdf",
-                "https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf",
-                124500L
+                "priya-patel-resume.pdf",
+                "/resumes/priya-patel-resume.pdf",
+                124500L,
+                CandidatePlan.PRO
         );
 
         User marcus = getOrCreateUser(
@@ -350,9 +446,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                 List.of(
                         new EducationDto("UC Berkeley", "Bachelor of Science (BS)", "Electrical Engineering & Computer Sciences (EECS)", "2012-08", "2016-05", "3.88 GPA")
                 ),
-                "Marcus_Vance_Cloud_Architect.pdf",
-                "https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf",
-                162300L
+                "marcus-vance-resume.pdf",
+                "/resumes/marcus-vance-resume.pdf",
+                162300L,
+                CandidatePlan.PRO
         );
 
         User elena = getOrCreateUser(
@@ -385,9 +482,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                 List.of(
                         new EducationDto("University of Oxford", "Bachelor of Arts (BA)", "Computer Science", "2014-10", "2018-06", "Double First Class")
                 ),
-                "Elena_Rostova_Lead_Mobile.pdf",
-                "https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf",
-                135000L
+                "elena-rostova-resume.pdf",
+                "/resumes/elena-rostova-resume.pdf",
+                135000L,
+                CandidatePlan.PRO
         );
 
         User david = getOrCreateUser(
@@ -421,9 +519,47 @@ public class DatabaseSeeder implements CommandLineRunner {
                         new EducationDto("Stanford University", "Master of Science (MSc)", "Artificial Intelligence & Systems", "2017-09", "2019-06", "3.95 GPA"),
                         new EducationDto("Carnegie Mellon University", "Bachelor of Science (BSc)", "Computer Science", "2013-09", "2017-05", "University Honors")
                 ),
-                "David_Kim_ML_Systems_Resume.pdf",
-                "https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf",
-                152000L
+                "david-kim-resume.pdf",
+                "/resumes/david-kim-resume.pdf",
+                152000L,
+                CandidatePlan.PRO
+        );
+
+        // Candidate 6: Free Tier Candidate User for Testing Free Limitations & Upgrade Flows
+        User leo = getOrCreateUser(
+                "Leo Torres",
+                "leo.torres@gmail.com",
+                Role.CANDIDATE,
+                null,
+                "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+                "+44 7700 900555",
+                defaultHashedPassword
+        );
+        seedFullCandidateProfile(
+                leo,
+                "Junior Full Stack Developer | React, TypeScript, Next.js & Node.js",
+                "Ambitious junior software engineer with 2 years of production experience crafting modern web applications and responsive client interfaces. Seeking early-career and mid-level full stack engineering opportunities.",
+                "London, United Kingdom",
+                "https://leotorres.dev",
+                "https://github.com/leotorres-dev",
+                "https://linkedin.com/in/leo-torres-web",
+                2,
+                "Junior Full Stack Developer",
+                "Seedling Labs",
+                List.of("TypeScript", "JavaScript", "React", "Next.js", "Node.js", "Express", "TailwindCSS", "PostgreSQL", "Git", "REST APIs"),
+                List.of(
+                        new WorkHistoryDto("Seedling Labs", "Junior Full Stack Developer", "London, UK", "2022-09", null, true,
+                                "Developed client dashboard components with Next.js, TailwindCSS, and React Hook Form. Integrated backend Node.js APIs for user profile onboarding."),
+                        new WorkHistoryDto("FinScale", "Frontend Engineering Intern", "Manchester, UK", "2021-06", "2022-08", false,
+                                "Assisted in migrating legacy jQuery components to React functional components and improved unit test coverage across authentication screens.")
+                ),
+                List.of(
+                        new EducationDto("Manchester Metropolitan University", "Bachelor of Science (BSc)", "Web Development & Computing", "2018-09", "2021-06", "2:1 Honours")
+                ),
+                "leo-torres-resume.pdf",
+                "/resumes/leo-torres-resume.pdf",
+                118000L,
+                CandidatePlan.FREE
         );
 
         // Security Test Candidate: Prompt Injection / Resume Tampering Case
@@ -452,7 +588,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 ),
                 "Adversarial_Prompt_Injection_Test.pdf",
                 "https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf",
-                98000L
+                98000L,
+                CandidatePlan.FREE
         );
 
         // --------------------------------------------------------------------
@@ -489,8 +626,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .signOnBonus(20000)
                     .annualBonusPercentage(15)
                     .compensationNotes("Calibrated based on technical depth, leadership scope, and verified systems engineering mastery.")
-                    .tags(List.of("Java 21", "Distributed Systems", "Kafka", "PostgreSQL", "Go", "Kubernetes"))
-                    .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY", "REMOTE_STIPEND", "LEARNING_BUDGET"))
+                    .tags(new ArrayList<>(List.of("Java 21", "Distributed Systems", "Kafka", "PostgreSQL", "Go", "Kubernetes")))
+                    .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY", "REMOTE_STIPEND", "LEARNING_BUDGET")))
                     .expiresAt(Instant.now().plus(17, ChronoUnit.DAYS))
                     .status(Job.JobStatus.PUBLISHED)
                     .applicantCount(2)
@@ -551,8 +688,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .signOnBonus(10000)
                     .annualBonusPercentage(10)
                     .compensationNotes("Includes generous early exercise option window, top-tier private healthcare, and equipment budget.")
-                    .tags(List.of("Next.js", "TypeScript", "React", "GraphQL", "TailwindCSS", "PostgreSQL"))
-                    .benefits(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "EQUITY", "LEARNING_BUDGET", "REMOTE_STIPEND"))
+                    .tags(new ArrayList<>(List.of("Next.js", "TypeScript", "React", "GraphQL", "TailwindCSS", "PostgreSQL")))
+                    .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "EQUITY", "LEARNING_BUDGET", "REMOTE_STIPEND")))
                     .expiresAt(Instant.now().plus(30, ChronoUnit.DAYS))
                     .status(Job.JobStatus.PUBLISHED)
                     .applicantCount(1)
@@ -603,8 +740,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .equityRange("0.20% - 0.40% Equity")
                     .hasSignOnBonus(true)
                     .signOnBonus(15000)
-                    .tags(List.of("Kubernetes", "Terraform", "AWS", "GCP", "Distributed Systems", "Docker"))
-                    .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY"))
+                    .tags(new ArrayList<>(List.of("Kubernetes", "Terraform", "AWS", "GCP", "Distributed Systems", "Docker")))
+                    .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "UNLIMITED_PTO", "EQUITY")))
                     .expiresAt(Instant.now().plus(7, ChronoUnit.DAYS))
                     .status(Job.JobStatus.PUBLISHED)
                     .applicantCount(1)
@@ -644,8 +781,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .hasEquity(true)
                     .equityRange("Share options pool allocation")
                     .annualBonusPercentage(10)
-                    .tags(List.of("React Native", "iOS", "Swift", "Kotlin", "TypeScript"))
-                    .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "PARENTAL_LEAVE", "COMMUTER_BENEFITS"))
+                    .tags(new ArrayList<>(List.of("React Native", "iOS", "Swift", "Kotlin", "TypeScript")))
+                    .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "PARENTAL_LEAVE", "COMMUTER_BENEFITS")))
                     .expiresAt(Instant.now().plus(2, ChronoUnit.DAYS))
                     .status(Job.JobStatus.PUBLISHED)
                     .applicantCount(1)
@@ -684,8 +821,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .salaryPeriod("YEARLY")
                     .hasEquity(true)
                     .equityRange("0.12% - 0.28% Equity")
-                    .tags(List.of("Python", "PyTorch", "LLMs", "Kafka", "Kubernetes", "Vector Databases"))
-                    .benefits(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "EQUITY", "UNLIMITED_PTO", "LEARNING_BUDGET"))
+                    .tags(new ArrayList<>(List.of("Python", "PyTorch", "LLMs", "Kafka", "Kubernetes", "Vector Databases")))
+                    .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "RETIREMENT_401K", "EQUITY", "UNLIMITED_PTO", "LEARNING_BUDGET")))
                     .expiresAt(Instant.now().plus(21, ChronoUnit.DAYS))
                     .status(Job.JobStatus.PUBLISHED)
                     .applicantCount(1)
@@ -719,8 +856,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .salaryPeriod("YEARLY")
                     .hasSignOnBonus(true)
                     .signOnBonus(5000)
-                    .tags(List.of("Crypto", "Data Entry", "Telegram", "Instant Payout", "Work From Home"))
-                    .benefits(List.of("REMOTE_STIPEND"))
+                    .tags(new ArrayList<>(List.of("Crypto", "Data Entry", "Telegram", "Instant Payout", "Work From Home")))
+                    .benefits(new ArrayList<>(List.of("REMOTE_STIPEND")))
                     .expiresAt(Instant.now().plus(60, ChronoUnit.DAYS))
                     .status(Job.JobStatus.PUBLISHED)
                     .applicantCount(1)
@@ -734,6 +871,86 @@ public class DatabaseSeeder implements CommandLineRunner {
                             "Off-platform communication channel demanded (Telegram @apex_quantum_lead)",
                             "Phishing / unverified domain detected in requisition contact URL (apex-quantum-crypto-clearing.xyz)"
                     )))
+                    .build();
+            return jobRepository.save(j);
+        });
+
+        // Job 7: Supabase - Senior PostgreSQL Core Systems Engineer (Free Plan Posting)
+        Job supabaseJob = jobRepository.findBySlug("senior-postgresql-core-systems-engineer").orElseGet(() -> {
+            Job j = Job.builder()
+                    .company(supabase)
+                    .title("Senior PostgreSQL Core Systems Engineer")
+                    .slug("senior-postgresql-core-systems-engineer")
+                    .description("""
+                            <p>Supabase is looking for a <strong>Senior PostgreSQL Core Systems Engineer</strong> to build and scale our multi-tenant PostgreSQL clustering, pgvector optimizations, and Write-Ahead Log (WAL) streaming architectures.</p>
+                            <h3>What you'll do:</h3>
+                            <ul>
+                              <li>Deep dive into PostgreSQL internal storage engines, query execution planner, and extensions.</li>
+                              <li>Benchmark and enhance pgvector indexing throughput for enterprise LLM workloads.</li>
+                              <li>Build high-availability failover automation and cross-region physical replication in Go/Rust.</li>
+                            </ul>
+                            """)
+                    .requirements("• 5+ years working deeply with PostgreSQL internals, C extensions, or distributed databases\n• Experience with Linux kernel storage performance, async I/O (io_uring), and memory management\n• Strong command of Go, Rust, or C in production infrastructure")
+                    .location("Remote Worldwide")
+                    .workplaceType(Job.WorkplaceType.REMOTE)
+                    .jobType(Job.JobType.FULL_TIME)
+                    .experienceLevel(Job.ExperienceLevel.SENIOR)
+                    .minSalary(140000)
+                    .maxSalary(180000)
+                    .currency("GBP")
+                    .salaryPeriod("YEARLY")
+                    .hasEquity(true)
+                    .equityRange("0.10% - 0.25% Equity")
+                    .tags(new ArrayList<>(List.of("PostgreSQL", "Go", "Rust", "Distributed Systems", "Database Internals", "Linux")))
+                    .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "REMOTE_STIPEND", "LEARNING_BUDGET", "HOME_OFFICE_SETUP")))
+                    .expiresAt(Instant.now().plus(45, ChronoUnit.DAYS))
+                    .status(Job.JobStatus.PUBLISHED)
+                    .applicantCount(0)
+                    .viewsCount(280L)
+                    .fraudRiskScore(2)
+                    .fraudRiskLevel("LOW")
+                    .isQuarantined(false)
+                    .fraudReasons(toJson(List.of("Verified supabase.com domain", "Well-calibrated systems engineering requisition")))
+                    .build();
+            return jobRepository.save(j);
+        });
+
+        // Job 8: Resend - Staff Frontend Infrastructure Engineer (Free Plan Posting)
+        Job resendJob = jobRepository.findBySlug("staff-frontend-infrastructure-engineer").orElseGet(() -> {
+            Job j = Job.builder()
+                    .company(resend)
+                    .title("Staff Frontend Infrastructure Engineer")
+                    .slug("staff-frontend-infrastructure-engineer")
+                    .description("""
+                            <p>Resend is looking for a <strong>Staff Frontend Infrastructure Engineer</strong> to architect our core component primitives, React Email design tooling, and ultra-fast transactional analytics dashboards.</p>
+                            <h3>What you'll do:</h3>
+                            <ul>
+                              <li>Lead the frontend engineering standards across React, Next.js, and TypeScript.</li>
+                              <li>Build real-time email preview sandboxes and interactive AST compilers for React Email.</li>
+                              <li>Obsess over performance, 60fps interaction polish, and accessibility.</li>
+                            </ul>
+                            """)
+                    .requirements("• 6+ years shipping production React and TypeScript applications with obsession for craft\n• Deep understanding of browser layout engines, canvas/DOM virtualization, and design systems\n• Experience building developer tooling or open-source libraries")
+                    .location("San Francisco, CA & Remote Worldwide")
+                    .workplaceType(Job.WorkplaceType.REMOTE)
+                    .jobType(Job.JobType.FULL_TIME)
+                    .experienceLevel(Job.ExperienceLevel.LEAD)
+                    .minSalary(130000)
+                    .maxSalary(165000)
+                    .currency("GBP")
+                    .salaryPeriod("YEARLY")
+                    .hasEquity(true)
+                    .equityRange("0.12% - 0.28% Equity")
+                    .tags(new ArrayList<>(List.of("React", "TypeScript", "Next.js", "Design Systems", "Web Performance")))
+                    .benefits(new ArrayList<>(List.of("HEALTH_INSURANCE", "UNLIMITED_PTO", "REMOTE_STIPEND", "LEARNING_BUDGET")))
+                    .expiresAt(Instant.now().plus(40, ChronoUnit.DAYS))
+                    .status(Job.JobStatus.PUBLISHED)
+                    .applicantCount(0)
+                    .viewsCount(195L)
+                    .fraudRiskScore(3)
+                    .fraudRiskLevel("LOW")
+                    .isQuarantined(false)
+                    .fraudReasons(toJson(List.of("Verified resend.com domain", "Standard engineering compensation benchmarks")))
                     .build();
             return jobRepository.save(j);
         });
@@ -772,7 +989,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             Application app1 = applicationRepository.save(Application.builder()
                     .job(stripeJob)
                     .candidate(alex)
-                    .resumeUrl("https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf")
+                    .resumeUrl("/resumes/alex-chen-resume.pdf")
                     .coverLetter("I have spent the past 4 years at Datadog architecting high-throughput ingestion pipelines handling 15TB daily on Kafka and Java 21. Joining Stripe Core Ledger represents the exact technical scale and fault-tolerant challenges where my background will deliver immediate impact.")
                     .phone("+44 7700 900123")
                     .matchScore(96)
@@ -858,7 +1075,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             Application app2 = applicationRepository.save(Application.builder()
                     .job(linearJob)
                     .candidate(priya)
-                    .resumeUrl("https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf")
+                    .resumeUrl("/resumes/priya-patel-resume.pdf")
                     .coverLetter("Linear is the global benchmark for software craftsmanship. At Wise, I spearheaded the transition to Next.js and built custom keyboard navigation systems. I would love to bring that craft to Linear cycles and sync.")
                     .phone("+44 7700 900456")
                     .matchScore(94)
@@ -937,7 +1154,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             applicationRepository.save(Application.builder()
                     .job(vercelJob)
                     .candidate(marcus)
-                    .resumeUrl("https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf")
+                    .resumeUrl("/resumes/marcus-vance-resume.pdf")
                     .coverLetter("Having architected multi-region Anycast edge infrastructure and Kubernetes fleet controllers at HashiCorp, I am excited by Vercel's vision of serverless compute at the edge.")
                     .phone("+1 415 555 0192")
                     .matchScore(92)
@@ -988,7 +1205,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             applicationRepository.save(Application.builder()
                     .job(monzoJob)
                     .candidate(elena)
-                    .resumeUrl("https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf")
+                    .resumeUrl("/resumes/elena-rostova-resume.pdf")
                     .coverLetter("Excited to bring high-performance native mobile architectures and biometric authentication to Monzo 9M+ active users.")
                     .phone("+44 7700 900888")
                     .matchScore(88)
@@ -1030,7 +1247,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             applicationRepository.save(Application.builder()
                     .job(datadogJob)
                     .candidate(david)
-                    .resumeUrl("https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf")
+                    .resumeUrl("/resumes/david-kim-resume.pdf")
                     .coverLetter("At Cohere, I built inference monitoring pipelines processing millions of prompt tokens per second. Datadog's AI Observability vision is exactly where my ML infrastructure background will provide massive value.")
                     .phone("+1 415 555 0165")
                     .matchScore(95)
@@ -1114,8 +1331,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         log.info("==================================================================");
         log.info("Production Database Seeder Completed Successfully!");
         log.info("Platform Admin: admin@jobportal.com (Password123!)");
-        log.info("Employers: sarah.jenkins@stripe.com, tuomas@linear.app, rauchg@vercel.com, claire.wilson@monzo.com, olivier.pomel@datadog.com");
-        log.info("Candidates: alex.chen@gmail.com, priya.patel@gmail.com, marcus.vance@gmail.com, elena.rostova@gmail.com, david.kim@gmail.com");
+        log.info("Paid Employers (Enterprise/Growth): sarah.jenkins@stripe.com, tuomas@linear.app, rauchg@vercel.com, claire.wilson@monzo.com, olivier.pomel@datadog.com");
+        log.info("Free Tier Employers: paul.copplestone@supabase.com, zeno.rocha@resend.com");
+        log.info("Under Verification Company: PostHog (james.hawkins@posthog.com) [Status: PENDING]");
+        log.info("PRO Candidates: alex.chen@gmail.com, priya.patel@gmail.com, marcus.vance@gmail.com, elena.rostova@gmail.com, david.kim@gmail.com");
+        log.info("FREE Tier Candidate: leo.torres@gmail.com (Password123!)");
         log.info("Active Job Offer: /offers/sign/linear-offer-sig-token-priya-patel-2026");
         log.info("Quarantined Scam Job: 'Global Data Flow & Crypto Clearing' [Score: 94% CRITICAL]");
         log.info("==================================================================");
@@ -1160,7 +1380,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             String website, String github, String linkedin, int yearsExp,
             String currentRole, String currentCompany, List<String> skills,
             List<WorkHistoryDto> experiences, List<EducationDto> educations,
-            String resumeFileName, String resumeUrl, Long resumeSize
+            String resumeFileName, String resumeUrl, Long resumeSize,
+            CandidatePlan plan
     ) {
         CandidateProfile profile = candidateProfileRepository.findByUserId(user.getId()).orElseGet(() ->
                 candidateProfileRepository.save(CandidateProfile.builder()
@@ -1174,7 +1395,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .yearsOfExperience(yearsExp)
                         .currentRole(currentRole)
                         .currentCompany(currentCompany)
-                        .skills(skills)
+                        .skills(skills != null ? new ArrayList<>(skills) : new ArrayList<>())
                         .resumeUrl(resumeUrl)
                         .resumeFileName(resumeFileName)
                         .build())
@@ -1189,7 +1410,14 @@ public class DatabaseSeeder implements CommandLineRunner {
         profile.setYearsOfExperience(yearsExp);
         profile.setCurrentRole(currentRole);
         profile.setCurrentCompany(currentCompany);
-        profile.setSkills(skills);
+        if (profile.getSkills() == null) {
+            profile.setSkills(new ArrayList<>());
+        } else {
+            profile.getSkills().clear();
+        }
+        if (skills != null) {
+            profile.getSkills().addAll(skills);
+        }
         profile.setResumeUrl(resumeUrl);
         profile.setResumeFileName(resumeFileName);
         candidateProfileRepository.save(profile);
@@ -1237,6 +1465,45 @@ public class DatabaseSeeder implements CommandLineRunner {
                         .build());
             }
         }
+
+        // Candidate Subscription (FREE or PRO)
+        if (candidateSubscriptionRepository.findByUserId(user.getId()).isEmpty()) {
+            boolean isPro = plan == CandidatePlan.PRO;
+            candidateSubscriptionRepository.save(CandidateSubscription.builder()
+                    .user(user)
+                    .planType(plan)
+                    .status(SubscriptionStatus.ACTIVE)
+                    .maxResumes(isPro ? 10 : 2)
+                    .aiResumeOptimizerEnabled(isPro)
+                    .spotlightBadgeEnabled(isPro)
+                    .cancelAtPeriodEnd(false)
+                    .currentPeriodEnd(isPro ? Instant.now().plus(365, ChronoUnit.DAYS) : null)
+                    .build());
+            log.info("Seeded {} candidate subscription for {}", plan, user.getEmail());
+        }
+
+        // Vectorize and index candidate profile into RAG chunks
+        try {
+            resumeRagService.indexCandidateProfile(user.getId());
+            log.info("Indexed RAG resume chunks for {}", user.getEmail());
+        } catch (Exception e) {
+            log.warn("Could not index RAG chunks for candidate {}: {}", user.getId(), e.getMessage());
+        }
+    }
+
+    private void seedCompanySubscription(Company company, SubscriptionPlan plan, int jobLimit) {
+        if (companySubscriptionRepository.findByCompanyId(company.getId()).isEmpty()) {
+            companySubscriptionRepository.save(CompanySubscription.builder()
+                    .company(company)
+                    .planType(plan)
+                    .status(SubscriptionStatus.ACTIVE)
+                    .jobPostingLimit(jobLimit)
+                    .aiFeaturesEnabled(plan != SubscriptionPlan.FREE)
+                    .cancelAtPeriodEnd(false)
+                    .currentPeriodEnd(Instant.now().plus(365, ChronoUnit.DAYS))
+                    .build());
+            log.info("Seeded {} subscription for company {}", plan, company.getName());
+        }
     }
 
     private String toJson(Object obj) {
@@ -1248,6 +1515,56 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
     }
 
-    private record WorkHistoryDto(String company, String title, String location, String startDate, String endDate, boolean currentlyWorking, String description) {}
-    private record EducationDto(String institution, String degree, String fieldOfStudy, String startDate, String endDate, String grade) {}
+    private static class WorkHistoryDto {
+        private final String company;
+        private final String title;
+        private final String location;
+        private final String startDate;
+        private final String endDate;
+        private final boolean currentlyWorking;
+        private final String description;
+
+        public WorkHistoryDto(String company, String title, String location, String startDate, String endDate, boolean currentlyWorking, String description) {
+            this.company = company;
+            this.title = title;
+            this.location = location;
+            this.startDate = startDate;
+            this.endDate = endDate;
+            this.currentlyWorking = currentlyWorking;
+            this.description = description;
+        }
+
+        public String company() { return company; }
+        public String title() { return title; }
+        public String location() { return location; }
+        public String startDate() { return startDate; }
+        public String endDate() { return endDate; }
+        public boolean currentlyWorking() { return currentlyWorking; }
+        public String description() { return description; }
+    }
+
+    private static class EducationDto {
+        private final String institution;
+        private final String degree;
+        private final String fieldOfStudy;
+        private final String startDate;
+        private final String endDate;
+        private final String grade;
+
+        public EducationDto(String institution, String degree, String fieldOfStudy, String startDate, String endDate, String grade) {
+            this.institution = institution;
+            this.degree = degree;
+            this.fieldOfStudy = fieldOfStudy;
+            this.startDate = startDate;
+            this.endDate = endDate;
+            this.grade = grade;
+        }
+
+        public String institution() { return institution; }
+        public String degree() { return degree; }
+        public String fieldOfStudy() { return fieldOfStudy; }
+        public String startDate() { return startDate; }
+        public String endDate() { return endDate; }
+        public String grade() { return grade; }
+    }
 }

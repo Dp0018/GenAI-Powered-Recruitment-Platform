@@ -1,0 +1,49 @@
+%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >> endobj
+4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> endobj
+5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+6 0 obj << /Length 1491 >> stream
+BT
+/F1 20 Tf 50 740 Td (Priya Patel) Tj
+/F2 10 Tf 0 -18 Td (Senior Product & Frontend Engineer | London, UK | priya.patel@gmail.com) Tj
+/F1 12 Tf 0 -26 Td (PROFESSIONAL SUMMARY) Tj
+/F2 9.5 Tf 0 -15 Td
+(Product engineer with 6+ years shipping high-craft web applications.) Tj 0 -13 Td
+(Specialized in local-first sync, optimistic UI updates, and design system architecture.) Tj 0 -13 Td
+/F1 12 Tf 0 -18 Td (WORK EXPERIENCE) Tj
+/F1 10.5 Tf 0 -16 Td (Senior Frontend Engineer - Design Systems) Tj
+/F2 9.5 Tf 0 -13 Td (Wise \(2022 - Present\) | London, UK) Tj
+/F2 9 Tf 0 -13 Td
+(- Architected multi-brand design system utilized by 60+ engineering squads across Europe.) Tj 0 -12 Td
+(- Pioneered optimistic client-side mutation sync reducing perceived latency by 65%.) Tj 0 -12 Td
+0 -4 Td
+/F1 10.5 Tf 0 -16 Td (Frontend Engineer) Tj
+/F2 9.5 Tf 0 -13 Td (Deliveroo \(2019 - 2022\) | London, UK) Tj
+/F2 9 Tf 0 -13 Td
+(- Built merchant order dispatch portal in Next.js, TypeScript, and GraphQL handling 50k RPM.) Tj 0 -12 Td
+(- Implemented automated Lighthouse CI enforcing sub-second Time to Interactive.) Tj 0 -12 Td
+0 -4 Td
+/F1 12 Tf 0 -16 Td (CORE SKILLS & TECHNOLOGIES) Tj
+/F2 9 Tf 0 -14 Td (TypeScript, Next.js, React, TailwindCSS, GraphQL, Design Systems, State Machines, Web Performance) Tj
+/F1 12 Tf 0 -20 Td (EDUCATION) Tj
+/F1 9.5 Tf 0 -14 Td (Bachelor of Engineering \(BEng\) - Software Engineering) Tj
+/F2 9 Tf 0 -12 Td (University of Bristol \(2015 - 2019\) - First Class Honours) Tj
+ET
+endstream
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000000 00000 n 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000000326 00000 n 
+0000000396 00000 n 
+trailer << /Size 8 /Root 1 0 R >>
+startxref
+1939
+%%EOF
