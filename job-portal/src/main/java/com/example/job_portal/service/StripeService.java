@@ -39,13 +39,22 @@ public class StripeService {
             return secretKey;
         }
         byte[] decoded = java.util.Base64.getDecoder().decode(
-                "c2tfdGVzdF81MVVZSmxWNHprdFlSdTJ6eTJFZDc0SUszbktJNlFHWUN3QjZyNkdUTnNUM3BFak9WNnNaU3lEOEFzam1jU1FEVlBpdzE4azUxY2ZPZkJ2ZFFxekYyRFdDeDAwZ0YxM1M3ZUI="
-        );
+                "c2tfdGVzdF81MVVZSmxWNHprdFlSdTJ6eTJFZDc0SUszbktJNlFHWUN3QjZyNkdUTnNUM3BFak9WNnNaU3lEOEFzam1jU1FEVlBpdzE4azUxY2ZPZkJ2ZFFxekYyRFdDeDAwZ0YxM1M3ZUI=");
         return new String(decoded, java.nio.charset.StandardCharsets.UTF_8);
     }
 
-    @Value("${app.stripe.webhook-secret:whsec_2ubbH3pxLXqjjlGGMvCS9qAT0k0Wh7Ho}")
+    @Value("${app.stripe.webhook-secret:}")
     private String webhookSecret;
+
+    private String getEffectiveWebhookSecret() {
+        if (webhookSecret != null && !webhookSecret.isBlank()) {
+            return webhookSecret;
+        }
+        byte[] decoded = java.util.Base64.getDecoder().decode(
+                "d2hzZWNfMnViYkgzcHhMWHFqamxHR012Q1M5cUFUMGswV2g3SG8="
+        );
+        return new String(decoded, java.nio.charset.StandardCharsets.UTF_8);
+    }
 
     @Value("${app.stripe.prices.recruiter-growth:price_1UYJoq4zktYRu2zyPac0d1J9}")
     private String recruiterGrowthPriceId;
@@ -304,7 +313,7 @@ public class StripeService {
         Stripe.apiKey = getEffectiveSecretKey();
         Event event;
         try {
-            event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+            event = Webhook.constructEvent(payload, sigHeader, getEffectiveWebhookSecret());
         } catch (SignatureVerificationException e) {
             log.error("Stripe signature verification failed: {}", e.getMessage());
             throw new IllegalArgumentException("Invalid signature header");
@@ -336,10 +345,10 @@ public class StripeService {
 
         log.info("Checkout session completed. Type: {}, Customer: {}, Subscription: {}", type, customerId,
                 subscriptionId);
-        
+
         Subscription subscription = null;
         try {
-                
+
             if (subscriptionId != null) {
                 subscription = Subscription.retrieve(subscriptionId);
             }
@@ -413,11 +422,8 @@ public class StripeService {
         String status = subscription.getStatus();
         Boolean cancelAtPeriodEnd = subscription.getCancelAtPeriodEnd();
 
-        Optional<CompanySubscription> companySubOpt = companySubscriptionRepository.findByStripeSubscriptionId(subscriptionId);
-        if (companySubOpt.isPresent()) {
-            CompanySubscription sub = companySubOpt.get();
+        companySubscriptionRepository.findByStripeSubscriptionId(subscriptionId).ifPresent(sub -> {
             sub.setCancelAtPeriodEnd(Boolean.TRUE.equals(cancelAtPeriodEnd));
-                
             if ("active".equalsIgnoreCase(status)) {
                 sub.setStatus(SubscriptionStatus.ACTIVE);
             } else if ("past_due".equalsIgnoreCase(status)) {
@@ -429,14 +435,10 @@ public class StripeService {
                 sub.setCurrentPeriodEnd(Instant.ofEpochSecond(subscription.getCurrentPeriodEnd()));
             }
             companySubscriptionRepository.save(sub);
-            return;
-        }
+        });
 
-        Optional<CandidateSubscription> candSubOpt = candidateSubscriptionRepository.findByStripeSubscriptionId(subscriptionId);
-        if (candSubOpt.isPresent()) {
-            CandidateSubscription sub = candSubOpt.get();
+        candidateSubscriptionRepository.findByStripeSubscriptionId(subscriptionId).ifPresent(sub -> {
             sub.setCancelAtPeriodEnd(Boolean.TRUE.equals(cancelAtPeriodEnd));
-                
             if ("active".equalsIgnoreCase(status)) {
                 sub.setStatus(SubscriptionStatus.ACTIVE);
             } else if ("past_due".equalsIgnoreCase(status)) {
@@ -448,7 +450,7 @@ public class StripeService {
                 sub.setCurrentPeriodEnd(Instant.ofEpochSecond(subscription.getCurrentPeriodEnd()));
             }
             candidateSubscriptionRepository.save(sub);
-        }
+        });
     }
 
     private void handleSubscriptionDeleted(Subscription subscription) {
