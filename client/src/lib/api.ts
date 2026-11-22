@@ -1,6 +1,9 @@
 import { ApiResponse, ErrorResponse } from "@/types/auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+const API_BASE_URL = rawBaseUrl.endsWith("/api/v1")
+  ? rawBaseUrl
+  : `${rawBaseUrl.replace(/\/+$/, "")}/api/v1`;
 
 export class ApiError extends Error {
   statusCode: number;
