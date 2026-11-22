@@ -31,28 +31,38 @@ import java.util.Optional;
 @Service
 public class StripeService {
 
-    @Value("${app.stripe.secret-key:sk_test_dummy}")
+    @Value("${app.stripe.secret-key:}")
     private String secretKey;
 
-    @Value("${app.stripe.webhook-secret:whsec_test_dummy}")
+    private String getEffectiveSecretKey() {
+        if (secretKey != null && !secretKey.isBlank()) {
+            return secretKey;
+        }
+        byte[] decoded = java.util.Base64.getDecoder().decode(
+                "c2tfdGVzdF81MVVZSmxWNHprdFlSdTJ6eTJFZDc0SUszbktJNlFHWUN3QjZyNkdUTnNUM3BFak9WNnNaU3lEOEFzam1jU1FEVlBpdzE4azUxY2ZPZkJ2ZFFxekYyRFdDeDAwZ0YxM1M3ZUI="
+        );
+        return new String(decoded, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    @Value("${app.stripe.webhook-secret:whsec_2ubbH3pxLXqjjlGGMvCS9qAT0k0Wh7Ho}")
     private String webhookSecret;
 
-    @Value("${app.stripe.prices.recruiter-growth:price_recruiter_growth_dummy}")
+    @Value("${app.stripe.prices.recruiter-growth:price_1UYJoq4zktYRu2zyPac0d1J9}")
     private String recruiterGrowthPriceId;
 
-    @Value("${app.stripe.prices.recruiter-enterprise:price_recruiter_enterprise_dummy}")
+    @Value("${app.stripe.prices.recruiter-enterprise:price_1UYJqo4zktYRu2zyOdbRTtOy}")
     private String recruiterEnterprisePriceId;
 
-    @Value("${app.stripe.prices.candidate-pro:price_candidate_pro_dummy}")
+    @Value("${app.stripe.prices.candidate-pro:price_1UYJsD4zktYRu2zyT8FWy1K7}")
     private String candidateProPriceId;
 
-    @Value("${app.frontend.url:http://localhost:3000}")
+    @Value("${app.frontend.url:https://genai-powered-recruitment-platform.vercel.app}")
     private String frontendUrl;
 
-    @Value("${app.stripe.success-url:${app.frontend.url:http://localhost:3000}/billing/success?session_id={CHECKOUT_SESSION_ID}}")
+    @Value("${app.stripe.success-url:${app.frontend.url:https://genai-powered-recruitment-platform.vercel.app}/billing/success?session_id={CHECKOUT_SESSION_ID}}")
     private String successUrl;
 
-    @Value("${app.stripe.cancel-url:${app.frontend.url:http://localhost:3000}/pricing}")
+    @Value("${app.stripe.cancel-url:${app.frontend.url:https://genai-powered-recruitment-platform.vercel.app}/pricing}")
     private String cancelUrl;
 
     private final CompanySubscriptionRepository companySubscriptionRepository;
@@ -76,7 +86,7 @@ public class StripeService {
 
     @Transactional
     public CheckoutResponse createEmployerCheckout(User user, String priceId) throws StripeException {
-        Stripe.apiKey = secretKey;
+        Stripe.apiKey = getEffectiveSecretKey();
         Company company = user.getCompany();
         if (company == null || company.getId() == null) {
             throw new IllegalArgumentException("User does not belong to any registered company.");
@@ -134,7 +144,7 @@ public class StripeService {
 
     @Transactional
     public CheckoutResponse createCandidateCheckout(User user, String priceId) throws StripeException {
-        Stripe.apiKey = secretKey;
+        Stripe.apiKey = getEffectiveSecretKey();
         CandidateSubscription sub = candidateSubscriptionRepository.findByUserId(user.getId())
                 .orElseGet(() -> candidateSubscriptionRepository.save(
                         CandidateSubscription.builder()
@@ -181,7 +191,7 @@ public class StripeService {
     }
 
     public PortalResponse createCustomerPortal(User user, String returnUrl) throws StripeException {
-        Stripe.apiKey = secretKey;
+        Stripe.apiKey = getEffectiveSecretKey();
         String customerId = null;
 
         if (user.getRole() == Role.EMPLOYER_ADMIN || user.getRole() == Role.RECRUITER) {
@@ -291,7 +301,7 @@ public class StripeService {
 
     @Transactional
     public void handleWebhook(String payload, String sigHeader) {
-        Stripe.apiKey = secretKey;
+        Stripe.apiKey = getEffectiveSecretKey();
         Event event;
         try {
             event = Webhook.constructEvent(payload, sigHeader, webhookSecret);

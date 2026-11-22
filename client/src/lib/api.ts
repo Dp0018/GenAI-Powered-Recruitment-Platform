@@ -1,6 +1,11 @@
 import { ApiResponse, ErrorResponse } from "@/types/auth";
 
-const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+const rawBaseUrl =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname.includes("vercel.app")
+    ? "https://genai-powered-recruitment-platform.onrender.com/api/v1"
+    : "http://localhost:8080/api/v1");
+
 const API_BASE_URL = rawBaseUrl.endsWith("/api/v1")
   ? rawBaseUrl
   : `${rawBaseUrl.replace(/\/+$/, "")}/api/v1`;
