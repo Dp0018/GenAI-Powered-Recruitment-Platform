@@ -91,9 +91,30 @@ export function ResumePreviewModal({
     Boolean(application?.id && activeTab === "xai"),
   );
 
+  const isRemoteUrl =
+    Boolean(application?.resumeUrl) &&
+    (application!.resumeUrl.startsWith("http://") ||
+      application!.resumeUrl.startsWith("https://"));
+
+  const [viewerMode, setViewerMode] = useState<"cloud" | "native">(
+    isRemoteUrl ? "cloud" : "native"
+  );
+  const [iframeLoading, setIframeLoading] = useState(true);
+
   if (!application) return null;
 
   const answersCount = application.screeningAnswers?.length || 0;
+
+  const googleDocsViewerUrl = isRemoteUrl
+    ? `https://docs.google.com/viewer?url=${encodeURIComponent(
+        application.resumeUrl
+      )}&embedded=true`
+    : application.resumeUrl;
+
+  const activeViewerUrl =
+    viewerMode === "cloud" && isRemoteUrl
+      ? googleDocsViewerUrl
+      : `${application.resumeUrl}#toolbar=0`;
 
   const handleStageTransition = (status: ApplicationStatus) => {
     setSelectedStatus(status);
@@ -117,75 +138,144 @@ export function ResumePreviewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 gap-0 bg-card border-border overflow-hidden">
+      <DialogContent className="w-[96vw] max-w-7xl sm:max-w-[96vw] md:max-w-6xl lg:max-w-7xl h-[92vh] flex flex-col p-0 gap-0 bg-card border-border overflow-hidden rounded-2xl shadow-2xl">
         {/* Modal Header */}
-        <DialogHeader className="p-4 px-6 border-b border-border bg-secondary/30 flex flex-row items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
+        <DialogHeader className="p-4 px-6 border-b border-border bg-secondary/30 flex flex-row items-center justify-between shrink-0 pr-14">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <FileText className="size-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <DialogTitle className="text-base font-bold text-foreground tracking-tight flex items-center gap-2">
-                <span>{application.candidate.name}</span>
-                <span className="text-xs font-mono font-normal px-2 py-0.5 rounded bg-secondary text-muted-foreground border border-border">
+                <span className="truncate">{application.candidate.name}</span>
+                <span className="text-xs font-mono font-normal px-2 py-0.5 rounded bg-secondary text-muted-foreground border border-border shrink-0">
                   {application.status}
                 </span>
               </DialogTitle>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                <span className="flex items-center gap-1">
-                  <Mail className="size-3 text-primary" />
-                  {application.candidate.email}
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5 truncate">
+                <span className="flex items-center gap-1 truncate">
+                  <Mail className="size-3 text-primary shrink-0" />
+                  <span className="truncate">{application.candidate.email}</span>
                 </span>
                 <span>•</span>
-                <span className="flex items-center gap-1 font-mono">
-                  <Briefcase className="size-3 text-primary" />
-                  {application.job.title}
+                <span className="flex items-center gap-1 font-mono truncate">
+                  <Briefcase className="size-3 text-primary shrink-0" />
+                  <span className="truncate">{application.job.title}</span>
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pr-6">
+          <div className="flex items-center gap-2 shrink-0">
             <a
               href={application.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
+              download
             >
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 border-border text-xs gap-1.5 font-mono"
+                className="h-8 border-border text-xs gap-1.5 font-mono cursor-pointer"
               >
                 <Download className="size-3.5" />
-                <span>Open File</span>
-                <ExternalLink className="size-3 text-muted-foreground" />
+                <span className="hidden sm:inline">Download</span>
               </Button>
             </a>
           </div>
         </DialogHeader>
 
         {/* Modal Body: Two Columns (PDF Viewer & Cover Letter / Fast Actions) */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 min-h-0 divide-y lg:divide-y-0 lg:divide-x divide-border">
-          {/* PDF Viewer (3 Columns) */}
-          <div className="lg:col-span-3 h-full bg-slate-950/60 relative flex flex-col">
-            <iframe
-              src={`${application.resumeUrl}#toolbar=0`}
-              className="w-full h-full border-0"
-              title={`${application.candidate.name} Resume`}
-            />
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0 divide-y lg:divide-y-0 lg:divide-x divide-border">
+          {/* Left: PDF Document Viewer (Spacious Flex Column) */}
+          <div className="flex-1 min-w-0 h-full bg-slate-950/70 relative flex flex-col">
+            {/* Viewer Control Bar */}
+            <div className="h-10 px-4 bg-secondary/40 border-b border-border/80 flex items-center justify-between text-xs shrink-0">
+              <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground min-w-0">
+                <FileText className="size-3.5 text-primary shrink-0" />
+                <span className="text-foreground font-medium truncate">
+                  {`${application.candidate.name}_Resume.pdf`}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {isRemoteUrl && (
+                  <div className="inline-flex rounded-lg bg-background/90 border border-border p-0.5 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIframeLoading(true);
+                        setViewerMode("cloud");
+                      }}
+                      className={`px-2.5 py-1 rounded-md transition-all font-mono cursor-pointer ${
+                        viewerMode === "cloud"
+                          ? "bg-secondary text-foreground font-semibold shadow-xs"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      title="In-browser cloud document reader (prevents browser auto-downloading)"
+                    >
+                      Web Preview
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIframeLoading(true);
+                        setViewerMode("native");
+                      }}
+                      className={`px-2.5 py-1 rounded-md transition-all font-mono cursor-pointer ${
+                        viewerMode === "native"
+                          ? "bg-secondary text-foreground font-semibold shadow-xs"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      title="Native browser PDF plugin view"
+                    >
+                      Native PDF
+                    </button>
+                  </div>
+                )}
+
+                <a
+                  href={application.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-background hover:bg-secondary text-foreground text-[11px] font-mono transition-colors"
+                  title="Open resume in full window tab"
+                >
+                  <ExternalLink className="size-3 text-muted-foreground" />
+                  <span>New Tab</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Iframe Frame Container */}
+            <div className="flex-1 relative bg-slate-950/80">
+              {iframeLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2 text-muted-foreground bg-card/40 backdrop-blur-xs z-10">
+                  <Loader2 className="size-5 animate-spin text-primary" />
+                  <span className="text-xs font-mono">Loading document preview...</span>
+                </div>
+              )}
+              <iframe
+                key={activeViewerUrl}
+                src={activeViewerUrl}
+                onLoad={() => setIframeLoading(false)}
+                className="w-full h-full border-0"
+                title={`${application.candidate.name} Resume`}
+              />
+            </div>
           </div>
 
-          {/* Screening Panel & Cover Note (1 Column) */}
-          <div className="lg:col-span-1 p-4 flex flex-col justify-between overflow-y-auto no-scrollbar bg-card/60 space-y-4">
+          {/* Right: Screening Panel & Fast Actions (Dedicated 380px-420px Column) */}
+          <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 h-full p-4 flex flex-col justify-between overflow-y-auto no-scrollbar bg-card/60 space-y-4">
             <div className="space-y-4">
-              {/* Tab Navigation */}
-              <div className="flex rounded-lg bg-secondary/80 p-0.5 border border-border text-[11px] font-mono">
+              {/* Tab Navigation (Comfortable 2x3 Grid) */}
+              <div className="grid grid-cols-3 gap-1 rounded-xl bg-secondary/80 p-1 border border-border text-[11px] font-mono">
                 <button
                   type="button"
                   onClick={() => setActiveTab("overview")}
-                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center cursor-pointer ${
+                  className={`py-1.5 px-2 rounded-lg transition-all text-center cursor-pointer ${
                     activeTab === "overview"
-                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -194,9 +284,9 @@ export function ResumePreviewModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("evaluation")}
-                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+                  className={`py-1.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
                     activeTab === "evaluation"
-                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -206,9 +296,9 @@ export function ResumePreviewModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("answers")}
-                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+                  className={`py-1.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
                     activeTab === "answers"
-                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -223,9 +313,9 @@ export function ResumePreviewModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("profile")}
-                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+                  className={`py-1.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
                     activeTab === "profile"
-                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -235,9 +325,9 @@ export function ResumePreviewModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("xai")}
-                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+                  className={`py-1.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
                     activeTab === "xai"
-                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -247,9 +337,9 @@ export function ResumePreviewModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("rag-chat")}
-                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+                  className={`py-1.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
                     activeTab === "rag-chat"
-                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -635,13 +725,13 @@ export function ResumePreviewModal({
                   variant="outline"
                   disabled={updateStatusMutation.isPending}
                   onClick={() => handleStageTransition("SHORTLISTED")}
-                  className="h-8 text-xs border-purple-800/40 text-purple-400 hover:bg-purple-950/30 gap-1"
+                  className="h-8 text-xs border-border bg-secondary/40 hover:bg-secondary text-foreground gap-1.5 font-medium cursor-pointer"
                 >
                   {updateStatusMutation.isPending &&
                   selectedStatus === "SHORTLISTED" ? (
                     <Loader2 className="size-3 animate-spin" />
                   ) : (
-                    <Sparkles className="size-3" />
+                    <CheckCircle2 className="size-3 text-primary" />
                   )}
                   <span>Shortlist</span>
                 </Button>
@@ -651,13 +741,13 @@ export function ResumePreviewModal({
                   variant="outline"
                   disabled={updateStatusMutation.isPending}
                   onClick={() => handleStageTransition("INTERVIEWING")}
-                  className="h-8 text-xs border-amber-800/40 text-amber-400 hover:bg-amber-950/30 gap-1"
+                  className="h-8 text-xs border-border bg-secondary/40 hover:bg-secondary text-foreground gap-1.5 font-medium cursor-pointer"
                 >
                   {updateStatusMutation.isPending &&
                   selectedStatus === "INTERVIEWING" ? (
                     <Loader2 className="size-3 animate-spin" />
                   ) : (
-                    <Calendar className="size-3" />
+                    <Calendar className="size-3 text-amber-500" />
                   )}
                   <span>Interview</span>
                 </Button>
@@ -667,15 +757,15 @@ export function ResumePreviewModal({
                   variant="outline"
                   disabled={updateStatusMutation.isPending}
                   onClick={() => handleStageTransition("OFFERED")}
-                  className="h-8 text-xs border-emerald-800/40 text-emerald-400 hover:bg-emerald-950/30 gap-1"
+                  className="h-8 text-xs border-border bg-secondary/40 hover:bg-secondary text-foreground gap-1.5 font-medium cursor-pointer"
                 >
                   {updateStatusMutation.isPending &&
                   selectedStatus === "OFFERED" ? (
                     <Loader2 className="size-3 animate-spin" />
                   ) : (
-                    <CheckCircle2 className="size-3" />
+                    <CheckCircle2 className="size-3 text-emerald-500" />
                   )}
-                  <span>Offer</span>
+                  <span>Extend Offer</span>
                 </Button>
 
                 <Button
@@ -683,11 +773,11 @@ export function ResumePreviewModal({
                   variant="outline"
                   disabled={updateStatusMutation.isPending}
                   onClick={() => setSkillGapRejectOpen(true)}
-                  className="h-8 text-xs border-destructive/40 text-destructive hover:bg-destructive/10 gap-1 cursor-pointer"
+                  className="h-8 text-xs border-border bg-secondary/40 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 text-muted-foreground gap-1.5 font-medium cursor-pointer"
                   title="Reject with skill gap analysis & feedback"
                 >
-                  <XCircle className="size-3" />
-                  <span>Reject with Feedback</span>
+                  <XCircle className="size-3 text-destructive" />
+                  <span>Reject</span>
                 </Button>
               </div>
             </div>
