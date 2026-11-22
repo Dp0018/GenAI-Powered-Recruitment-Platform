@@ -37,6 +37,8 @@ import { useCandidateProfileByIdQuery } from "@/features/profile/hooks/use-profi
 import { useExplainApplicationMatchQuery } from "@/features/ai/hooks/use-ai";
 import { ExplainableMatchCard } from "@/features/ai/components/explainable-match-card";
 import { SkillGapRejectionModal } from "./skill-gap-rejection-modal";
+import { ResumeChatDrawer } from "@/features/rag/components/resume-chat-drawer";
+import { GroundedJobFitModal } from "@/features/rag/components/grounded-job-fit-modal";
 
 const REJECTION_TEMPLATES = [
   {
@@ -76,7 +78,7 @@ export function ResumePreviewModal({
   const [skillGapRejectOpen, setSkillGapRejectOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "evaluation" | "answers" | "profile" | "xai"
+    "overview" | "evaluation" | "answers" | "profile" | "xai" | "rag-chat"
   >("overview");
   const { data: candidateProfile, isLoading: isProfileLoading } =
     useCandidateProfileByIdQuery(application?.candidate?.id);
@@ -241,6 +243,18 @@ export function ResumePreviewModal({
                 >
                   <Sparkles className="size-3 text-primary" />
                   <span>AI Fit</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("rag-chat")}
+                  className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+                    activeTab === "rag-chat"
+                      ? "bg-background text-foreground shadow-sm font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <MessageSquare className="size-3 text-primary" />
+                  <span>Ask Resume</span>
                 </button>
               </div>
 
@@ -544,6 +558,16 @@ export function ResumePreviewModal({
                       No XAI report generated yet.
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Tab 6: Grounded Resume Chat (RAG) */}
+              {activeTab === "rag-chat" && (
+                <div className="pt-1">
+                  <ResumeChatDrawer
+                    candidateId={application.candidate.id}
+                    candidateName={application.candidate.name}
+                  />
                 </div>
               )}
             </div>

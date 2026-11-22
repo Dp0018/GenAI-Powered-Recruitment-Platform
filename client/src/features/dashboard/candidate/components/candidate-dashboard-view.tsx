@@ -30,7 +30,9 @@ import {
   CreditCard,
   ShieldCheck,
   ShieldAlert,
+  Zap,
 } from "lucide-react";
+import { ResumeBulletOptimizer } from "@/features/rag/components/resume-bullet-optimizer";
 import { useBilling } from "@/features/billing/hooks/use-billing";
 import { CandidateJobAlertsTab } from "./candidate-job-alerts-tab";
 import { CandidateOffersTab } from "@/features/offers/components/candidate-offers-tab";
@@ -583,6 +585,14 @@ export function CandidateDashboardView() {
             </TabsTrigger>
 
             <TabsTrigger
+              value="resume-optimizer"
+              className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
+            >
+              <Zap className="size-3.5" />
+              <span>Bullet Optimizer (AI)</span>
+            </TabsTrigger>
+
+            <TabsTrigger
               value="profile"
               className="h-7 px-3 rounded-md text-xs font-medium gap-1.5 transition-colors text-muted-foreground hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs border-transparent select-none whitespace-nowrap cursor-pointer"
             >
@@ -624,6 +634,12 @@ export function CandidateDashboardView() {
 
         <TabsContent value="alerts" className="outline-none">
           <CandidateJobAlertsTab />
+        </TabsContent>
+
+        <TabsContent value="resume-optimizer" className="outline-none">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-xs">
+            <ResumeBulletOptimizer />
+          </div>
         </TabsContent>
 
         <TabsContent value="profile" className="outline-none">

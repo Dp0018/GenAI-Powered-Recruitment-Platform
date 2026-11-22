@@ -44,6 +44,9 @@ class JobServiceTest {
     @Mock
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
+    @Mock
+    private com.example.job_portal.repository.CompanySubscriptionRepository companySubscriptionRepository;
+
     @InjectMocks
     private JobService jobService;
 

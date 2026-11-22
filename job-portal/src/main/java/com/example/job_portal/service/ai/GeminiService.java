@@ -24,4 +24,10 @@ public interface GeminiService {
     ResumeAnomalyScanResponse scanResumeText(String resumeText);
 
     String generateJobDescription(String jobTitle, String notes);
+
+    List<Float> generateEmbedding(String text);
+
+    double calculateCosineSimilarity(List<Float> vectorA, List<Float> vectorB);
+
+    String generateRagResponse(String prompt, boolean jsonFormat);
 }

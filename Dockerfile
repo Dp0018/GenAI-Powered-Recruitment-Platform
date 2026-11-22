@@ -1,17 +1,20 @@
 # Multi-stage Dockerfile for Spring Boot deployed from repository root
-FROM maven:3.9-eclipse-temurin-25 AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-# Copy pom.xml from job-portal module
-COPY job-portal/pom.xml ./
-RUN mvn dependency:go-offline -B || true
+# Prevent Maven OOM on Render Free / Starter build nodes (512MB RAM limits)
+ENV MAVEN_OPTS="-Xmx768m -XX:+UseSerialGC -XX:TieredStopAtLevel=1"
 
-# Copy source code and package
+# Copy pom.xml from job-portal module and pre-cache runtime dependencies
+COPY job-portal/pom.xml ./
+RUN mvn dependency:resolve -Dmaven.test.skip=true -B || true
+
+# Copy source code and build production jar (skips test compilation & test dependency downloads)
 COPY job-portal/src ./src
-RUN mvn clean package -DskipTests
+RUN mvn package -Dmaven.test.skip=true -B
 
 # Stage 2: Runtime image
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Security: Run as non-privileged system user

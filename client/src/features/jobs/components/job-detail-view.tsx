@@ -43,6 +43,7 @@ import { SkillsMatchBreakdownCard } from "./skills-match-breakdown-card";
 import { JobFraudShieldBadge } from "@/features/ai/components/job-fraud-shield-badge";
 import { ExplainableMatchCard } from "@/features/ai/components/explainable-match-card";
 import { useExplainJobMatchQuery } from "@/features/ai/hooks/use-ai";
+import { GroundedJobFitModal } from "@/features/rag/components/grounded-job-fit-modal";
 
 interface JobDetailViewProps {
   slug: string;
@@ -576,28 +577,31 @@ export function JobDetailView({ slug }: JobDetailViewProps) {
                   </div>
                 </div>
 
-                <Button
-                  size="sm"
-                  variant={showAiFit ? "outline" : "default"}
-                  onClick={() => {
-                    setShowAiFit(true);
-                    if (showAiFit) refetchAiFit();
-                  }}
-                  disabled={isAiMatchLoading}
-                  className="h-9 px-4 text-xs font-semibold gap-2 rounded-xl shrink-0 cursor-pointer"
-                >
-                  {isAiMatchLoading ? (
-                    <>
-                      <Loader2 className="size-3.5 animate-spin" />
-                      <span>Analyzing Profile...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="size-3.5" />
-                      <span>{showAiFit ? "Refresh Fit Score" : "Check Profile Match"}</span>
-                    </>
-                  )}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <GroundedJobFitModal jobId={job.id} jobTitle={job.title} />
+                  <Button
+                    size="sm"
+                    variant={showAiFit ? "outline" : "default"}
+                    onClick={() => {
+                      setShowAiFit(true);
+                      if (showAiFit) refetchAiFit();
+                    }}
+                    disabled={isAiMatchLoading}
+                    className="h-9 px-4 text-xs font-semibold gap-2 rounded-xl shrink-0 cursor-pointer"
+                  >
+                    {isAiMatchLoading ? (
+                      <>
+                        <Loader2 className="size-3.5 animate-spin" />
+                        <span>Analyzing Profile...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="size-3.5" />
+                        <span>{showAiFit ? "Refresh Fit Score" : "Check Profile Match"}</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
 
               {showAiFit && (

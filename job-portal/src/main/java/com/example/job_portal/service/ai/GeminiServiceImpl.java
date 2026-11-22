@@ -510,4 +510,125 @@ public class GeminiServiceImpl implements GeminiService {
                         : "No text manipulation or prompt injection patterns detected in resume text.")
                 .build();
     }
+
+    // -------------------------------------------------------------------------------------------------
+    // RAG Vector Embedding & Similarity Engine
+    // -------------------------------------------------------------------------------------------------
+
+    @Override
+    public List<Float> generateEmbedding(String text) {
+        if (!StringUtils.hasText(text)) {
+            return generateDeterministicVector("empty", 768);
+        }
+
+        if (StringUtils.hasText(geminiApiKey)) {
+            try {
+                Map<String, Object> part = Map.of("text", text.length() > 2000 ? text.substring(0, 2000) : text);
+                Map<String, Object> content = Map.of("parts", List.of(part));
+                Map<String, Object> requestBody = Map.of(
+                        "model", "models/text-embedding-004",
+                        "content", content
+                );
+
+                String endpoint = String.format("/models/text-embedding-004:embedContent?key=%s", geminiApiKey);
+                String rawResponse = restClient.post()
+                        .uri(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(requestBody)
+                        .retrieve()
+                        .body(String.class);
+
+                if (StringUtils.hasText(rawResponse)) {
+                    JsonNode root = objectMapper.readTree(rawResponse);
+                    JsonNode valuesNode = root.path("embedding").path("values");
+                    if (valuesNode.isArray() && valuesNode.size() > 0) {
+                        List<Float> vector = new ArrayList<>(valuesNode.size());
+                        for (JsonNode val : valuesNode) {
+                            vector.add((float) val.asDouble());
+                        }
+                        return vector;
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Gemini embedding API failed, using deterministic embedding fallback: {}", ex.getMessage());
+            }
+        }
+
+        return generateDeterministicVector(text, 768);
+    }
+
+    @Override
+    public double calculateCosineSimilarity(List<Float> vectorA, List<Float> vectorB) {
+        if (vectorA == null || vectorB == null || vectorA.isEmpty() || vectorB.isEmpty()) {
+            return 0.0;
+        }
+        int size = Math.min(vectorA.size(), vectorB.size());
+        double dotProduct = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
+
+        for (int i = 0; i < size; i++) {
+            float a = vectorA.get(i);
+            float b = vectorB.get(i);
+            dotProduct += a * b;
+            normA += a * a;
+            normB += b * b;
+        }
+
+        if (normA == 0.0 || normB == 0.0) {
+            return 0.0;
+        }
+
+        double similarity = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        return Math.max(0.0, Math.min(1.0, similarity));
+    }
+
+    @Override
+    public String generateRagResponse(String prompt, boolean jsonFormat) {
+        if (StringUtils.hasText(geminiApiKey)) {
+            try {
+                if (jsonFormat) {
+                    return callGeminiJson(prompt);
+                } else {
+                    return callGeminiRaw(prompt);
+                }
+            } catch (Exception ex) {
+                log.warn("Gemini AI RAG generation call failed: {}", ex.getMessage());
+            }
+        }
+        return null;
+    }
+
+    private List<Float> generateDeterministicVector(String text, int dimensions) {
+        float[] vector = new float[dimensions];
+        String clean = text.toLowerCase().replaceAll("[^a-z0-9 ]", " ");
+        String[] tokens = clean.split("\\s+");
+
+        for (String token : tokens) {
+            if (token.isBlank()) continue;
+            int hash = Math.abs(token.hashCode());
+            int index = hash % dimensions;
+            vector[index] += 1.0f;
+            // Also hash 2nd order feature
+            int secondaryIndex = Math.abs((token + "_alt").hashCode()) % dimensions;
+            vector[secondaryIndex] += 0.5f;
+        }
+
+        // L2 normalize
+        double sumSq = 0.0;
+        for (float v : vector) {
+            sumSq += v * v;
+        }
+        double norm = Math.sqrt(sumSq);
+        if (norm == 0.0) {
+            norm = 1.0;
+            vector[0] = 1.0f;
+        }
+
+        List<Float> result = new ArrayList<>(dimensions);
+        for (float v : vector) {
+            result.add((float) (v / norm));
+        }
+        return result;
+    }
 }

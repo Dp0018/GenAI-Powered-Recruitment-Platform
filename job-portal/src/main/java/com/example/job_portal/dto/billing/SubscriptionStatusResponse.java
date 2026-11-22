@@ -1,5 +1,6 @@
 package com.example.job_portal.dto.billing;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.Instant;
@@ -12,6 +13,8 @@ import java.time.Instant;
 public class SubscriptionStatusResponse {
     private String planType; // FREE, GROWTH, ENTERPRISE, PRO
     private String status;   // ACTIVE, PAST_DUE, CANCELED
+
+    @JsonProperty("isPaid")
     private boolean isPaid;
     private int jobPostingLimit;
     private int currentActiveJobs;

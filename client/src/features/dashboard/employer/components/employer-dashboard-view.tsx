@@ -12,6 +12,7 @@ import { useCompanyApplicationsQuery } from "@/features/applications/hooks/use-a
 import { EmployerApplicantsTable } from "@/features/applications/components/employer-applicants-table";
 import { EmployerTeamTab } from "./employer-team-tab";
 import { EmployerCompanyBrandingTab } from "./employer-company-branding-tab";
+import { TalentSearchCopilot } from "@/features/rag/components/talent-search-copilot";
 import { Button } from "@/components/ui/button";
 import { JobItem } from "@/features/jobs/types/job";
 import {
@@ -36,6 +37,7 @@ import {
   TrendingUp,
   CreditCard,
   Sparkles,
+  Search,
 } from "lucide-react";
 import { useBilling } from "@/features/billing/hooks/use-billing";
 
@@ -566,7 +568,7 @@ function JobExpirationBadge({ job }: { job: JobItem }) {
 export function EmployerDashboardView() {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "jobs" | "applicants" | "branding" | "team"
+    "jobs" | "applicants" | "talent-search" | "branding" | "team"
   >("jobs");
   const { data: jobsData, isLoading: jobsLoading } = useCompanyJobsQuery();
   const { data: appsData } = useCompanyApplicationsQuery();
@@ -661,6 +663,19 @@ export function EmployerDashboardView() {
 
           <button
             type="button"
+            onClick={() => setActiveTab("talent-search")}
+            className={`h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer flex items-center ${
+              activeTab === "talent-search"
+                ? "bg-secondary text-foreground shadow-xs border border-border/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+            }`}
+          >
+            <Search className="size-4" />
+            <span>Talent Copilot (AI)</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("branding")}
             className={`h-10 px-4 sm:px-5 rounded-xl text-sm font-medium gap-2.5 transition-all outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 select-none whitespace-nowrap cursor-pointer flex items-center ${
               activeTab === "branding"
@@ -695,6 +710,10 @@ export function EmployerDashboardView() {
         />
       ) : activeTab === "applicants" ? (
         <EmployerApplicantsTable />
+      ) : activeTab === "talent-search" ? (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-xs">
+          <TalentSearchCopilot />
+        </div>
       ) : activeTab === "branding" ? (
         <EmployerCompanyBrandingTab />
       ) : (

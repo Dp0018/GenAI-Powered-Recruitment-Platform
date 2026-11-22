@@ -19,7 +19,6 @@ import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,28 +29,30 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class StripeService {
 
-    @Value("${app.stripe.secret-key}")
+    @Value("${app.stripe.secret-key:sk_test_dummy}")
     private String secretKey;
 
-    @Value("${app.stripe.webhook-secret}")
+    @Value("${app.stripe.webhook-secret:whsec_test_dummy}")
     private String webhookSecret;
 
-    @Value("${app.stripe.prices.recruiter-growth}")
+    @Value("${app.stripe.prices.recruiter-growth:price_recruiter_growth_dummy}")
     private String recruiterGrowthPriceId;
 
-    @Value("${app.stripe.prices.recruiter-enterprise}")
+    @Value("${app.stripe.prices.recruiter-enterprise:price_recruiter_enterprise_dummy}")
     private String recruiterEnterprisePriceId;
 
-    @Value("${app.stripe.prices.candidate-pro}")
+    @Value("${app.stripe.prices.candidate-pro:price_candidate_pro_dummy}")
     private String candidateProPriceId;
 
-    @Value("${app.stripe.success-url}")
+    @Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
+    @Value("${app.stripe.success-url:${app.frontend.url:http://localhost:3000}/billing/success?session_id={CHECKOUT_SESSION_ID}}")
     private String successUrl;
 
-    @Value("${app.stripe.cancel-url}")
+    @Value("${app.stripe.cancel-url:${app.frontend.url:http://localhost:3000}/pricing}")
     private String cancelUrl;
 
     private final CompanySubscriptionRepository companySubscriptionRepository;
@@ -59,6 +60,19 @@ public class StripeService {
     private final CompanyRepository companyRepository;
     private final JobRepository jobRepository;
     private final CandidateResumeRepository candidateResumeRepository;
+
+    public StripeService(
+            CompanySubscriptionRepository companySubscriptionRepository,
+            CandidateSubscriptionRepository candidateSubscriptionRepository,
+            CompanyRepository companyRepository,
+            JobRepository jobRepository,
+            CandidateResumeRepository candidateResumeRepository) {
+        this.companySubscriptionRepository = companySubscriptionRepository;
+        this.candidateSubscriptionRepository = candidateSubscriptionRepository;
+        this.companyRepository = companyRepository;
+        this.jobRepository = jobRepository;
+        this.candidateResumeRepository = candidateResumeRepository;
+    }
 
     @Transactional
     public CheckoutResponse createEmployerCheckout(User user, String priceId) throws StripeException {
@@ -80,8 +94,7 @@ public class StripeService {
                                 .status(SubscriptionStatus.ACTIVE)
                                 .jobPostingLimit(1)
                                 .aiFeaturesEnabled(false)
-                                .build()
-                ));
+                                .build()));
 
         String customerId = sub.getStripeCustomerId();
         if (customerId == null || customerId.isBlank()) {
@@ -106,8 +119,7 @@ public class StripeService {
                         SessionCreateParams.LineItem.builder()
                                 .setPrice(priceId)
                                 .setQuantity(1L)
-                                .build()
-                )
+                                .build())
                 .putMetadata("type", "EMPLOYER_SUBSCRIPTION")
                 .putMetadata("companyId", companyId)
                 .putMetadata("userId", user.getId())
@@ -132,8 +144,7 @@ public class StripeService {
                                 .maxResumes(2)
                                 .aiResumeOptimizerEnabled(false)
                                 .spotlightBadgeEnabled(false)
-                                .build()
-                ));
+                                .build()));
 
         String customerId = sub.getStripeCustomerId();
         if (customerId == null || customerId.isBlank()) {
@@ -157,8 +168,7 @@ public class StripeService {
                         SessionCreateParams.LineItem.builder()
                                 .setPrice(priceId)
                                 .setQuantity(1L)
-                                .build()
-                )
+                                .build())
                 .putMetadata("type", "CANDIDATE_SUBSCRIPTION")
                 .putMetadata("userId", user.getId())
                 .build();
@@ -176,7 +186,8 @@ public class StripeService {
 
         if (user.getRole() == Role.EMPLOYER_ADMIN || user.getRole() == Role.RECRUITER) {
             if (user.getCompany() != null) {
-                CompanySubscription sub = companySubscriptionRepository.findByCompanyId(user.getCompany().getId()).orElse(null);
+                CompanySubscription sub = companySubscriptionRepository.findByCompanyId(user.getCompany().getId())
+                        .orElse(null);
                 if (sub != null) {
                     customerId = sub.getStripeCustomerId();
                 }
@@ -192,15 +203,15 @@ public class StripeService {
             throw new IllegalStateException("No active billing account found. Please subscribe to a plan first.");
         }
 
-        String finalReturnUrl = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "http://localhost:3000/dashboard";
-        com.stripe.param.billingportal.SessionCreateParams portalParams =
-                com.stripe.param.billingportal.SessionCreateParams.builder()
-                        .setCustomer(customerId)
-                        .setReturnUrl(finalReturnUrl)
-                        .build();
+        String finalReturnUrl = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : (frontendUrl + "/dashboard");
+        com.stripe.param.billingportal.SessionCreateParams portalParams = com.stripe.param.billingportal.SessionCreateParams
+                .builder()
+                .setCustomer(customerId)
+                .setReturnUrl(finalReturnUrl)
+                .build();
 
-        com.stripe.model.billingportal.Session portalSession =
-                com.stripe.model.billingportal.Session.create(portalParams);
+        com.stripe.model.billingportal.Session portalSession = com.stripe.model.billingportal.Session
+                .create(portalParams);
 
         return PortalResponse.builder()
                 .portalUrl(portalSession.getUrl())
@@ -313,10 +324,12 @@ public class StripeService {
         String customerId = session.getCustomer();
         String subscriptionId = session.getSubscription();
 
-        log.info("Checkout session completed. Type: {}, Customer: {}, Subscription: {}", type, customerId, subscriptionId);
-
+        log.info("Checkout session completed. Type: {}, Customer: {}, Subscription: {}", type, customerId,
+                subscriptionId);
+        
         Subscription subscription = null;
         try {
+                
             if (subscriptionId != null) {
                 subscription = Subscription.retrieve(subscriptionId);
             }
@@ -394,6 +407,7 @@ public class StripeService {
         if (companySubOpt.isPresent()) {
             CompanySubscription sub = companySubOpt.get();
             sub.setCancelAtPeriodEnd(Boolean.TRUE.equals(cancelAtPeriodEnd));
+                
             if ("active".equalsIgnoreCase(status)) {
                 sub.setStatus(SubscriptionStatus.ACTIVE);
             } else if ("past_due".equalsIgnoreCase(status)) {
@@ -412,6 +426,7 @@ public class StripeService {
         if (candSubOpt.isPresent()) {
             CandidateSubscription sub = candSubOpt.get();
             sub.setCancelAtPeriodEnd(Boolean.TRUE.equals(cancelAtPeriodEnd));
+                
             if ("active".equalsIgnoreCase(status)) {
                 sub.setStatus(SubscriptionStatus.ACTIVE);
             } else if ("past_due".equalsIgnoreCase(status)) {
